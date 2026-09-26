@@ -1,0 +1,475 @@
+{%- liquid
+  assign section_id = 'am-combos-v2-' | append: section.id
+-%}
+
+<section
+  id="{{ section_id }}"
+  class="am-combos-v2"
+  data-am-combos-v2
+  style="
+    --amcv2-bg: {{ section.settings.background }};
+    --amcv2-card: {{ section.settings.card_background }};
+    --amcv2-text: {{ section.settings.text_color }};
+    --amcv2-muted: {{ section.settings.muted_color }};
+    --amcv2-border: {{ section.settings.border_color }};
+    --amcv2-accent: {{ section.settings.accent_color }};
+  "
+>
+  <div class="am-combos-v2__container">
+    <header class="am-combos-v2__header">
+      {% if section.settings.eyebrow != blank %}
+        <p class="am-combos-v2__eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+
+      <h1 class="am-combos-v2__title">{{ section.settings.title }}</h1>
+
+      {% if section.settings.subtitle != blank %}
+        <p class="am-combos-v2__subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </header>
+
+    <div class="am-combos-v2__grid" role="list">
+      {% for block in section.blocks %}
+        <article
+          class="am-combos-v2__card"
+          role="listitem"
+          data-am-combo-card
+          data-combo-key="{{ block.settings.combo_key | escape }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="am-combos-v2__media">
+            {% if block.settings.image != blank %}
+              {{
+                block.settings.image
+                | image_url: width: 1200
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '360, 540, 720, 960, 1200',
+                  sizes: '(min-width: 990px) 33vw, (min-width: 700px) 50vw, 100vw',
+                  class: 'am-combos-v2__image',
+                  alt: block.settings.title
+              }}
+            {% else %}
+              <div class="am-combos-v2__placeholder" aria-hidden="true"></div>
+            {% endif %}
+
+            {% if block.settings.badge != blank %}
+              <span class="am-combos-v2__badge">{{ block.settings.badge }}</span>
+            {% endif %}
+          </div>
+
+          <div class="am-combos-v2__content">
+            <div>
+              <h2 class="am-combos-v2__card-title">{{ block.settings.title }}</h2>
+
+              {% if block.settings.description != blank %}
+                <p class="am-combos-v2__description">{{ block.settings.description }}</p>
+              {% endif %}
+            </div>
+
+            <div class="am-combos-v2__footer">
+              {% if block.settings.price != blank %}
+                <div class="am-combos-v2__price-wrap">
+                  {% if block.settings.price_prefix != blank %}
+                    <span class="am-combos-v2__price-prefix">{{ block.settings.price_prefix }}</span>
+                  {% endif %}
+                  <strong class="am-combos-v2__price">{{ block.settings.price }}</strong>
+                </div>
+              {% endif %}
+
+              {% if block.settings.link != blank %}
+                <a
+                  class="am-combos-v2__action"
+                  href="{{ block.settings.link }}"
+                  data-combo-entry
+                  data-combo-key="{{ block.settings.combo_key | escape }}"
+                >
+                  <span>{{ block.settings.button_label }}</span>
+                  <span aria-hidden="true">→</span>
+                </a>
+              {% else %}
+                <button
+                  class="am-combos-v2__action"
+                  type="button"
+                  data-combo-entry
+                  data-combo-key="{{ block.settings.combo_key | escape }}"
+                >
+                  <span>{{ block.settings.button_label }}</span>
+                  <span aria-hidden="true">→</span>
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </div>
+
+  <style>
+    #{{ section_id }} {
+      background: var(--amcv2-bg);
+      color: var(--amcv2-text);
+      padding: clamp(40px, 6vw, 88px) 0;
+    }
+
+    #{{ section_id }} * {
+      box-sizing: border-box;
+    }
+
+    #{{ section_id }} .am-combos-v2__container {
+      width: min(100% - 32px, 1240px);
+      margin: 0 auto;
+    }
+
+    #{{ section_id }} .am-combos-v2__header {
+      max-width: 760px;
+      margin-bottom: clamp(28px, 4vw, 48px);
+    }
+
+    #{{ section_id }} .am-combos-v2__eyebrow {
+      margin: 0 0 10px;
+      color: var(--amcv2-muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    #{{ section_id }} .am-combos-v2__title {
+      margin: 0;
+      color: var(--amcv2-text);
+      font-family: var(--font-heading--family, inherit);
+      font-size: clamp(32px, 5vw, 60px);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1;
+    }
+
+    #{{ section_id }} .am-combos-v2__subtitle {
+      max-width: 620px;
+      margin: 18px 0 0;
+      color: var(--amcv2-muted);
+      font-size: clamp(14px, 1.5vw, 17px);
+      line-height: 1.6;
+    }
+
+    #{{ section_id }} .am-combos-v2__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    #{{ section_id }} .am-combos-v2__card {
+      min-width: 0;
+      overflow: hidden;
+      background: var(--amcv2-card);
+      border: 1px solid var(--amcv2-border);
+      border-radius: 20px;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    }
+
+    #{{ section_id }} .am-combos-v2__media {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      background: #f3f3f1;
+    }
+
+    #{{ section_id }} .am-combos-v2__image,
+    #{{ section_id }} .am-combos-v2__placeholder {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #{{ section_id }} .am-combos-v2__image {
+      object-fit: cover;
+      transition: transform .45s cubic-bezier(.2,.7,.2,1);
+    }
+
+    #{{ section_id }} .am-combos-v2__placeholder {
+      background:
+        linear-gradient(135deg, rgba(0,0,0,.025), rgba(0,0,0,.06)),
+        #f4f3ef;
+    }
+
+    #{{ section_id }} .am-combos-v2__badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color: #151515;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+
+    #{{ section_id }} .am-combos-v2__content {
+      display: flex;
+      min-height: 220px;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 28px;
+      padding: 22px;
+    }
+
+    #{{ section_id }} .am-combos-v2__card-title {
+      margin: 0;
+      color: var(--amcv2-text);
+      font-family: var(--font-heading--family, inherit);
+      font-size: clamp(22px, 2.2vw, 30px);
+      font-weight: 500;
+      letter-spacing: -.025em;
+      line-height: 1.1;
+    }
+
+    #{{ section_id }} .am-combos-v2__description {
+      margin: 10px 0 0;
+      color: var(--amcv2-muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    #{{ section_id }} .am-combos-v2__footer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    #{{ section_id }} .am-combos-v2__price-wrap {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    #{{ section_id }} .am-combos-v2__price-prefix {
+      color: var(--amcv2-muted);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    #{{ section_id }} .am-combos-v2__price {
+      color: var(--amcv2-text);
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    #{{ section_id }} .am-combos-v2__action {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 17px;
+      border: 1px solid var(--amcv2-text);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--amcv2-text);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    @media (hover: hover) {
+      #{{ section_id }} .am-combos-v2__card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(0,0,0,.18);
+        box-shadow: 0 18px 44px rgba(0,0,0,.07);
+      }
+
+      #{{ section_id }} .am-combos-v2__card:hover .am-combos-v2__image {
+        transform: scale(1.025);
+      }
+
+      #{{ section_id }} .am-combos-v2__action:hover {
+        background: var(--amcv2-text);
+        color: var(--amcv2-bg);
+      }
+    }
+
+    @media (min-width: 700px) {
+      #{{ section_id }} .am-combos-v2__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 990px) {
+      #{{ section_id }} .am-combos-v2__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 699px) {
+      #{{ section_id }} .am-combos-v2__container {
+        width: min(100% - 24px, 1240px);
+      }
+
+      #{{ section_id }} .am-combos-v2__content {
+        min-height: 0;
+        padding: 18px;
+      }
+
+      #{{ section_id }} .am-combos-v2__footer {
+        align-items: center;
+      }
+
+      #{{ section_id }} .am-combos-v2__action {
+        min-width: 112px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #{{ section_id }} .am-combos-v2__card,
+      #{{ section_id }} .am-combos-v2__image,
+      #{{ section_id }} .am-combos-v2__action {
+        transition: none;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "A MARCA — Combos V2",
+  "tag": "section",
+  "class": "section-am-combos-v2",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Sobretítulo",
+      "default": "A MARCA · COMBOS"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Vamos montar seu combo?"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Escolha qual combinação faz sentido para você. Na próxima etapa, você personaliza as peças."
+    },
+    {
+      "type": "header",
+      "content": "Cores"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Fundo",
+      "default": "#F7F6F3"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fundo dos cards",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Texto",
+      "default": "#151515"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Texto secundário",
+      "default": "#6D6D68"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Borda",
+      "default": "#E6E4DE"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Acento",
+      "default": "#90332F"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "combo",
+      "name": "Combo",
+      "settings": [
+        {
+          "type": "text",
+          "id": "combo_key",
+          "label": "Chave interna",
+          "info": "Identificador técnico que será usado pelo novo builder. Ex.: best-friends"
+        },
+        {
+          "type": "text",
+          "id": "badge",
+          "label": "Badge"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagem"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Descrição"
+        },
+        {
+          "type": "text",
+          "id": "price_prefix",
+          "label": "Prefixo do preço",
+          "default": "Por"
+        },
+        {
+          "type": "text",
+          "id": "price",
+          "label": "Preço exibido"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Texto do botão",
+          "default": "Montar combo"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "A MARCA — Combos V2"
+    }
+  ]
+}
+{% endschema %}
