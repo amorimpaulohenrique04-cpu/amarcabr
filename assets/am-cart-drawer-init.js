@@ -1,28 +1,6 @@
-/**
- * A MARCA — Cart Drawer Controller (v7.0 — mobile-safe rewrite)
- *
- * Fixes over v6:
- * ─────────────────────────────────────────────────────────────
- * FIX-1  renderDrawerSection — Dialog agora SEMPRE abre via showModal()
- *        após inserção no DOM, garantindo Top Layer. Antes, setAttribute('open')
- *        abria como não-modal e o backdrop cobria os botões no mobile.
- *
- * FIX-2  openDrawer — close() de segurança antes de showModal() para evitar
- *        InvalidStateError se dialog ficou em estado não-modal.
- *
- * FIX-3  setItemLoading — Adia desabilitação para requestAnimationFrame para
- *        não cancelar o submit do browser. Não desabilita mais <input>.
- *
- * FIX-4  handleCartFormSubmit — Usa internalFetchDepth para o interceptor não
- *        disparar scheduleCartTouch duplicado. Trata status 422/429/500.
- *
- * FIX-5  init — Aborta bubbleAbort pendente ao reinicializar.
- *
- * FIX-6  closeDrawer — animationend listener recebe signal para limpeza
- *        correta no BFCache.
- *
- * FIX-7  Checkout form — protege contra desabilitar botões que impedem submit.
- */
+import { cartService } from '@theme/cart-service';
+import { CartUpdateEvent, CartErrorEvent } from '@theme/events';
+
 (() => {
   /* ════════════════════════════════════════
    * CONSTANTS
@@ -54,7 +32,6 @@
   };
 
   const REOPEN_GUARD_MS    = 400;
-  const SESSION_MAX_AGE_MS = 1000 * 60 * 10;
   const CLOSE_ANIM_TIMEOUT = 260;
 
   /* ════════════════════════════════════════
@@ -73,17 +50,14 @@
         navigatingToCheckout:  false,
         lastManualClose:       0,
         renderToken:           0,
-        fetchPatched:          false,
-        lastCartTouchTs:       0,
-        cartTouchTimer:        0,
-        internalFetchDepth:    0,
         bubbleRetryTimer:      0,
-        lastCartUpdateEventTs: 0,
         loadingTimers:         [],
         lastBubbleSyncTs:      0,
         closeTimer:            0,
         lastCartDrawerSectionHtml: null,
         lastCartDrawerSectionTs:   0,
+        itemMutationTokens:    new Map(),
+        itemMutationTimers:    new Map(),
       };
     }
     return window[STATE_KEY];
@@ -154,19 +128,6 @@
     document.body.classList.toggle('am-cart-lock', lock);
   }
 
-  /* ── Sections URL ── */
-  function getSectionsUrl(sectionId) {
-    const basePath      = window.Shopify?.routes?.root || '/';
-    const currentParams = new URLSearchParams(window.location.search);
-    const params        = new URLSearchParams();
-    ['preview_theme_id', 'pb', 'locale'].forEach(key => {
-      const val = currentParams.get(key);
-      if (val) params.set(key, val);
-    });
-    params.set('sections', sectionId);
-    return `${basePath.replace(/\/+$/, '')}/?${params.toString()}`;
-  }
-
   /* ════════════════════════════════════════
    * BADGE UPDATE
    * ════════════════════════════════════════ */
@@ -231,15 +192,7 @@
       });
     });
 
-    /* 4. Session storage */
-    try {
-      sessionStorage.setItem(
-        'cart-count',
-        JSON.stringify({ value: nStr, timestamp: Date.now() })
-      );
-    } catch (_) {}
-
-    /* 5. Acessibilidade */
+    /* 4. Acessibilidade */
     let lr = document.getElementById('am-cart-live-region');
     if (!lr) {
       lr = document.createElement('div');
@@ -254,7 +207,7 @@
     }
     lr.textContent = n === 0 ? 'Carrinho vazio' : `${n} no carrinho`;
 
-    /* 6. Retry */
+    /* 5. Retry */
     if (state.bubbleRetryTimer) {
       clearTimeout(state.bubbleRetryTimer);
       state.bubbleRetryTimer = 0;
@@ -268,40 +221,8 @@
     }
   }
 
-  function fastSyncBubbleFromSession() {
-    try {
-      const raw = sessionStorage.getItem('cart-count');
-      if (!raw) return;
-      const { value, timestamp } = JSON.parse(raw);
-      if (typeof timestamp === 'number' && Date.now() - timestamp > SESSION_MAX_AGE_MS) {
-        sessionStorage.removeItem('cart-count');
-        return;
-      }
-      const c = parseInt(value, 10);
-      if (Number.isFinite(c) && c >= 0) updateBubble(c);
-    } catch (_) {}
-  }
-
-  function getCurrentBubbleCount() {
-    const el = document.querySelector(SEL.bubbleCount);
-    if (el && el.children.length === 0) {
-      const n = parseInt(el.textContent, 10);
-      if (Number.isFinite(n) && n >= 0) return n;
-    }
-    try {
-      const raw = sessionStorage.getItem('cart-count');
-      if (raw) {
-        const { value } = JSON.parse(raw);
-        const n = parseInt(value, 10);
-        if (Number.isFinite(n) && n >= 0) return n;
-      }
-    } catch (_) {}
-    return 0;
-  }
-
-  const CART_COUNT_TOTAL_SOURCES = new Set(['cart-items-component', 'cart-drawer']);
-
   function toCartCount(value) {
+    if (value === null || value === undefined || value === '') return null;
     const n = Number(value);
     return Number.isFinite(n) && n >= 0 ? n : null;
   }
@@ -311,7 +232,7 @@
   }
 
   function getCartEventSections(event) {
-    return event?.detail?.sections || getCartEventData(event).sections || null;
+    return getCartEventData(event).sections || null;
   }
 
   function getCartDrawerSectionFromEvent(event) {
@@ -351,33 +272,20 @@
 
   function getExplicitCartCount(event) {
     const data   = getCartEventData(event);
-    const source = data.source || event?.detail?.source;
     const total  =
-      event?.detail?.cart?.item_count ??
-      event?.detail?.resource?.item_count ??
       data.cart?.item_count ??
-      data.item_count ??
-      (data.itemCountIsTotal === true || CART_COUNT_TOTAL_SOURCES.has(source)
-        ? data.itemCount
-        : null);
+      data.itemCount;
 
     return toCartCount(total);
   }
 
-  // itemCount pode ser delta em add-to-cart/combos e total em cart-items.
   function applyCartUpdateCount(event) {
     const explicitTotal = getExplicitCartCount(event);
     if (explicitTotal !== null) {
       updateBubble(explicitTotal);
       return 'total';
     }
-
-    const delta = toCartCount(getCartEventData(event).itemCount);
-    if (delta === null) return 'none';
-    if (event?.detail?.__amCartReplay === true) return 'none';
-
-    updateBubble(getCurrentBubbleCount() + delta);
-    return 'optimistic';
+    return 'none';
   }
 
   /* ════════════════════════════════════════
@@ -423,7 +331,7 @@
   }
 
   /* ════════════════════════════════════════
-   * OPEN / CLOSE DRAWER  — FIX-2
+   * OPEN / CLOSE DRAWER
    * ════════════════════════════════════════ */
   function openDrawer({ animate = true, reason = 'program' } = {}) {
     const dialog = getDialog();
@@ -453,8 +361,6 @@
 
     lockScroll(true);
 
-    /* FIX-2: Sempre close() antes de showModal() para garantir
-       que o dialog entre no Top Layer mesmo se já tinha open="" */
     try {
       if (dialog.open) dialog.close();
       dialog.showModal();
@@ -507,7 +413,6 @@
       }
     };
 
-    /* FIX-6: usa signal para limpeza no BFCache */
     const sig = state.controller?.signal;
     dialog.addEventListener('animationend', e => {
       if (e.target === dialog) finish();
@@ -555,7 +460,7 @@
   }
 
   /* ════════════════════════════════════════
-   * RENDER DRAWER — FIX-1
+   * RENDER DRAWER
    * ════════════════════════════════════════ */
   async function renderDrawerSection({
     keepOpen     = false,
@@ -576,20 +481,9 @@
       if (sectionsHtml && typeof sectionsHtml === 'string') {
         html = sectionsHtml;
       } else {
-        state.internalFetchDepth++;
-        try {
-          const res = await fetch(getSectionsUrl('cart-drawer'), {
-            headers: { Accept: 'application/json' },
-            cache: 'no-store',
-            signal,
-          });
-          if (!res.ok || token !== state.renderToken) return;
-          const json = await res.json();
-          if (token !== state.renderToken) return;
-          html = json?.['cart-drawer'];
-        } finally {
-          state.internalFetchDepth--;
-        }
+        const result = await cartService.getSections(['cart-drawer'], { signal });
+        if (token !== state.renderToken) return;
+        html = result.sections?.['cart-drawer'];
       }
 
       if (!html || token !== state.renderToken) return;
@@ -603,9 +497,8 @@
       const parsedHost = tmp.querySelector(SEL.sectionHost);
       const newDialog  = tmp.querySelector(SEL.dialog);
 
-      /* FIX-1: NÃO setar open="" no parsed dialog. */
       if (newDialog) {
-        newDialog.removeAttribute('open');                           // ← FIX-1
+        newDialog.removeAttribute('open');
       }
 
       if (token !== state.renderToken) return;
@@ -662,8 +555,6 @@
         lockScroll(true);
 
         if (d && !canPatchOpenDialog) {
-          /* FIX-1: Sempre usar showModal() para Top Layer.
-             close() de segurança caso o template Liquid traga open="" */
           try {
             if (d.open) d.close();
             d.showModal();
@@ -711,36 +602,25 @@
     const { signal } = state.bubbleAbort;
 
     try {
-      state.internalFetchDepth++;
-      const res = await fetch(
-        (window.Shopify?.routes?.root || '/') + 'cart.js',
-        { headers: { Accept: 'application/json' }, cache: 'no-store', signal }
-      );
-
-      if (!res.ok) return;
-
-      const cart = await res.json();
+      const result = await cartService.get({ signal });
+      const cart = result.resource;
       if (typeof cart?.item_count === 'number') updateBubble(cart.item_count);
       state.lastBubbleSyncTs = Date.now();
     } catch (err) {
       if (err?.name !== 'AbortError')
         console.warn('[cart-drawer] bubble refresh error:', err);
     } finally {
-      state.internalFetchDepth = Math.max(0, state.internalFetchDepth - 1);
       state.bubbleAbort = null;
     }
   }
 
   /* ════════════════════════════════════════
-   * ITEM LOADING & ERROR UX — FIX-3
+   * ITEM LOADING & ERROR UX
    * ════════════════════════════════════════ */
   function setItemLoading(itemEl) {
     if (!itemEl) return;
     itemEl.classList.add('is-loading');
 
-    /* FIX-3: Adia desabilitação para o próximo frame para não cancelar
-       o activation behavior (form submit) do browser.
-       Desabilita APENAS buttons — inputs precisam existir no FormData. */
     requestAnimationFrame(() => {
       if (!itemEl.classList.contains('is-loading')) return;
       itemEl.querySelectorAll('button').forEach(el => { el.disabled = true; });
@@ -781,152 +661,71 @@
     setTimeout(() => { if (errEl) errEl.hidden = true; }, 5000);
   }
 
-  /* ════════════════════════════════════════
-   * CART API FORMS — FIX-4
-   * ════════════════════════════════════════ */
-  function isCartApiForm(form) {
-    const a1 = (form.getAttribute('action') || '').trim();
-    const a2 = (form.action || '').trim();
-    return /\/cart\/(change|update|add|clear)\b/i.test(a1) ||
-           /\/cart\/(change|update|add|clear)\b/i.test(a2);
-  }
-
-
   async function updateDrawerItemQuantity(itemKey, nextQuantity) {
     const safeQty = Number.isFinite(Number(nextQuantity)) && Number(nextQuantity) > 0
       ? Number.parseInt(nextQuantity, 10)
       : 0;
     const state = getState();
     const host = document.querySelector(SEL.sectionHost);
-    const cartChangeUrl = (window.routes && window.routes.cart_change_url)
-      ? window.routes.cart_change_url
-      : '/cart/change.js';
+    const token = (state.itemMutationTokens.get(itemKey) || 0) + 1;
+    state.itemMutationTokens.set(itemKey, token);
 
     if (!itemKey) return;
     if (host) host.classList.add('cart-drawer--updating');
 
     try {
-      state.internalFetchDepth++;
-      let res;
-      try {
-        res = await fetch(cartChangeUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-          body: JSON.stringify({
-            id: itemKey,
-            quantity: safeQty,
-            sections: ['cart-drawer'],
-          }),
-        });
-      } finally {
-        state.internalFetchDepth--;
-      }
-
-      if (!res.ok) {
-        const errMsg =
-          res.status === 422 ? 'Quantidade indisponível em estoque.' :
-          res.status === 429 ? 'Muitas requisições. Aguarde um momento.' :
-          res.status >= 500  ? 'Erro no servidor. Tente novamente.' :
-                               'Erro ao atualizar o carrinho.';
-        throw new Error(errMsg);
-      }
-
-      const data = await res.json();
-      const keepOpen = true;
-      const sectionHtml = data?.sections?.['cart-drawer'] || null;
-
-      if (typeof data?.item_count === 'number') {
-        updateBubble(data.item_count);
-      }
-
-      await queueRender({ keepOpen, sectionsHtml: sectionHtml });
-
-      if (typeof data?.item_count !== 'number') {
-        await refreshBubble(true);
-      }
+      const result = safeQty === 0
+        ? await cartService.remove(itemKey, { sections: cartService.getCartSectionIds() })
+        : await cartService.change(itemKey, safeQty, { sections: cartService.getCartSectionIds() });
+      if (state.itemMutationTokens.get(itemKey) !== token) return;
+      document.dispatchEvent(new CartUpdateEvent(result.resource, 'cart-drawer', {
+        source: 'cart-drawer',
+        operation: safeQty === 0 ? 'remove' : 'change',
+        itemCount: result.itemCount,
+        cart: result.cart,
+        sections: result.sections,
+      }));
     } catch (err) {
+      if (state.itemMutationTokens.get(itemKey) !== token) return;
       console.error('[cart-drawer] quantity update error:', err);
+      document.dispatchEvent(new CartErrorEvent('cart-drawer', err.message, err.description, err.errors, {
+        source: 'cart-drawer',
+        operation: safeQty === 0 ? 'remove' : 'change',
+        status: err.status,
+      }));
       showDrawerError(err?.message || 'Erro ao atualizar o carrinho. Tente novamente.');
       await queueRender({ keepOpen: true });
       await refreshBubble(true).catch(() => {});
-    } finally {
-      if (host) host.classList.remove('cart-drawer--updating');
       clearItemLoadingStates();
+    } finally {
+      if (state.itemMutationTokens.get(itemKey) === token) {
+        state.itemMutationTokens.delete(itemKey);
+        if (host) host.classList.remove('cart-drawer--updating');
+      }
     }
   }
 
-  async function handleCartFormSubmit(form) {
-    const action = form.action || form.getAttribute('action') || '';
-    const method = (form.method || 'POST').toUpperCase();
-    const state  = getState();
-    const host   = document.querySelector(SEL.sectionHost);
-
-    if (host) host.classList.add('cart-drawer--updating');
-
-    try {
-      const formData  = new FormData(form);
-      const fetchOpts = {
-        method,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      };
-
-      /* FIX-4: internalFetchDepth impede o interceptor de disparar
-         scheduleCartTouch em duplicata */
-      let res;
-      state.internalFetchDepth++;
-      try {
-        if (method === 'GET') {
-          const qs  = new URLSearchParams(formData).toString();
-          const url = action + (action.includes('?') ? '&' : '?') + qs;
-          res = await fetch(url, fetchOpts);
-        } else {
-          fetchOpts.body = formData;
-          res = await fetch(action, fetchOpts);
-        }
-      } finally {
-        state.internalFetchDepth--;
-      }
-
-      /* FIX-4: Feedback para erros HTTP */
-      if (res && !res.ok && !res.redirected) {
-        const errMsg =
-          res.status === 422 ? 'Quantidade indisponível em estoque.' :
-          res.status === 429 ? 'Muitas requisições. Aguarde um momento.' :
-          res.status >= 500  ? 'Erro no servidor. Tente novamente.' :
-                               'Erro ao atualizar o carrinho.';
-        showDrawerError(errMsg);
-      }
-
-      /* Captura estado DEPOIS do fetch — respeita se o usuário
-         fechou o drawer durante a requisição */
-      const keepOpen = isOpen();
-      await queueRender({ keepOpen });
-      await refreshBubble(true);
-    } catch (err) {
-      if (err?.name !== 'AbortError') {
-        console.error('[cart-drawer] form submit error:', err);
-        showDrawerError();
-      }
-    } finally {
-      if (host) host.classList.remove('cart-drawer--updating');
-      clearItemLoadingStates();
-    }
+  function scheduleDrawerItemQuantity(itemKey, nextQuantity, itemElement) {
+    const state = getState();
+    const currentTimer = state.itemMutationTimers.get(itemKey);
+    if (currentTimer) clearTimeout(currentTimer);
+    const timer = setTimeout(() => {
+      state.itemMutationTimers.delete(itemKey);
+      setItemLoading(itemElement);
+      updateDrawerItemQuantity(itemKey, nextQuantity);
+    }, 180);
+    state.itemMutationTimers.set(itemKey, timer);
   }
 
-  /* ════════════════════════════════════════
-   * INIT — FIX-5
-   * ════════════════════════════════════════ */
   function init() {
     const state = getState();
 
     /* Aborta TODOS os controllers pendentes do ciclo anterior */
     state.controller?.abort();
-    state.bubbleAbort?.abort();   // ← FIX-5
+    state.bubbleAbort?.abort();
     state.renderAbort?.abort();
+    state.itemMutationTimers.forEach(timer => clearTimeout(timer));
+    state.itemMutationTimers.clear();
     if (state.closeTimer) {
       clearTimeout(state.closeTimer);
       state.closeTimer = 0;
@@ -980,15 +779,7 @@
 
     /* ── Theme events ── */
     document.addEventListener('cart:update', async e => {
-      state.lastCartUpdateEventTs = Date.now();
-
       const data = getCartEventData(e);
-      if (data.didError) {
-        clearItemLoadingStates();
-        return;
-      }
-
-      const source       = data.source || e?.detail?.source;
       let countMode      = applyCartUpdateCount(e);
       const html         = getCartDrawerSectionFromEvent(e);
       const sectionCount = getCartCountFromSectionHtml(html);
@@ -998,7 +789,7 @@
       }
       rememberCartDrawerSection(html);
       const canAutoOpen  =
-        source === 'product-form-component' &&
+        data.operation === 'add' &&
         document.querySelector('cart-drawer-component[auto-open]') &&
         Date.now() - state.lastManualClose >= REOPEN_GUARD_MS;
       // Open first, then hydrate, so mobile feedback is immediate after add-to-cart.
@@ -1020,20 +811,6 @@
       } finally {
         clearItemLoadingStates();
       }
-    }, { passive: true, signal });
-
-    document.addEventListener('cart:refresh', async e => {
-      const keep = isOpen();
-      const c    = getExplicitCartCount(e);
-      const html = getCartDrawerSectionFromEvent(e);
-      const sectionCount = getCartCountFromSectionHtml(html);
-      if (c !== null) updateBubble(c);
-      else if (sectionCount !== null) updateBubble(sectionCount);
-      rememberCartDrawerSection(html);
-      try { await queueRender({ keepOpen: keep, sectionsHtml: html }); }
-      catch (_) {}
-      if (c === null && sectionCount === null) await refreshBubble(true).catch(() => {});
-      clearItemLoadingStates();
     }, { passive: true, signal });
 
     document.addEventListener('cart:open', async e => {
@@ -1078,7 +855,8 @@
         if (!item || !key || !Number.isFinite(currentQty)) return;
         if (nextQty === currentQty || nextQty < 0) return;
 
-        updateDrawerItemQuantity(key, nextQty);
+        input.value = String(nextQty);
+        scheduleDrawerItemQuantity(key, nextQty, item);
         return;
       }
 
@@ -1088,43 +866,24 @@
         const item = removeBtn.closest('.cart-drawer__item');
         const key = item?.getAttribute('data-key');
         if (!item || !key) return;
+        setItemLoading(item);
         updateDrawerItemQuantity(key, 0);
       }
     }, { passive: false, signal });
 
-    /* ── Per-item loading UX — FIX-3 ── */
-    document.addEventListener('click', e => {
-      const t = e.target;
-      if (!(t instanceof Element)) return;
-      const removeBtn = t.closest(
-        '.cart-drawer__remove-x, [data-cart-drawer-remove], [data-cart-remove]'
-      );
-      const qtyBtn  = t.closest('.cart-drawer__qty button');
-      const trigger = removeBtn || qtyBtn;
-      if (!trigger) return;
-      const item = trigger.closest('.cart-drawer__item');
-      if (!item || !item.closest(SEL.sectionHost)) return;
-      setItemLoading(item);
-    }, { passive: true, signal });
-
-    /* ── Submit — FIX-7 ── */
+    /* ── Checkout submit ── */
     document.addEventListener('submit', e => {
       const form = e.target;
       if (!(form instanceof HTMLFormElement)) return;
       const submitter = e.submitter || null;
 
-      /* FIX-7: Checkout — limpa UI imediatamente sem desabilitar nada */
       if (isCheckoutSubmit(form, submitter)) {
         state.navigatingToCheckout = true;
         document.documentElement.classList.add('am-cart-restoring');
         hardResetUI();
-        return;                            // ← deixa o submit nativo acontecer
+        return;
       }
 
-      if (isCartApiForm(form) && form.closest(SEL.sectionHost)) {
-        e.preventDefault();
-        handleCartFormSubmit(form);
-      }
     }, { capture: true, passive: false, signal });
   }
 
@@ -1147,7 +906,6 @@
         document.documentElement.classList.remove('am-cart-restoring');
       });
       setTimeout(() => init(), 0);
-      fastSyncBubbleFromSession();
       refreshBubble(false).catch(() => {});
     }, { passive: true });
   }
@@ -1157,12 +915,6 @@
   function bootstrap() {
     ensureBFCacheListeners();
     init();
-    fastSyncBubbleFromSession();
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => refreshBubble(false).catch(() => {}), { timeout: 2500 });
-    } else {
-      setTimeout(() => refreshBubble(false).catch(() => {}), 1200);
-    }
   }
 
   if (document.readyState === 'loading') {

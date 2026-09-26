@@ -396,7 +396,6 @@
 <script>
 (() => {
   const SECTION_ID = '{{ section.id }}';
-  const cartChangeUrl = (window.routes && window.routes.cart_change_url) ? window.routes.cart_change_url : '/cart/change.js';
 
   const toggleLoading = (isLoading) => {
     const wrapper = document.querySelector('.f-cart-wrapper');
@@ -407,28 +406,27 @@
   window.FashionCart = window.FashionCart || {};
   window.FashionCart.sectionId = SECTION_ID;
 
-  window.FashionCart.updateQuantity = (btn, key, newQuantity) => {
+  window.FashionCart.updateQuantity = async (btn, key, newQuantity) => {
     const qty = Number.parseInt(newQuantity, 10);
     const safeQty = Number.isFinite(qty) && qty > 0 ? qty : 0;
 
     toggleLoading(true);
 
-    fetch(cartChangeUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        id: key,
-        quantity: safeQty,
-        sections: [SECTION_ID]
-      })
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const sectionHtml = data && data.sections && data.sections[SECTION_ID];
+    let cartEvents;
+    try {
+        const modules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+        const cartApi = modules[0];
+        cartEvents = modules[1];
+        const result = safeQty === 0
+          ? await cartApi.cartService.remove(key, { sections: cartApi.getCartSectionIds([SECTION_ID]) })
+          : await cartApi.cartService.change(key, safeQty, { sections: cartApi.getCartSectionIds([SECTION_ID]) });
+        const sectionHtml = result.sections[SECTION_ID];
         if (!sectionHtml) throw new Error('Cart section HTML missing from response');
+
+        document.dispatchEvent(new cartEvents.CartUpdateEvent(result.resource, SECTION_ID, {
+          source: 'main-cart', operation: safeQty === 0 ? 'remove' : 'change',
+          itemCount: result.itemCount, cart: result.cart, sections: result.sections
+        }));
 
         const html = new DOMParser().parseFromString(sectionHtml, 'text/html');
         const newCartContainer = html.querySelector('.f-cart-wrapper');
@@ -436,16 +434,17 @@
 
         if (currentWrapper && newCartContainer) {
           currentWrapper.replaceWith(newCartContainer);
-          // Loading class is removed because we replaced the wrapper
           return;
         }
 
         window.location.reload();
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error updating cart:', error);
+        if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent(SECTION_ID, error.message, error.description, error.errors, {
+          source: 'main-cart', operation: safeQty === 0 ? 'remove' : 'change', status: error.status
+        }));
         toggleLoading(false);
-      });
+      }
   };
 })();
 </script>

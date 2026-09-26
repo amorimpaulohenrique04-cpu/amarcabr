@@ -454,7 +454,7 @@
         {%- endif -%}
       </div>
 
-      <form class="lx-atc" method="post" action="/cart/add" data-atc-form>
+      <form class="lx-atc" method="post" action="{{ routes.cart_add_url }}" data-atc-form>
         <input type="hidden" name="id" value="{{ current_variant.id }}">
         <input type="hidden" name="quantity" value="1">
         <input type="hidden" name="properties[_combo_choice_1_product]" value="" data-prop="c1p">
@@ -745,77 +745,23 @@
       btn.disabled = true;
       btn.textContent = 'Adicionando...';
 
+      var cartEvents;
       try {
-        var sIds = [];
-        document.querySelectorAll('cart-items-component[data-section-id]').forEach(function(el){
-          if (el.dataset.sectionId) sIds.push(el.dataset.sectionId);
-        });
-
         var fd = new FormData(form);
-
-        if (sIds.length) {
-          fd.set('sections', sIds.join(','));
-          fd.set('sections_url', window.location.pathname);
-        }
-
-        var res = await fetch('/cart/add.js', {
-          method: 'POST',
-          body: fd
-        });
-
-        var data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || 'Falha ao adicionar');
-        }
-
-        var hdrId = sIds[0] || 'header_section';
-
-        function fireUpdate(s){
-          document.dispatchEvent(new CustomEvent('cart:update', {
-            bubbles: true,
-            detail: {
-              resource: {},
-              sourceId: 'combo-libre',
-              data: {
-                source: 'combo-libre',
-                itemCount: 1,
-                sections: s || undefined
-              }
-            }
-          }));
-        }
-
-        function openDrawer(){
-          try {
-            document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true }));
-            return;
-          } catch(_) {}
-
-          var b = document.querySelector('[data-cart-drawer-open]');
-          if (b) b.click();
-        }
-
-        if (data.sections && data.sections[hdrId]) {
-          fireUpdate(data.sections);
-          openDrawer();
-        } else {
-          var u = new URL(window.location.href);
-          u.searchParams.set('sections', hdrId);
-
-          fetch(u)
-            .then(function(r){ return r.json(); })
-            .then(function(j){
-              if (j && j[hdrId]) fireUpdate(j);
-              openDrawer();
-            })
-            .catch(openDrawer);
-        }
+        var cartModules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+        var cartApi = cartModules[0]; cartEvents = cartModules[1];
+        var result = await cartApi.cartService.add(fd, { sections: cartApi.getCartSectionIds() });
+        document.dispatchEvent(new cartEvents.CartAddEvent(result.resource, 'combo-novo', {
+          source: 'combo-novo', operation: 'add', itemCount: result.itemCount,
+          cart: result.cart, sections: result.sections
+        }));
 
         btn.textContent = 'Adicionado!';
       } catch(err) {
         btn.textContent = 'Erro';
-        alert(err.message || 'Erro ao adicionar ao carrinho.');
+        if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent('combo-novo', err.message, err.description, err.errors, {
+          source: 'combo-novo', operation: 'add', status: err.status
+        }));
       }
 
       setTimeout(function(){

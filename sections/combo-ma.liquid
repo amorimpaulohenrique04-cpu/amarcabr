@@ -823,19 +823,14 @@
         Object.keys(map).forEach(function(k){items.push({id:map[k].id,quantity:map[k].qty,properties:{'_combo_extra':'T-shirt Infantil Extra','_estampa':exChildT}})});
       }
 
+      var cartEvents;
       try{
-        var sids=[];document.querySelectorAll('cart-items-component[data-section-id]').forEach(function(el){if(el.dataset.sectionId)sids.push(el.dataset.sectionId)});
-        var body={items:items};if(sids.length){body.sections=sids.join(',');body.sections_url=window.location.pathname}
-        var res=await fetch('/cart/add.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-        var data=await res.json();if(!res.ok)throw new Error(data.message||data.description||'Falha');
-
-        var hsi=sids[0]||'header_section';
-        function dc(s){document.dispatchEvent(new CustomEvent('cart:update',{bubbles:true,detail:{resource:{},sourceId:'combo',data:{source:'combo',itemCount:items.length,sections:s||undefined}}}))}
-        function oc(){try{document.dispatchEvent(new CustomEvent('cart:open',{bubbles:true}));return}catch(_){}var b=document.querySelector('[data-cart-drawer-open]');if(b)b.click()}
-        if(data.sections&&data.sections[hsi]){dc(data.sections);oc()}
-        else{var u=new URL(window.location.href);u.searchParams.set('sections',hsi);fetch(u).then(function(r){return r.json()}).then(function(j){if(j&&j[hsi])dc(j);oc()}).catch(oc)}
+        var cartModules=await Promise.all([import('@theme/cart-service'),import('@theme/events')]);
+        var cartApi=cartModules[0];cartEvents=cartModules[1];
+        var result=await cartApi.cartService.add(items,{sections:cartApi.getCartSectionIds()});
+        document.dispatchEvent(new cartEvents.CartAddEvent(result.resource,'combo-ma',{source:'combo-ma',operation:'add',itemCount:result.itemCount,cart:result.cart,sections:result.sections}));
         btnLabel.textContent='Adicionado ✓';
-      }catch(err){btnLabel.textContent='Erro';alert(err.message||'Erro')}
+      }catch(err){btnLabel.textContent='Erro';if(cartEvents)document.dispatchEvent(new cartEvents.CartErrorEvent('combo-ma',err.message,err.description,err.errors,{source:'combo-ma',operation:'add',status:err.status}));showHint(err.message||'Erro ao adicionar ao carrinho.')}
       setTimeout(function(){btn.classList.toggle('is-disabled',!ready);btnLabel.textContent=orig},2000);
     })();
   });

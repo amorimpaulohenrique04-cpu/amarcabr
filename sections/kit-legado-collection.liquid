@@ -1542,7 +1542,6 @@
     const availableLabel = {{ section.settings.card_button_label | json }};
     const checkoutLoadingLabel = {{ section.settings.checkout_loading_label | json }};
     const shopRoot = window.Shopify?.routes?.root || '/';
-    const cartAddUrl = `${shopRoot}cart/add.js`;
     const checkoutUrl = `${shopRoot}checkout`;
 
     const formatMoney = (cents) => {
@@ -1830,20 +1829,12 @@
         isSubmitting = true;
         updatePurchaseState();
 
+        let cartEvents;
         try {
-          const response = await fetch(cartAddUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
-            },
-            body: JSON.stringify({ items })
-          });
-
-          if (!response.ok) {
-            const payload = await response.json().catch(() => ({}));
-            throw new Error(payload.description || payload.message || 'Não foi possível adicionar os produtos.');
-          }
+          const modules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+          const { cartService } = modules[0];
+          cartEvents = modules[1];
+          await cartService.add(items, { sections: false });
 
           window.location.assign(checkoutUrl);
 
@@ -1851,6 +1842,9 @@
           // instantâneo, aba em segundo plano), o botão se libera sozinho.
           submitTimeout = window.setTimeout(cancelSubmitting, 10000);
         } catch (error) {
+          if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent(section.id, error.message, error.description, error.errors, {
+            source: 'kit-legado-checkout', operation: 'add', status: error.status
+          }));
           cancelSubmitting();
           if (statusNode) {
             statusNode.textContent = error?.message || 'Não foi possível abrir o checkout. Tente novamente.';

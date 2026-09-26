@@ -831,45 +831,7 @@
       return properties;
     }
 
-    function collectCartSections() {
-      var ids = ['cart-drawer', 'cart-icon-bubble'];
-      document.querySelectorAll('[data-section-id], [data-cart-section-id]').forEach(function(el) {
-        var id = el.dataset.sectionId || el.dataset.cartSectionId;
-        if (id) ids.push(id);
-      });
-      return Array.from(new Set(ids.filter(Boolean))).slice(0, 5);
-    }
-
-    function renderReturnedSections(sections) {
-      if (!sections || typeof sections !== 'object') return;
-      Object.keys(sections).forEach(function(sectionId) {
-        var html = sections[sectionId];
-        if (!html) return;
-        var parsed = new DOMParser().parseFromString(html, 'text/html');
-        var current = document.getElementById('shopify-section-' + sectionId);
-        var next = parsed.getElementById('shopify-section-' + sectionId);
-        if (current && next) {
-          current.replaceWith(next);
-          return;
-        }
-        current = document.getElementById(sectionId);
-        next = parsed.getElementById(sectionId);
-        if (current && next) current.replaceWith(next);
-      });
-    }
-
-    function dispatchCartEvents(data) {
-      var detail = {
-        data: data,
-        sections: data && data.sections || null,
-        source: 'product-form-kit',
-        sourceId: formId,
-        itemCount: data && Array.isArray(data.items) ? data.items.length : 1 + getExtraCount()
-      };
-      document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: detail }));
-      document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: detail }));
-      document.dispatchEvent(new CustomEvent('product:added', { bubbles: true, detail: { product: data } }));
-
+    function publishLegacyCartUpdate(data) {
       if (typeof window.publish === 'function' && window.PUB_SUB_EVENTS && window.PUB_SUB_EVENTS.cartUpdate) {
         try {
           window.publish(window.PUB_SUB_EVENTS.cartUpdate, {
@@ -881,21 +843,6 @@
           console.warn('[Kit Dia dos Pais] Falha ao publicar evento do carrinho.', eventError);
         }
       }
-    }
-
-    function openCartDrawer() {
-      var drawer = document.querySelector('cart-drawer, [data-cart-drawer], .cart-drawer');
-      if (drawer) {
-        if (typeof drawer.open === 'function') { drawer.open(); return true; }
-        if (typeof drawer.show === 'function') { drawer.show(); return true; }
-        drawer.classList.add('is-open', 'active', 'animate');
-        drawer.removeAttribute('hidden');
-        drawer.setAttribute('open', '');
-        return true;
-      }
-      var opener = document.querySelector('[data-cart-drawer-open], [aria-controls="CartDrawer"], [aria-controls="cart-drawer"]');
-      if (opener) { opener.click(); return true; }
-      return false;
     }
 
     function buildCartItems() {
@@ -945,34 +892,25 @@
         button.setAttribute('aria-busy', 'true');
       }
 
+      var cartEvents;
       try {
-        var sectionIds = collectCartSections();
-        var payload = {
-          items: buildCartItems(),
-          sections: sectionIds.join(','),
-          sections_url: window.location.pathname
-        };
-        var cartAddUrl = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') + 'cart/add.js';
-        var res = await fetch(cartAddUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        var data = await res.json().catch(function() { return {}; });
-        if (!res.ok) throw new Error(data.description || data.message || 'Falha ao adicionar o kit.');
-
-        renderReturnedSections(data.sections);
-        dispatchCartEvents(data);
+        var cartModules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+        var cartApi = cartModules[0];
+        cartEvents = cartModules[1];
+        var result = await cartApi.cartService.add(buildCartItems(), { sections: cartApi.getCartSectionIds() });
+        var data = result.resource;
+        document.dispatchEvent(new cartEvents.CartAddEvent(data, formId, {
+          source: 'product-form-kit', operation: 'add', itemCount: result.itemCount,
+          cart: result.cart, sections: result.sections
+        }));
+        document.dispatchEvent(new CustomEvent('product:added', { bubbles: true, detail: { product: data } }));
+        publishLegacyCartUpdate(data);
 
         if (redirectToCheckout) {
           window.location.assign('/checkout');
           return;
         }
 
-        document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true, detail: { sourceId: formId } }));
-        window.setTimeout(function() {
-          if (!openCartDrawer()) console.info('[Kit Dia dos Pais] Carrinho adicionado; drawer controlado pelo tema.');
-        }, 60);
         if (button) {
           button.textContent = 'Adicionado!';
           button.classList.add('is-added');
@@ -985,6 +923,9 @@
         }, 1800);
       } catch (err) {
         console.error('[Kit Dia dos Pais]', err);
+        if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent(formId, err.message, err.description, err.errors, {
+          source: 'product-form-kit', operation: 'add', status: err.status
+        }));
         purchaseBusy = false;
         if (button) {
           button.textContent = originalText;

@@ -2152,29 +2152,23 @@
 
           fd.delete('return_to');
 
-          var sectionIds = ['cart-drawer'];
+          var cartModules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
 
-          document.querySelectorAll('[data-section-id]').forEach(function(el) {
+          var cartApi = cartModules[0];
 
-            if (el.dataset.sectionId) sectionIds.push(el.dataset.sectionId);
+          var cartEvents = cartModules[1];
 
-          });
+          var result = await cartApi.cartService.add(fd, { sections: cartApi.getCartSectionIds() });
 
-          sectionIds = Array.from(new Set(sectionIds));
+          var data = result.resource;
 
-          fd.set('sections', sectionIds.join(','));
-
-          fd.set('sections_url', window.location.pathname);
-
-          var res = await fetch('/cart/add.js', { method: 'POST', body: fd });
-
-          var data = await res.json();
-
-          if (!res.ok) throw new Error(data.description || data.message || 'Falha ao adicionar');
-
-          document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { data: data, source: 'product-form' } }));
-
-          document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true, detail: { sourceId: formId } }));
+          document.dispatchEvent(new cartEvents.CartAddEvent(data, formId, {
+            source: 'product-form-premium',
+            operation: 'add',
+            itemCount: result.itemCount,
+            cart: result.cart,
+            sections: result.sections
+          }));
 
           document.dispatchEvent(new CustomEvent('product:added', { bubbles: true, detail: { product: data } }));
 
@@ -2200,23 +2194,15 @@
 
           btn.setAttribute('aria-busy', 'false');
 
-          try {
+          if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent(formId, err.message, err.description, err.errors, {
+            source: 'product-form-premium', operation: 'add', status: err.status
+          }));
 
-            var returnInput = formEl.querySelector('input[name="return_to"]');
+          btn.textContent = 'Erro';
 
-            if (returnInput) returnInput.remove();
+          setTimeout(function() { btn.textContent = originalText; btn.disabled = false; }, 2500);
 
-            HTMLFormElement.prototype.submit.call(formEl);
-
-          } catch (fallbackErr) {
-
-            btn.textContent = 'Erro';
-
-            setTimeout(function() { btn.textContent = originalText; btn.disabled = false; }, 2500);
-
-            showToast(err.message || 'Erro ao adicionar');
-
-          }
+          showToast(err.message || 'Erro ao adicionar');
 
         }
 

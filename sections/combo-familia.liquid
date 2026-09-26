@@ -272,7 +272,7 @@
           </div>
         </footer>
 
-        <form method="post" action="/cart/add" data-atc-form hidden>
+        <form method="post" action="{{ routes.cart_add_url }}" data-atc-form hidden>
           <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-input>
           <input type="hidden" name="quantity" value="1">
 
@@ -1434,51 +1434,25 @@
           nextLabel.textContent = 'Adicionando...';
           setStatus('');
 
+          let cartEvents;
           try {
-            const sectionIds = [...document.querySelectorAll('cart-items-component[data-section-id]')]
-              .map(element => element.dataset.sectionId)
-              .filter(Boolean);
-
             const formData = new FormData(form);
-            if (sectionIds.length) {
-              formData.set('sections', sectionIds.join(','));
-              formData.set('sections_url', window.location.pathname);
-            }
-
-            const response = await fetch('/cart/add.js', {
-              method: 'POST',
-              headers: { Accept: 'application/json' },
-              body: formData
-            });
-
-            const payload = await response.json();
-            if (!response.ok) throw new Error(payload.description || payload.message || 'Não foi possível adicionar o combo.');
-
-            document.dispatchEvent(new CustomEvent('cart:update', {
-              bubbles: true,
-              detail: {
-                resource: payload,
-                sourceId: 'combo-familia',
-                data: {
-                  source: 'combo-familia',
-                  itemCount: 1,
-                  sections: payload.sections || null
-                }
-              }
+            const modules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+            const cartApi = modules[0];
+            cartEvents = modules[1];
+            const result = await cartApi.cartService.add(formData, { sections: cartApi.getCartSectionIds() });
+            document.dispatchEvent(new cartEvents.CartAddEvent(result.resource, 'combo-familia', {
+              source: 'combo-familia', operation: 'add', itemCount: result.itemCount,
+              cart: result.cart, sections: result.sections
             }));
-
-            document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
-            document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true }));
-
-            const drawerTrigger = document.querySelector('[data-cart-drawer-open], [data-cart-toggle], a[href="/cart"]');
-            if (drawerTrigger?.hasAttribute('data-cart-drawer-open') || drawerTrigger?.hasAttribute('data-cart-toggle')) {
-              drawerTrigger.click();
-            }
 
             setStatus('Combo adicionado ao carrinho.', false);
             nextLabel.textContent = 'Adicionado';
           } catch (error) {
             console.error('Family Combo Builder:', error);
+            if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent('combo-familia', error.message, error.description, error.errors, {
+              source: 'combo-familia', operation: 'add', status: error.status
+            }));
             setStatus(error.message || 'Ocorreu um erro ao adicionar o combo.', true);
             nextLabel.textContent = 'Tentar novamente';
           } finally {

@@ -176,7 +176,7 @@
           </div>
         </div>
 
-        <form method="post" action="/cart/add" data-atc-form style="display:none;">
+        <form method="post" action="{{ routes.cart_add_url }}" data-atc-form style="display:none;">
           <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-input>
           <input type="hidden" name="quantity" value="1">
           <input type="hidden" name="properties[_combo_qty]" value="" data-prop="qty">
@@ -573,30 +573,22 @@
 
         nextBtn.disabled = true;
         btnText.textContent = 'ENVIANDO...';
+        var cartEvents;
         try {
-          var sectionIds = [];
-          document.querySelectorAll('cart-items-component[data-section-id]').forEach(function(el){ if(el.dataset.sectionId) sectionIds.push(el.dataset.sectionId); });
           var formData = new FormData(atcForm);
-          if(sectionIds.length){ formData.set('sections', sectionIds.join(',')); formData.set('sections_url', window.location.pathname); }
-          var res = await fetch('/cart/add.js', { method: 'POST', body: formData });
-          var data = await res.json();
-          if(!res.ok) throw new Error(data.message || 'Falha ao adicionar');
-          var headerSectionId = sectionIds[0] || 'header_section';
-          function dispatchCartUpdate(sectionsPayload){ var payload = { source: 'combo-juntas', itemCount: 1 }; if(sectionsPayload) payload.sections = sectionsPayload; document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: { resource: {}, sourceId: 'combo-juntas', data: payload } })); }
-          function openCartDrawer(){
-  try {
-    document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true }));
-    return;
-  } catch (_) {}
-  var btn = document.querySelector('[data-cart-drawer-open]');
-  if (btn) btn.click();
-}
-          if(data.sections && data.sections[headerSectionId]){ dispatchCartUpdate(data.sections); openCartDrawer(); }
-          else{ var sectionUrl = new URL(window.location.href); sectionUrl.searchParams.set('sections', headerSectionId); fetch(sectionUrl.toString()).then(function(r){ return r.json(); }).then(function(sectionJson){ if(sectionJson && sectionJson[headerSectionId]) dispatchCartUpdate(sectionJson); openCartDrawer(); }).catch(function(){ openCartDrawer(); }); }
+          var cartModules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+          var cartApi = cartModules[0]; cartEvents = cartModules[1];
+          var result = await cartApi.cartService.add(formData, { sections: cartApi.getCartSectionIds() });
+          document.dispatchEvent(new cartEvents.CartAddEvent(result.resource, 'combo-juntas', {
+            source: 'combo-juntas', operation: 'add', itemCount: result.itemCount,
+            cart: result.cart, sections: result.sections
+          }));
           btnText.textContent = 'ADICIONADO!';
         } catch(err) {
           btnText.textContent = 'ERRO';
-          alert(err.message || 'Erro ao adicionar ao carrinho.');
+          if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent('combo-juntas', err.message, err.description, err.errors, {
+            source: 'combo-juntas', operation: 'add', status: err.status
+          }));
         }
         nextBtn.disabled = false;
         btnText.textContent = 'ADICIONAR';

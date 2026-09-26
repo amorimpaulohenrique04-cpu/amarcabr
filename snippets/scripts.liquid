@@ -4,6 +4,7 @@
       "@theme/overflow-list": "{{ 'overflow-list.js' | asset_url }}",
       "@theme/product-title": "{{ 'product-title-truncation.js' | asset_url }}",
       "@theme/component": "{{ 'component.js' | asset_url }}",
+      "@theme/cart-service": "{{ 'cart-service.js' | asset_url }}",
       "@theme/dialog": "{{ 'dialog.js' | asset_url }}",
       "@theme/events": "{{ 'events.js' | asset_url }}",
       "@theme/focus": "{{ 'focus.js' | asset_url }}",
@@ -122,16 +123,14 @@
   ]));
 
   onFirstMatch('pointerdown',
-    '[data-cart-drawer-open],[data-cart-toggle],a[href="/cart"],a[href^="/cart?"]',
+    '[data-cart-drawer-open],[data-cart-toggle],a[href="{{ routes.cart_url }}"],a[href^="{{ routes.cart_url }}?"]',
     () => { loadCartInternals(); }
   );
 
   document.addEventListener('cart:open', () => { loadCartInternals(); }, { passive: true });
-  document.addEventListener('cart:refresh', () => { loadCartInternals(); }, { passive: true });
-
   {% if settings.show_add_discount_code %}
     onFirstMatch('pointerdown',
-      '[data-cart-drawer-open],[data-cart-toggle],a[href="/cart"],a[href^="/cart?"]',
+      '[data-cart-drawer-open],[data-cart-toggle],a[href="{{ routes.cart_url }}"],a[href^="{{ routes.cart_url }}?"]',
       () => once('cart-discount', () => import('{{ "cart-discount.js" | asset_url }}').catch(()=>{}))
     );
   {% endif %}
@@ -245,6 +244,7 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',ini
     routes: {
       cart_add_url: '{{ routes.cart_add_url | append: '.js' }}',
       cart_change_url: '{{ routes.cart_change_url }}',
+      cart_get_url: '{{ routes.cart_url | append: '.js' }}',
       cart_update_url: '{{ routes.cart_update_url }}',
       cart_url: '{{ routes.cart_url }}',
       predictive_search_url: '{{ routes.predictive_search_url }}',

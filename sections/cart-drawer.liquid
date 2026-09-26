@@ -1,8 +1,8 @@
 {% comment %}
   A MARCA — Cart Drawer (Side Cart)
   - Section fixa (injetada no layout/theme.liquid)
-  - Atualiza via cart-items-component (AJAX /cart/change.js + sections rendering)
-  - Auto-open após add-to-cart (CartAddEvent) se auto-open estiver presente
+  - Atualiza via cart-service + bundled section rendering
+  - Auto-open após CartAddEvent se auto-open estiver presente
 {% endcomment %}
 
 <link rel="stylesheet" href="{{ 'am-cart-drawer.css' | asset_url }}" media="print" onload="this.media='all'">
@@ -38,6 +38,7 @@
                 class="cart-drawer__item"
                 ref="cartItemRows[]"
                 data-key="{{ item.key }}"
+                data-variant-id="{{ item.variant_id }}"
                 data-line="{{ forloop.index }}"
               >
                 <a class="cart-drawer__thumb" href="{{ item.url }}">

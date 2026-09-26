@@ -500,29 +500,36 @@ const productJson = {{ product.variants | json }};
     });
   });
 
-  document.getElementById('BtnAddToCart').addEventListener('click', function(e) {
+  document.getElementById('BtnAddToCart').addEventListener('click', async function(e) {
     e.preventDefault();
     const btn = this;
     const old = btn.textContent;
     btn.textContent = "Adicionando...";
     btn.disabled = true;
 
-    fetch('/cart/add.js', {
-      method: 'POST',
-      body: new FormData(document.getElementById('{{ product_form_id }}'))
-    })
-    .then(r => r.ok ? r.json() : Promise.reject(r))
-    .then(() => {
+    let cartEvents;
+    try {
+      const modules = await Promise.all([import('@theme/cart-service'), import('@theme/events')]);
+      const cartApi = modules[0];
+      cartEvents = modules[1];
+      const result = await cartApi.cartService.add(
+        new FormData(document.getElementById('{{ product_form_id }}')),
+        { sections: cartApi.getCartSectionIds() }
+      );
+      document.dispatchEvent(new cartEvents.CartAddEvent(result.resource, '{{ product_form_id }}', {
+        source: 'fashiondetails', operation: 'add', itemCount: result.itemCount,
+        cart: result.cart, sections: result.sections
+      }));
       btn.textContent = "Adicionado!";
       btn.classList.add('is-added');
-      document.documentElement.dispatchEvent(new CustomEvent('cart:refresh', {bubbles: true}));
-      document.documentElement.dispatchEvent(new CustomEvent('cart:open', {bubbles: true}));
       setTimeout(() => { btn.textContent = old; btn.classList.remove('is-added'); btn.disabled = false; }, 2000);
-    })
-    .catch(() => {
+    } catch (error) {
+      if (cartEvents) document.dispatchEvent(new cartEvents.CartErrorEvent('{{ product_form_id }}', error.message, error.description, error.errors, {
+        source: 'fashiondetails', operation: 'add', status: error.status
+      }));
       btn.textContent = "Erro ao adicionar";
       btn.disabled = false;
-    });
+    }
   });
 
   document.getElementById('BtnBuyNow').addEventListener('click', function() {

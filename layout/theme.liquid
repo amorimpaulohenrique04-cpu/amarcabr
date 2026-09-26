@@ -289,7 +289,7 @@
           cartLoaderPromise = new Promise(function (resolve, reject) {
             var s = document.createElement('script');
             s.src = "{{ 'am-cart-drawer-init.js' | asset_url }}";
-            s.defer = true;
+            s.type = 'module';
             s.onload = function () {
               cartModuleReady = true;
               resolve();
@@ -306,7 +306,7 @@
         }
 
         function isCartTrigger(target) {
-          return !!(target && target.closest && target.closest('[data-cart-drawer-open],[data-cart-toggle],a[href="/cart"],a[href^="/cart?"]'));
+          return !!(target && target.closest && target.closest('[data-cart-drawer-open],[data-cart-toggle],a[href="{{ routes.cart_url }}"],a[href^="{{ routes.cart_url }}?"]'));
         }
 
         function isAddToCartTrigger(target) {
@@ -342,11 +342,6 @@
         document.addEventListener('cart:update', function (e) {
           if (cartModuleReady) return;
           queueCartEvent('cart:update', e.detail || {});
-        }, { passive: true });
-
-        document.addEventListener('cart:refresh', function (e) {
-          if (cartModuleReady) return;
-          queueCartEvent('cart:refresh', e.detail || {});
         }, { passive: true });
 
         document.addEventListener('cart:open', function (e) {
