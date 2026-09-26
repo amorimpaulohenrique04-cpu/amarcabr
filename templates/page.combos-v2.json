@@ -1,0 +1,67 @@
+{
+  "sections": {
+    "combos_v2": {
+      "type": "combos-v2",
+      "blocks": {
+        "melhores_amigos": {
+          "type": "combo",
+          "settings": {
+            "combo_key": "best-friends",
+            "badge": "2 peças",
+            "title": "Melhores Amigos",
+            "description": "Escolha duas T-shirts. Cada pessoa pode usar uma estampa e um tamanho diferente.",
+            "price_prefix": "Combo",
+            "price": "R$ 249,90",
+            "button_label": "Montar combo",
+            "link": ""
+          }
+        },
+        "pais_filhos": {
+          "type": "combo",
+          "settings": {
+            "combo_key": "parents-kids",
+            "badge": "Adulto + Infantil",
+            "title": "Pais & Filhos",
+            "description": "Monte a combinação entre adulto e infantil, mantendo a relação correta entre estampas e tamanhos.",
+            "price_prefix": "Combo",
+            "price": "R$ 199,90",
+            "button_label": "Montar combo",
+            "link": ""
+          }
+        },
+        "familia": {
+          "type": "combo",
+          "settings": {
+            "combo_key": "family",
+            "badge": "Família",
+            "title": "Família Completa",
+            "description": "Comece com 2 adultos + 1 infantil e personalize a composição para a sua família.",
+            "price_prefix": "A partir de",
+            "price": "R$ 349,90",
+            "button_label": "Montar combo",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "melhores_amigos",
+        "pais_filhos",
+        "familia"
+      ],
+      "settings": {
+        "eyebrow": "A MARCA · COMBOS",
+        "title": "Vamos montar seu combo?",
+        "subtitle": "Escolha qual combinação faz sentido para você. Na próxima etapa, você personaliza as peças.",
+        "background": "#F7F6F3",
+        "card_background": "#FFFFFF",
+        "text_color": "#151515",
+        "muted_color": "#6D6D68",
+        "border_color": "#E6E4DE",
+        "accent_color": "#90332F"
+      }
+    }
+  },
+  "order": [
+    "combos_v2"
+  ]
+}
