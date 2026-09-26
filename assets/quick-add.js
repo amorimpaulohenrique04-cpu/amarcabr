@@ -13,11 +13,16 @@ export class QuickAddComponent extends Component {
   get productPageUrl() {
     const productCard = this.closest('product-card');
     const hotspotProduct = this.closest('product-hotspot-component');
-    const productLink = productCard?.getProductCardLink() || hotspotProduct?.getHotspotProductLink();
+    const amProductCard = this.closest('[data-am-product-card]');
+    const productLink =
+      productCard?.getProductCardLink() ||
+      hotspotProduct?.getHotspotProductLink() ||
+      amProductCard?.querySelector('[data-am-product-link]');
+    const productUrl = productLink?.href || amProductCard?.dataset.productUrl || this.dataset.productUrl;
 
-    if (!productLink?.href) return '';
+    if (!productUrl) return '';
 
-    const url = new URL(productLink.href);
+    const url = new URL(productUrl, window.location.origin);
     if (url.searchParams.has('variant')) return url.toString();
 
     const selectedVariantId = this.#getSelectedVariantId();
@@ -28,7 +33,14 @@ export class QuickAddComponent extends Component {
 
   #getSelectedVariantId() {
     const productCard = this.closest('product-card');
-    return productCard?.getSelectedVariantId() || null;
+    const amProductCard = this.closest('[data-am-product-card]');
+    return productCard?.getSelectedVariantId() || amProductCard?.dataset.selectedVariantId || null;
+  }
+
+  #getQuickAddRequestUrl(productPageUrl) {
+    const url = new URL(productPageUrl, window.location.origin);
+    url.searchParams.set('section_id', 'section-rendering-product-card');
+    return url.toString();
   }
 
   connectedCallback() {
@@ -66,7 +78,7 @@ export class QuickAddComponent extends Component {
     let productGrid = this.#cachedContent.get(currentUrl);
 
     if (!productGrid) {
-      const html = await this.fetchProductPage(currentUrl);
+      const html = await this.fetchProductPage(this.#getQuickAddRequestUrl(currentUrl));
       if (html) {
         const gridElement = html.querySelector('[data-product-grid-content]');
         if (gridElement) {
@@ -193,7 +205,9 @@ export class QuickAddComponent extends Component {
 
   #updateQuickAddButtonState = (event) => {
     if (!(event.target instanceof HTMLElement)) return;
-    if (event.target.closest('product-card') !== this.closest('product-card')) return;
+    const eventCard = event.target.closest('product-card, [data-am-product-card]');
+    const currentCard = this.closest('product-card, [data-am-product-card]');
+    if (eventCard !== currentCard) return;
 
     const productOptionsCount = this.dataset.productOptionsCount;
     const quickAddButton = productOptionsCount === '1' ? 'add' : 'choose';

@@ -30,6 +30,11 @@
   assign sku = product.selected_or_first_available_variant.sku
 %}
 
+<div data-product-grid-content>
+  {% content_for 'block', type: 'variant-picker', id: 'quick-buy-variant-picker', closest.product: product %}
+  {% content_for 'block', type: 'buy-buttons', id: 'quick-buy-buy-buttons', closest.product: product %}
+</div>
+
 {%- if settings.transition_to_main_product -%}
   <product-card-link
     data-product-id="{{ product.id }}"

@@ -1,0 +1,373 @@
+{%- doc -%}
+  Renders the shared A MARCA product card.
+
+  @param {object} product - Product resource to render
+  @param {string} section_id - Owning section ID
+  @param {string} image_sizes - Responsive sizes attribute
+  @param {string} [image_ratio] - Card image aspect ratio
+  @param {string} [loading] - Primary image loading strategy
+  @param {boolean} [enable_hover_image] - Whether to show the second image on hover
+  @param {boolean} [show_installments] - Whether to show installment information
+  @param {string} [sale_metafield_namespace] - Sale price metafield namespace
+  @param {string} [sale_metafield_key] - Sale price metafield key
+  @param {string} [sale_label] - Sale badge label
+  @param {string} [quick_buy_label] - Desktop quick buy trigger label
+{%- enddoc -%}
+
+{%- liquid
+  assign image_ratio = image_ratio | default: '3/4'
+  assign loading = loading | default: 'lazy'
+  assign sale_metafield_namespace = sale_metafield_namespace | default: 'custom'
+  assign sale_metafield_key = sale_metafield_key | default: 'sale'
+  assign sale_label = sale_label | default: 'Sale'
+  if quick_buy_label == blank
+    assign quick_buy_label = 'actions.choose' | t
+  endif
+  assign selected_variant = product.selected_or_first_available_variant
+  assign sale_price = blank
+
+  if sale_metafield_namespace != blank and sale_metafield_key != blank
+    assign sale_price = product.metafields[sale_metafield_namespace][sale_metafield_key].value
+  endif
+-%}
+
+<am-product-card
+  class="eurus-card{% if enable_hover_image %} am-card--hover-image{% endif %}"
+  role="listitem"
+  data-am-product-card
+  data-quick-add
+  data-product-url="{{ product.url | escape }}"
+  data-selected-variant-id="{{ selected_variant.id }}"
+  style="--aspect-ratio: {{ image_ratio }};"
+>
+  <div class="eurus-card__media-wrap" data-product-url="{{ product.url | escape }}">
+    <a
+      href="{{ product.url }}"
+      class="eurus-card__media"
+      data-am-product-link
+      aria-label="{{ product.title | escape }}"
+    >
+      {%- if product.featured_media != blank -%}
+        {%- assign primary_image = product.featured_media.preview_image -%}
+        <img
+          class="eurus-card__img eurus-card__img--primary"
+          src="{{ primary_image | image_url: width: 400 }}"
+          srcset="{{ primary_image | image_url: width: 165 }} 165w, {{ primary_image | image_url: width: 240 }} 240w, {{ primary_image | image_url: width: 320 }} 320w, {{ primary_image | image_url: width: 400 }} 400w, {{ primary_image | image_url: width: 550 }} 550w, {{ primary_image | image_url: width: 750 }} 750w, {{ primary_image | image_url: width: 1000 }} 1000w"
+          sizes="{{ image_sizes }}"
+          loading="{{ loading }}"
+          decoding="async"
+          width="{{ primary_image.width }}"
+          height="{{ primary_image.height }}"
+          alt="{{ primary_image.alt | default: product.title | escape }}"
+        >
+
+        {%- if enable_hover_image and product.media[1] != blank -%}
+          {%- assign secondary_image = product.media[1].preview_image -%}
+          <img
+            class="eurus-card__img eurus-card__img--secondary"
+            src="{{ secondary_image | image_url: width: 400 }}"
+            srcset="{{ secondary_image | image_url: width: 165 }} 165w, {{ secondary_image | image_url: width: 240 }} 240w, {{ secondary_image | image_url: width: 320 }} 320w, {{ secondary_image | image_url: width: 400 }} 400w, {{ secondary_image | image_url: width: 550 }} 550w, {{ secondary_image | image_url: width: 750 }} 750w, {{ secondary_image | image_url: width: 1000 }} 1000w"
+            sizes="{{ image_sizes }}"
+            loading="lazy"
+            decoding="async"
+            width="{{ secondary_image.width }}"
+            height="{{ secondary_image.height }}"
+            alt="{{ secondary_image.alt | default: product.title | escape }}"
+          >
+        {%- endif -%}
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'eurus-card__placeholder' }}
+      {%- endif -%}
+    </a>
+
+    {%- render 'quick-add',
+      product: product,
+      section_id: section_id,
+      button_label: quick_buy_label,
+      am_product_card: true
+    -%}
+  </div>
+
+  <div class="eurus-card__content">
+    <a href="{{ product.url }}" class="eurus-card__title">{{ product.title }}</a>
+
+    <div class="eurus-card__price">
+      {%- if sale_price != blank -%}
+        <span class="eurus-card__price--compare">{{ product.price | money_without_trailing_zeros }}</span>
+        <span class="eurus-card__price--sale">{{ sale_price | money_without_trailing_zeros }}</span>
+        <span class="eurus-card__sale-tag">{{ sale_label }}</span>
+      {%- else -%}
+        <span>{{ product.price | money_without_trailing_zeros }}</span>
+        {%- if product.compare_at_price > product.price -%}
+          <span class="eurus-card__price--compare">{{ product.compare_at_price | money_without_trailing_zeros }}</span>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+
+    {%- if show_installments -%}
+      <div class="eurus-card__installments">
+        {%- render 'installment-3x', product: product -%}
+      </div>
+    {%- endif -%}
+  </div>
+</am-product-card>
+
+{% stylesheet %}
+  .eurus-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-radius: var(--radius, 8px);
+    background: var(--card-bg, #fff);
+  }
+
+  .eurus-card[data-reveal-ready]:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .eurus-card[data-reveal-ready] {
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .eurus-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .eurus-card__media-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--aspect-ratio, 3/4);
+    overflow: hidden;
+    border-radius: var(--radius, 8px);
+    background: #f4f4f4;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .eurus-card__media {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+  }
+
+  .eurus-card__img,
+  .eurus-card__placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .eurus-card__img {
+    transform: scale(1);
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 300ms ease;
+  }
+
+  .eurus-card__img--secondary {
+    z-index: 1;
+    opacity: 0;
+  }
+
+  .eurus-card__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px 0 24px;
+    text-align: left;
+  }
+
+  .eurus-card__title {
+    width: 100%;
+    margin: 0 0 4px;
+    color: var(--heading-color, #000);
+    font-family: var(--font-body, var(--font-body--family, 'Inter', sans-serif));
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    text-decoration: none;
+  }
+
+  .eurus-card__price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    color: var(--price-color, #1a1a1a);
+    font-family: var(--font-body, var(--font-body--family, 'Inter', sans-serif));
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .eurus-card__price--compare {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0.5;
+    text-decoration: line-through;
+  }
+
+  .eurus-card__price--sale {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .eurus-card__sale-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 7px;
+    border-radius: 2px;
+    color: var(--badge-text, #fff);
+    background: var(--badge-bg, #000);
+    font-family: var(--font-body, var(--font-body--family, 'Inter', sans-serif));
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .eurus-card__installments {
+    color: #666;
+    font-family: var(--font-body, var(--font-body--family, 'Inter', sans-serif));
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .eurus-card__installments .installment-3x {
+    display: block;
+  }
+
+  .eurus-card .quick-add {
+    --quick-add-right: 12px;
+    --quick-add-bottom: 12px;
+    --button-size-md: var(--cta-mobile-size, 40px);
+  }
+
+  .eurus-card .quick-add__button {
+    display: flex;
+    width: max(var(--cta-mobile-size, 40px), 40px);
+    height: max(var(--cta-mobile-size, 40px), 40px);
+    border: 0;
+    opacity: 1;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
+  }
+
+  .eurus-card .quick-add__button-text {
+    display: none;
+  }
+
+  .eurus-card .quick-add__button .add-to-cart-icon {
+    display: none;
+  }
+
+  .eurus-card .quick-add__button .add-to-cart-text::before {
+    content: '+';
+    display: grid;
+    place-items: center;
+    width: max(var(--cta-mobile-size, 40px), 40px);
+    height: max(var(--cta-mobile-size, 40px), 40px);
+    font-size: calc(var(--cta-mobile-size, 40px) * 0.55);
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  @media (hover: hover) {
+    .eurus-card:hover .eurus-card__img {
+      transform: scale(1.04);
+    }
+
+    .eurus-card.am-card--hover-image:hover .eurus-card__img--primary {
+      opacity: 0;
+    }
+
+    .eurus-card.am-card--hover-image:hover .eurus-card__img--secondary {
+      opacity: 1;
+    }
+  }
+
+  @media (hover: hover) and (min-width: 1024px) {
+    .eurus-card .quick-add__button {
+      right: auto;
+      bottom: 24px;
+      left: 50%;
+      width: auto;
+      min-width: var(--cta-desktop-min-width, 160px);
+      min-height: 44px;
+      padding: var(--cta-desktop-padding, 9px) 0;
+      opacity: 0;
+      translate: -50% 15px;
+      box-shadow: 0 4px 20px rgb(0 0 0 / 6%);
+    }
+
+    .eurus-card:is(:hover, :focus-within) .quick-add__button {
+      opacity: 1;
+      translate: -50% 0;
+    }
+
+    .eurus-card .quick-add__button .add-to-cart-text::before {
+      content: none;
+    }
+
+    .eurus-card .quick-add__button .add-to-cart-text__content {
+      display: grid;
+      grid-template-columns: 1fr;
+      font-size: var(--cta-desktop-font-size, 11px);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eurus-card .quick-add__button .add-to-cart-text__content > span > span {
+      padding-inline: var(--padding-sm);
+      opacity: 1;
+      filter: none;
+      translate: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eurus-card,
+    .eurus-card__img,
+    .eurus-card .quick-add__button {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  const revealObserver =
+    'IntersectionObserver' in window
+      ? new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              entry.target.classList.add('is-visible');
+              revealObserver.unobserve(entry.target);
+            }
+          },
+          { threshold: 0.1 }
+        )
+      : null;
+
+  class AmProductCard extends HTMLElement {
+    connectedCallback() {
+      if (this.hasAttribute('data-reveal-ready')) return;
+      this.setAttribute('data-reveal-ready', '');
+      if (revealObserver) revealObserver.observe(this);
+      else this.classList.add('is-visible');
+    }
+
+    disconnectedCallback() {
+      revealObserver?.unobserve(this);
+    }
+  }
+
+  if (!customElements.get('am-product-card')) {
+    customElements.define('am-product-card', AmProductCard);
+  }
+{% endjavascript %}

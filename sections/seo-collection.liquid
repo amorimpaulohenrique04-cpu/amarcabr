@@ -6,7 +6,21 @@
 {%- endcomment -%}
 
 <style>
-  #shopify-section-{{ section.id }} { background: {{ section.settings.background }}; }
+  #shopify-section-{{ section.id }} {
+    --card-bg: #fff;
+    --heading-color: #000;
+    --price-color: #1a1a1a;
+    --radius: 8px;
+    --aspect-ratio: 3/4;
+    --badge-bg: #000;
+    --badge-text: #fff;
+    --font-body: var(--font-body--family, 'Inter', sans-serif);
+    --cta-desktop-min-width: 160px;
+    --cta-desktop-font-size: 11px;
+    --cta-desktop-padding: 9px;
+    --cta-mobile-size: 40px;
+    background: {{ section.settings.background }};
+  }
   .am-seo-collection { padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px; color: #111; }
   .am-seo-collection__inner { width: min(100% - 32px, 1200px); margin: 0 auto; }
 
@@ -40,15 +54,6 @@
   }
 
   .am-seo-collection__grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 20px; }
-  .am-seo-card { min-width: 0; }
-  .am-seo-card__media { position: relative; display: block; overflow: hidden; aspect-ratio: 3/4; border-radius: 8px; background: #f4f4f4; }
-  .am-seo-card__image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .35s ease, transform .6s ease; }
-  .am-seo-card__image--secondary { opacity: 0; }
-  .am-seo-card__content { padding: 12px 0 24px; }
-  .am-seo-card__title { display: block; color: #111; text-decoration: none; font-size: 14px; line-height: 1.35; font-weight: 600; }
-  .am-seo-card__price { display: flex; gap: 8px; align-items: baseline; margin-top: 5px; font-size: 14px; }
-  .am-seo-card__compare { text-decoration: line-through; opacity: .48; font-size: 12px; }
-  .am-seo-card__installments { margin-top: 3px; color: #666; font-size: 12px; }
 
   .am-seo-pagination { display: flex; align-items: center; justify-content: center; gap: 20px; padding-top: 24px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
   .am-seo-pagination a { color: inherit; text-decoration: none; border-bottom: 1px solid currentColor; }
@@ -90,10 +95,6 @@
   .am-seo-collection__description h3 { margin: 22px 0 9px; font-size: 13px; line-height: 1.35; letter-spacing: .04em; text-transform: none; color: #52201b; }
   .am-seo-collection__description a { color: inherit; text-underline-offset: 3px; }
 
-  @media (hover:hover) {
-    .am-seo-card__media:hover .am-seo-card__image--primary { opacity: 0; transform: scale(1.025); }
-    .am-seo-card__media:hover .am-seo-card__image--secondary { opacity: 1; transform: scale(1.025); }
-  }
   @media (max-width: 1023px) {
     .am-seo-collection__grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
   }
@@ -104,7 +105,6 @@
     .am-seo-collection__title { font-size: 21px; }
     .am-seo-collection__count { font-size: 9px; }
     .am-seo-collection__grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-    .am-seo-card__content { padding-bottom: 18px; }
     .am-seo-collection__about { margin-top: 30px; }
     .am-seo-collection__description { font-size: 12.5px; }
   }
@@ -121,53 +121,22 @@
       {%- if collection.products_count > 0 -%}
         <div class="am-seo-collection__grid" role="list">
           {%- for product in collection.products -%}
-            <article class="am-seo-card" role="listitem">
-              <a class="am-seo-card__media" href="{{ product.url }}" aria-label="{{ product.title | escape }}">
-                {%- if product.featured_media != blank -%}
-                  {%- assign primary_image = product.featured_media.preview_image -%}
-                  <img
-                    class="am-seo-card__image am-seo-card__image--primary"
-                    src="{{ primary_image | image_url: width: 640 }}"
-                    srcset="{{ primary_image | image_url: width: 320 }} 320w, {{ primary_image | image_url: width: 480 }} 480w, {{ primary_image | image_url: width: 640 }} 640w, {{ primary_image | image_url: width: 900 }} 900w"
-                    sizes="(max-width: 749px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                    width="{{ primary_image.width }}"
-                    height="{{ primary_image.height }}"
-                    alt="{{ primary_image.alt | default: product.title | escape }}"
-                    loading="{% if forloop.index <= 4 %}eager{% else %}lazy{% endif %}"
-                    decoding="async"
-                  >
-                  {%- if section.settings.enable_hover_image and product.media[1] != blank -%}
-                    {%- assign secondary_image = product.media[1].preview_image -%}
-                    <img
-                      class="am-seo-card__image am-seo-card__image--secondary"
-                      src="{{ secondary_image | image_url: width: 640 }}"
-                      srcset="{{ secondary_image | image_url: width: 320 }} 320w, {{ secondary_image | image_url: width: 480 }} 480w, {{ secondary_image | image_url: width: 640 }} 640w, {{ secondary_image | image_url: width: 900 }} 900w"
-                      sizes="(max-width: 749px) 50vw, (max-width: 1023px) 33vw, 25vw"
-                      width="{{ secondary_image.width }}"
-                      height="{{ secondary_image.height }}"
-                      alt="{{ secondary_image.alt | default: product.title | escape }}"
-                      loading="lazy"
-                      decoding="async"
-                    >
-                  {%- endif -%}
-                {%- else -%}
-                  {{ 'product-1' | placeholder_svg_tag: 'am-seo-card__placeholder' }}
-                {%- endif -%}
-              </a>
-
-              <div class="am-seo-card__content">
-                <a class="am-seo-card__title" href="{{ product.url }}">{{ product.title }}</a>
-                <div class="am-seo-card__price">
-                  <span>{{ product.price | money_without_trailing_zeros }}</span>
-                  {%- if product.compare_at_price > product.price -%}
-                    <span class="am-seo-card__compare">{{ product.compare_at_price | money_without_trailing_zeros }}</span>
-                  {%- endif -%}
-                </div>
-                {%- if section.settings.show_installments -%}
-                  <div class="am-seo-card__installments">{%- render 'installment-3x', product: product -%}</div>
-                {%- endif -%}
-              </div>
-            </article>
+            {%- assign card_loading = 'lazy' -%}
+            {%- if forloop.index <= 4 -%}
+              {%- assign card_loading = 'eager' -%}
+            {%- endif -%}
+            {%- render 'am-product-card',
+              product: product,
+              section_id: section.id,
+              image_sizes: '(max-width: 749px) 50vw, (max-width: 1023px) 33vw, 25vw',
+              image_ratio: '3/4',
+              loading: card_loading,
+              enable_hover_image: section.settings.enable_hover_image,
+              show_installments: section.settings.show_installments,
+              sale_metafield_namespace: 'custom',
+              sale_metafield_key: 'sale',
+              sale_label: 'Sale'
+            -%}
           {%- endfor -%}
         </div>
 

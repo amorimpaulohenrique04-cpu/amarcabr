@@ -5,12 +5,18 @@
   @param {string} section_id - The section ID
   @param {object} [block] - The block object
   @param {string} [color_scheme] - The color scheme to use
+  @param {string} [button_label] - Custom trigger label
+  @param {boolean} [am_product_card] - Whether the component belongs to the shared A MARCA card
 {%- enddoc -%}
 
 {% liquid
-  assign product_form_id = 'QuickAdd-ProductForm-' | append: product.id | append: '-' | append: block.id
+  assign product_form_id = 'QuickAdd-ProductForm-' | append: section_id | append: '-' | append: product.id | append: '-' | append: block.id
   assign add_to_cart_text = 'actions.add' | t
   assign choose_options_text = 'actions.choose' | t
+  if button_label != blank
+    assign add_to_cart_text = button_label
+    assign choose_options_text = button_label
+  endif
   assign color_scheme = color_scheme | default: settings.quick_add_color_scheme
 
   # Logic to determine which variant to use (matching swatch selection logic from product-card)
@@ -34,6 +40,10 @@
   data-product-title="{{ product.title }}"
   data-quick-add-button="{{ quick_add_button }}"
   data-product-options-count="{{ product.options.size }}"
+  data-product-url="{{ product.url | escape }}"
+  {% if am_product_card %}
+    data-am-quick-add
+  {% endif %}
 >
   <product-form-component
     data-section-id="{{ section_id }}"
@@ -88,6 +98,7 @@
         type="button"
         name="add"
         on:click="quick-add-component/handleClick"
+        aria-label="{{ choose_options_text | escape }}"
       >
         <span
           class="add-to-cart-text quick-add__button-content"
