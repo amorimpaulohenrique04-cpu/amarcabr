@@ -1,0 +1,102 @@
+{%- liquid
+  assign am_heading = section.settings.title
+  assign am_cta_link = section.settings.cta_link
+  if template.name == 'index'
+    assign am_heading = 'Camisetas cristãs premium'
+    assign am_cta_link = '/collections/t-shirts'
+  endif
+-%}
+
+<section class="identity-modern-section section-{{ section.id }}">
+  <div class="identity-modern-container am-page-width">
+    {%- if am_heading != blank -%}
+      <header class="identity-modern-header identity-modern-header--{{ section.settings.header_align }}">
+        <div class="identity-modern-title-row">
+          {%- if section.settings.title_icon != blank -%}
+            <span class="identity-modern-title-icon" aria-hidden="true">{{ section.settings.title_icon | image_url: width: 120 | image_tag: loading: 'lazy' }}</span>
+          {%- endif -%}
+          {%- if template.name == 'index' -%}
+            <h1 class="identity-modern-title">{{ am_heading }}</h1>
+          {%- else -%}
+            <h2 class="identity-modern-title">{{ am_heading }}</h2>
+          {%- endif -%}
+        </div>
+        {%- if section.settings.subtitle != blank -%}<p class="identity-modern-subtitle">{{ section.settings.subtitle }}</p>{%- endif -%}
+        {%- if section.settings.cta_text != blank -%}
+          <a href="{{ am_cta_link }}" class="identity-modern-cta">{{ section.settings.cta_text | upcase }} <span aria-hidden="true">→</span></a>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div class="identity-modern-grid" role="list">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign am_link = block.settings.link
+          if template.name == 'index' and block.settings.category_title contains 'PEQUENOS'
+            assign am_link = '/collections/t-shirt-infantil-premium'
+          endif
+        -%}
+        <article class="identity-modern-item" role="listitem" {{ block.shopify_attributes }}>
+          <a href="{{ am_link }}" class="identity-modern-link" aria-label="{{ block.settings.category_title | escape }}">
+            <div class="identity-modern-image-box">
+              {%- if block.settings.image != blank -%}
+                <img src="{{ block.settings.image | image_url: width: 700 }}"
+                  srcset="{{ block.settings.image | image_url: width: 300 }} 300w, {{ block.settings.image | image_url: width: 450 }} 450w, {{ block.settings.image | image_url: width: 700 }} 700w, {{ block.settings.image | image_url: width: 1000 }} 1000w"
+                  sizes="(max-width: 767px) 85vw, (max-width: 1023px) 50vw, 33vw"
+                  alt="{{ block.settings.category_title | escape }}" loading="lazy" decoding="async"
+                  width="{{ block.settings.image.width }}" height="{{ block.settings.image.height }}" class="identity-modern-img">
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'identity-modern-img' }}
+              {%- endif -%}
+              <div class="identity-modern-text-overlay">
+                <span class="identity-modern-number">0{{ forloop.index }}</span>
+                <h3 class="identity-modern-cat">{{ block.settings.category_title | upcase }}</h3>
+                <span class="identity-modern-mini-link">VER</span>
+              </div>
+            </div>
+          </a>
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+.identity-modern-section{padding:{{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;background:{{ section.settings.bg_color }};overflow:hidden;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+.identity-modern-container.am-page-width{max-width:var(--am-header-max,var(--page-width,1240px));margin-inline:auto;padding-inline:var(--am-header-x,var(--page-margin,16px))}
+.identity-modern-header{margin-bottom:22px}.identity-modern-header--left{text-align:left}.identity-modern-header--center{text-align:center}
+.identity-modern-title-row{display:inline-flex;align-items:center;gap:{{ section.settings.title_gap }}px}.identity-modern-title-icon{display:inline-flex;width:{{ section.settings.title_icon_size }}px;height:{{ section.settings.title_icon_size }}px;opacity:{{ section.settings.title_icon_opacity | times: 0.01 }}}
+.identity-modern-title-icon img{width:100%;height:100%;object-fit:contain}.identity-modern-title{font-size:clamp(22px,2.2vw,{{ section.settings.title_size }}px);font-weight:400;letter-spacing:-.02em;margin:0;color:{{ section.settings.text_color }};line-height:1.15;text-transform:none}
+.identity-modern-subtitle{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:{{ section.settings.text_color }};opacity:.65;margin:10px 0 16px}.identity-modern-cta{display:inline-flex;gap:6px;font-size:11px;font-weight:500;letter-spacing:2px;color:{{ section.settings.text_color }};text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:3px}
+.identity-modern-grid{display:grid;gap:18px;grid-template-columns:repeat(3,minmax(0,1fr))}.identity-modern-link{display:block;text-decoration:none;color:inherit;height:100%}.identity-modern-image-box{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:16/10;background:#f6f6f6;height:100%}.identity-modern-img{width:100%;height:100%;display:block;object-fit:cover;filter:grayscale({{ section.settings.grayscale }}%);transition:transform .7s ease,filter .35s ease}.identity-modern-text-overlay{position:absolute;left:14px;bottom:14px;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:6px}.identity-modern-number{font-size:10px;font-weight:600;letter-spacing:2px;color:{{ section.settings.text_color }}}.identity-modern-cat{font-size:clamp(13px,1.15vw,18px);font-weight:300;letter-spacing:3px;margin:0;background:#fff;padding:6px 16px;box-shadow:6px 6px 0 {{ section.settings.accent_color }};border:1px solid #f0f0f0}.identity-modern-mini-link{font-size:10px;letter-spacing:2px;font-weight:600;color:{{ section.settings.text_color }};background:rgba(255,255,255,.92);border:1px solid #f0f0f0;padding:4px 12px}
+@media(hover:hover){.identity-modern-item:hover .identity-modern-img{transform:scale(1.06);filter:grayscale(0)}}
+@media(min-width:768px) and (max-width:1023px){.identity-modern-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.identity-modern-title{font-size:32px}}
+@media(max-width:767px){.identity-modern-grid{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:0 16px 24px;scrollbar-width:none}.identity-modern-grid::-webkit-scrollbar{display:none}.identity-modern-item{flex:0 0 min(85vw,300px);scroll-snap-align:center}.identity-modern-image-box{aspect-ratio:4/3.5;border-radius:12px}.identity-modern-cat{font-size:14px;padding:6px 14px;letter-spacing:1px}.identity-modern-mini-link{font-size:11px;padding:8px 14px;min-height:44px;display:inline-flex;align-items:center}}
+</style>
+
+{% schema %}
+{
+  "name":"Identidade Desconstruída",
+  "settings":[
+    {"type":"text","id":"title","label":"Título","default":"Identidade"},
+    {"type":"image_picker","id":"title_icon","label":"Ícone antes do título"},
+    {"type":"range","id":"title_icon_size","min":12,"max":40,"step":1,"unit":"px","label":"Tamanho do ícone (px)","default":18},
+    {"type":"range","id":"title_icon_opacity","min":20,"max":100,"step":5,"unit":"%","label":"Opacidade do ícone","default":100},
+    {"type":"range","id":"title_gap","min":6,"max":24,"step":1,"unit":"px","label":"Espaço ícone/título","default":10},
+    {"type":"range","id":"title_size","min":10,"max":80,"step":1,"unit":"px","label":"Tamanho Título","default":30},
+    {"type":"text","id":"subtitle","label":"Subtítulo","default":"Vista sua identidade em Cristo"},
+    {"type":"text","id":"cta_text","label":"Texto do Botão","default":"Ver todas as peças"},
+    {"type":"url","id":"cta_link","label":"Link do Botão"},
+    {"type":"select","id":"header_align","label":"Alinhamento Header","options":[{"value":"left","label":"Esquerda"},{"value":"center","label":"Centro"}],"default":"left"},
+    {"type":"color","id":"bg_color","label":"Cor de Fundo","default":"#ffffff"},
+    {"type":"color","id":"text_color","label":"Cor do Texto","default":"#000000"},
+    {"type":"color","id":"accent_color","label":"Cor do Detalhe (Sombra)","default":"#eeeeee"},
+    {"type":"range","id":"grayscale","min":0,"max":100,"step":10,"unit":"%","label":"Filtro Cinza Inicial","default":0},
+    {"type":"header","content":"Espaçamento"},
+    {"type":"range","id":"padding_top","min":0,"max":150,"step":5,"unit":"px","default":60,"label":"Padding Top"},
+    {"type":"range","id":"padding_bottom","min":0,"max":150,"step":5,"unit":"px","default":60,"label":"Padding Bottom"}
+  ],
+  "blocks":[{"type":"category","name":"Categoria","limit":4,"settings":[{"type":"image_picker","id":"image","label":"Imagem"},{"type":"text","id":"category_title","label":"Nome","default":"Promessas"},{"type":"url","id":"link","label":"Link"}]}],
+  "presets":[{"name":"Identidade Desconstruída","blocks":[{"type":"category","settings":{"category_title":"Identidade"}},{"type":"category","settings":{"category_title":"Adoração"}},{"type":"category","settings":{"category_title":"Herança"}},{"type":"category","settings":{"category_title":"Pequenos"}}]}]
+}
+{% endschema %}

@@ -1,0 +1,148 @@
+{% comment %}
+  Section: Trust Bar Premium - Horizon Style (Responsive Refined)
+{% endcomment %}
+
+<style>
+  .trust-bar-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    border-top: 1px solid {{ section.settings.border_color }};
+    border-bottom: 1px solid {{ section.settings.border_color }};
+    padding: 20px 0;
+    overflow: hidden;
+  }
+
+  .trust-bar-container {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin-inline: auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+  }
+
+  .trust-bar-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  /* Esconde a duplicata no Desktop */
+  .trust-bar-{{ section.id }} .mobile-duplicate {
+    display: none;
+  }
+
+  .trust-icon {
+    display: flex;
+    align-items: center;
+    color: {{ section.settings.accent_color }};
+    flex-shrink: 0;
+  }
+
+  .trust-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 1.3px;
+  }
+
+  .trust-text {
+    font-family: 'SoraCustom', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: {{ section.settings.text_color }};
+    white-space: nowrap;
+  }
+
+  /* --- RESPONSIVIDADE MOBILE --- */
+  @media (max-width: 768px) {
+    .trust-bar-{{ section.id }} {
+      padding: 18px 0;
+    }
+
+    .trust-bar-container {
+      padding: 0;
+    }
+
+    .trust-bar-grid {
+      justify-content: flex-start;
+      gap: 50px; 
+      width: max-content;
+      animation: marquee-{{ section.id }} 25s linear infinite;
+    }
+
+    /* Mostra a duplicata apenas no mobile para o loop */
+    .trust-bar-{{ section.id }} .mobile-duplicate {
+      display: flex;
+      gap: 50px;
+    }
+
+    .trust-item {
+      flex: 0 0 auto;
+      justify-content: flex-start;
+    }
+
+    @keyframes marquee-{{ section.id }} {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+  }
+</style>
+
+<section class="trust-bar-{{ section.id }}">
+  <div class="trust-bar-container">
+    <div class="trust-bar-grid">
+      
+      {% capture trust_items %}
+        <div class="trust-item">
+          <span class="trust-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          </span>
+          <span class="trust-text">Envio para todo Brasil</span>
+        </div>
+
+        <div class="trust-item">
+          <span class="trust-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </span>
+          <span class="trust-text">Troca fácil</span>
+        </div>
+
+        <div class="trust-item">
+          <span class="trust-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
+          </span>
+          <span class="trust-text">Algodão Premium</span>
+        </div>
+      {% endcapture %}
+
+      {% comment %} Conteúdo Principal {% endcomment %}
+      {{ trust_items }}
+
+      {% comment %} Conteúdo Duplicado (Visível apenas no mobile para fechar o loop do marquee) {% endcomment %}
+      <div class="mobile-duplicate">
+        {{ trust_items }}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Barra de Confiança Luxo",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Cor de Fundo", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Cor do Texto", "default": "#000000" },
+    { "type": "color", "id": "accent_color", "label": "Cor do Ícone", "default": "#84332e" },
+    { "type": "color", "id": "border_color", "label": "Cor da Borda", "default": "#f0f0f0" }
+  ],
+  "presets": [{ "name": "Barra de Confiança Luxo" }]
+}
+{% endschema %}

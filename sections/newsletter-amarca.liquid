@@ -1,0 +1,264 @@
+{% comment %}
+  Section: Newsletter Fashion Otimizada
+  1. Foto no mobile integrada de forma editorial.
+  2. Tipografia minimalista: maiúscula, pequena e espaçada.
+  3. Sucesso absoluto: remove todo o conteúdo e centraliza a mensagem.
+{% endcomment %}
+
+<style>
+  .section-{{ section.id }} {
+    padding: {{ section.settings.padding_v }}px 0;
+    background-color: {{ section.settings.bg_color }};
+    overflow: hidden;
+  }
+
+  .section-{{ section.id }} .container {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin-inline: auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+  }
+
+  /* --- REVELAÇÃO (ANIMAÇÃO) --- */
+  .section-{{ section.id }} .reveal-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s cubic-bezier(0.2, 0, 0.2, 1), 
+                transform 1.2s cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  .section-{{ section.id }}.is-visible .reveal-item {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-{{ section.id }} .newsletter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+  }
+
+  /* --- IMAGEM --- */
+  .section-{{ section.id }} .image-box {
+    flex: 0 0 350px;
+    height: 480px;
+    position: relative;
+    overflow: hidden;
+    display: {% if section.settings.show_image %}block{% else %}none{% endif %};
+  }
+
+  .section-{{ section.id }} .image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* --- TEXTO --- */
+  .section-{{ section.id }} .title {
+    font-family: "Playfair Display", serif !important;
+    font-size: clamp(36px, 6vw, 52px);
+    font-style: italic;
+    font-weight: 400;
+    margin: 0 0 20px 0;
+    color: {{ section.settings.text_color }};
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .section-{{ section.id }} .subtitle {
+    font-size: 14px;
+    max-width: 420px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+    color: color-mix(in srgb, {{ section.settings.text_color }} 65%, transparent);
+  }
+
+  /* --- INPUT (REQUISITO 2: MAIÚSCULO, PEQUENO, ESPAÇADO) --- */
+  .section-{{ section.id }} .input-row {
+    display: flex;
+    align-items: center;
+    position: relative;
+    border-bottom: 1px solid color-mix(in srgb, {{ section.settings.text_color }} 15%, transparent);
+  }
+
+  .section-{{ section.id }} input[type="email"] {
+    flex: 1;
+    border: none;
+    background: transparent;
+    /* Estilo Minimalista */
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.35em !important;
+    padding: 15px 0;
+    color: {{ section.settings.text_color }};
+    outline: none;
+  }
+
+  .section-{{ section.id }} input[type="email"]::placeholder {
+    color: {{ section.settings.text_color }};
+    opacity: 0.5;
+  }
+
+  .section-{{ section.id }} .submit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: {{ section.settings.text_color }};
+    padding-left: 20px;
+  }
+
+  /* --- SUCESSO ABSOLUTO (REQUISITO 3) --- */
+  .section-{{ section.id }} .success-view {
+    width: 100%;
+    text-align: center;
+    padding: 100px 0;
+    animation: fadeInSuccess 1.2s ease forwards;
+  }
+
+  .section-{{ section.id }} .success-view h2 {
+    font-family: "Playfair Display", serif !important;
+    font-style: italic;
+    font-size: clamp(28px, 4vw, 42px);
+    color: {{ section.settings.text_color }};
+    margin: 0;
+  }
+
+  @keyframes fadeInSuccess {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- RESPONSIVIDADE MOBILE (REQUISITO 1: FOTO FASHION NO MOBILE) --- */
+  @media (max-width: 768px) {
+    .section-{{ section.id }} .newsletter-wrapper { 
+      flex-direction: column; 
+      gap: 40px; 
+    }
+
+    .section-{{ section.id }} .image-box { 
+      display: block !important; /* Força exibição no mobile */
+      flex: none;
+      width: 100%;
+      height: 320px; /* Altura editorial para mobile */
+      margin-bottom: 10px;
+    }
+
+    .section-{{ section.id }} .content-box {
+      text-align: center;
+      width: 100%;
+    }
+
+    .section-{{ section.id }} .subtitle {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .section-{{ section.id }} .input-row {
+      justify-content: center;
+    }
+
+    .section-{{ section.id }} input[type="email"] {
+      text-align: center;
+      padding-left: 30px; /* Compensa o botão para centralizar o texto */
+    }
+  }
+</style>
+
+<section class="section-{{ section.id }}" id="Newsletter-{{ section.id }}">
+  <div class="container">
+    {%- form 'customer' -%}
+      {%- if form.posted_successfully? -%}
+        {% comment %} ESTADO DE SUCESSO: O resto do HTML nem é renderizado {% endcomment %}
+        <div class="success-view">
+          <h2>{{ section.settings.success_msg }}</h2>
+        </div>
+      {%- else -%}
+        
+        <div class="newsletter-wrapper">
+          {% comment %} LADO A: IMAGEM (Ativa em ambos, com CSS tratando o tamanho) {% endcomment %}
+          {% if section.settings.show_image and section.settings.image != blank %}
+            <div class="image-box reveal-item reveal-image">
+              <img 
+                src="{{ section.settings.image | image_url: width: 700 }}" 
+                srcset="
+                  {{ section.settings.image | image_url: width: 400 }} 400w,
+                  {{ section.settings.image | image_url: width: 600 }} 600w,
+                  {{ section.settings.image | image_url: width: 700 }} 700w"
+                sizes="(max-width: 768px) 100vw, 350px"
+                alt="{{ section.settings.image.alt | escape }}" 
+                loading="lazy"
+                decoding="async"
+                width="{{ section.settings.image.width }}"
+                height="{{ section.settings.image.height }}"
+              >
+            </div>
+          {% endif %}
+
+          {% comment %} LADO B: CONTEÚDO {% endcomment %}
+          <div class="content-box">
+            <h2 class="title reveal-item reveal-title">{{ section.settings.title }}</h2>
+            <p class="subtitle reveal-item reveal-subtitle">{{ section.settings.subtitle }}</p>
+
+            <div class="form-wrapper reveal-item reveal-form">
+              <div class="input-row">
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <input type="email" name="contact[email]" placeholder="{{ section.settings.placeholder }}" required autocomplete="email">
+                <button type="submit" class="submit-btn" aria-label="Entrar">
+                  {{ section.settings.button_label }} <span>→</span>
+                </button>
+              </div>
+              
+              <div class="privacy" style="font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 25px; opacity: 0.5;">
+                {{ section.settings.privacy_text }} 
+                {% if section.settings.privacy_link != blank %}
+                  <a href="{{ section.settings.privacy_link }}" style="text-decoration: underline; color: inherit;">política</a>.
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {%- endif -%}
+    {%- endform -%}
+  </div>
+</section>
+
+<script type="module">
+(function() {
+    const sectionElement = document.getElementById('Newsletter-{{ section.id }}');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          sectionElement.classList.add('is-visible');
+          observer.unobserve(sectionElement);
+        }
+      });
+    }, { threshold: 0.1 });
+    observer.observe(sectionElement);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Newsletter Fashion",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Fundo", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Texto", "default": "#121212" },
+    { "type": "range", "id": "padding_v", "min": 40, "max": 160, "step": 10, "unit": "px", "label": "Espaço Vertical", "default": 100 },
+    { "type": "checkbox", "id": "show_image", "label": "Mostrar Imagem", "default": true },
+    { "type": "image_picker", "id": "image", "label": "Imagem Editorial" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Seja um marcado" },
+    { "type": "textarea", "id": "subtitle", "label": "Subtítulo", "default": "RECEBA CONTEÚDOS EXCLUSIVOS." },
+    { "type": "text", "id": "placeholder", "label": "E-MAIL", "default": "E-MAIL" },
+    { "type": "text", "id": "button_label", "label": "Botão", "default": "ENTRAR" },
+    { "type": "text", "id": "success_msg", "label": "Sucesso", "default": "Bem vindo! Sua marca começa agora." },
+    { "type": "text", "id": "privacy_text", "label": "Texto Privacidade", "default": "CONCORDO COM A" },
+    { "type": "url", "id": "privacy_link", "label": "Link Privacidade" }
+  ],
+  "presets": [{ "name": "Newsletter Fashion" }]
+}
+{% endschema %}

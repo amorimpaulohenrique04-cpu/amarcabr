@@ -1,0 +1,243 @@
+{% comment %}
+  A MARCA — Botão branco sobre imagem (Atacado)
+  FIX: tracking escalado corretamente + texto não quebra
+{% endcomment %}
+
+<section class="am-btnimg section-{{ section.id }}">
+  <div class="am-btnimg__bleed">
+    <div class="am-btnimg__wrap">
+
+      {% if section.settings.image != blank %}
+        <img
+          class="am-btnimg__img"
+          src="{{ section.settings.image | image_url: width: 1400 }}"
+          srcset="{{ section.settings.image | image_url: width: 480 }} 480w,
+                  {{ section.settings.image | image_url: width: 768 }} 768w,
+                  {{ section.settings.image | image_url: width: 1024 }} 1024w,
+                  {{ section.settings.image | image_url: width: 1400 }} 1400w,
+                  {{ section.settings.image | image_url: width: 1800 }} 1800w,
+                  {{ section.settings.image | image_url: width: 2200 }} 2200w,
+                  {{ section.settings.image | image_url: width: 2600 }} 2600w"
+          sizes="100vw"
+          alt="{{ section.settings.image.alt | escape }}"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}"
+          loading="lazy"
+          decoding="async"
+        >
+      {% endif %}
+
+      {% if section.settings.button_label != blank %}
+        <a
+          class="am-btnimg__btn"
+          href="{{ section.settings.button_link | default: '#' }}"
+          aria-label="{{ section.settings.button_label | escape }}"
+        >
+          <span class="am-btnimg__btnText">{{ section.settings.button_label | escape }}</span>
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <style>
+    /* Zera espaçamento do wrapper Shopify */
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} > *{
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .section-{{ section.id }}{
+      --btn-w: {{ section.settings.button_width }}px;
+      --btn-h: {{ section.settings.button_height }}px;
+      --btn-font: {{ section.settings.button_font_size }}px;
+
+      /* tracking agora vem em "centésimos": 18 => 0.18em */
+      --btn-track: calc({{ section.settings.button_tracking }} / 100 * 1em);
+
+      --btn-radius: {{ section.settings.button_radius }}px;
+      --btn-border: {{ section.settings.button_border }}px;
+      --btn-offset: {{ section.settings.button_bottom }}%;
+      --ink: rgba(124,44,38,.95);
+    }
+
+    /* Full width real */
+    .section-{{ section.id }} .am-btnimg__bleed{
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+
+    .section-{{ section.id }} .am-btnimg__wrap{
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #7c2c26;
+    }
+
+    /* Imagem manda na altura */
+    .section-{{ section.id }} .am-btnimg__img{
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Botão */
+    .section-{{ section.id }} .am-btnimg__btn{
+      position: absolute;
+      left: 50%;
+      bottom: var(--btn-offset);
+      transform: translateX(-50%);
+      z-index: 2;
+
+      width: min(var(--btn-w), calc(100% - 64px));
+      height: var(--btn-h);
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      background: rgba(255,255,255,.96);
+      border: var(--btn-border) solid rgba(124,44,38,.28);
+      border-radius: var(--btn-radius);
+
+      text-decoration: none;
+      color: var(--ink);
+
+      transition:
+        transform 220ms cubic-bezier(.2,.7,.2,1),
+        box-shadow 220ms cubic-bezier(.2,.7,.2,1),
+        border-color 220ms cubic-bezier(.2,.7,.2,1),
+        background 220ms cubic-bezier(.2,.7,.2,1);
+
+      box-shadow: 0 10px 30px rgba(0,0,0,.10);
+      overflow: hidden;
+      will-change: transform;
+    }
+
+    /* Texto do botão (FIX) */
+    .section-{{ section.id }} .am-btnimg__btnText{
+      font-size: var(--btn-font);
+      letter-spacing: var(--btn-track);
+      text-transform: uppercase;
+      font-weight: 500;
+      line-height: 1;           /* evita “corte” vertical */
+      white-space: nowrap;      /* evita quebrar em 2 linhas */
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: 0 2px;           /* micro folga pra não “clipar” */
+    }
+
+    /* brilho passando */
+    .section-{{ section.id }} .am-btnimg__btn::before{
+      content:"";
+      position:absolute;
+      top:-40%;
+      left:-60%;
+      width: 40%;
+      height: 180%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+      transform: rotate(18deg);
+      opacity: 0;
+      transition: opacity 240ms ease;
+      pointer-events:none;
+    }
+
+    @media (hover:hover){
+      .section-{{ section.id }} .am-btnimg__btn:hover{
+        transform: translateX(-50%) translateY(-2px);
+        border-color: rgba(124,44,38,.38);
+        background: rgba(255,255,255,1);
+        box-shadow: 0 14px 40px rgba(0,0,0,.14);
+      }
+      .section-{{ section.id }} .am-btnimg__btn:hover::before{
+        opacity: .85;
+        animation: amBtnShine 900ms ease forwards;
+      }
+    }
+
+    .section-{{ section.id }} .am-btnimg__btn:focus-visible{
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255,255,255,.6), 0 0 0 6px rgba(124,44,38,.35);
+    }
+
+    @keyframes amBtnShine{
+      0%   { left: -60%; }
+      100% { left: 140%; }
+    }
+
+    /* Mobile overrides */
+    @media (max-width: 768px){
+      .section-{{ section.id }}{
+        --btn-w: {{ section.settings.button_width_mobile }}px;
+        --btn-h: {{ section.settings.button_height_mobile }}px;
+        --btn-font: {{ section.settings.button_font_size_mobile }}px;
+        --btn-offset: {{ section.settings.button_bottom_mobile }}%;
+        --btn-track: calc({{ section.settings.button_tracking_mobile }} / 100 * 1em);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .section-{{ section.id }} .am-btnimg__btn,
+      .section-{{ section.id }} .am-btnimg__btn::before{
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "A MARCA Botao",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Imagem (com o texto embutido)" },
+
+    { "type": "text", "id": "button_label", "label": "Texto do botão", "default": "SOLICITAR ACESSO" },
+    { "type": "url", "id": "button_link", "label": "Link do botão" },
+
+    { "type": "header", "content": "Botão — Desktop" },
+    { "type": "range", "id": "button_width", "label": "Largura (px)", "min": 220, "max": 700, "step": 10, "default": 440 },
+    { "type": "range", "id": "button_height", "label": "Altura (px)", "min": 36, "max": 72, "step": 1, "default": 44 },
+    { "type": "range", "id": "button_font_size", "label": "Tamanho do texto (px)", "min": 10, "max": 16, "step": 1, "default": 12 },
+
+    {
+      "type": "range",
+      "id": "button_tracking",
+      "label": "Tracking (0–30 = 0.00–0.30em)",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 18
+    },
+
+    { "type": "range", "id": "button_radius", "label": "Raio (px)", "min": 0, "max": 18, "step": 1, "default": 2 },
+    { "type": "range", "id": "button_border", "label": "Borda (px)", "min": 0, "max": 3, "step": 1, "default": 1 },
+    { "type": "range", "id": "button_bottom", "label": "Posição vertical (% do banner)", "min": 2, "max": 30, "step": 1, "default": 18 },
+
+    { "type": "header", "content": "Botão — Mobile" },
+    { "type": "range", "id": "button_width_mobile", "label": "Largura (px)", "min": 200, "max": 520, "step": 10, "default": 320 },
+    { "type": "range", "id": "button_height_mobile", "label": "Altura (px)", "min": 36, "max": 64, "step": 1, "default": 44 },
+    { "type": "range", "id": "button_font_size_mobile", "label": "Tamanho do texto (px)", "min": 10, "max": 16, "step": 1, "default": 12 },
+
+    {
+      "type": "range",
+      "id": "button_tracking_mobile",
+      "label": "Tracking mobile (0–30 = 0.00–0.30em)",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 18
+    },
+
+    { "type": "range", "id": "button_bottom_mobile", "label": "Posição vertical (% do banner)", "min": 2, "max": 30, "step": 1, "default": 16 }
+  ],
+  "presets": [
+    { "name": "A MARCA — Botão sobre imagem" }
+  ]
+}
+{% endschema %}

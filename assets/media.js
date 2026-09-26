@@ -1,0 +1,20 @@
+import{Component}from '@theme/component';import{ThemeEvents,MediaStartedPlayingEvent}from '@theme/events';import{DialogCloseEvent}from '@theme/dialog';class DeferredMedia extends Component{isPlaying=!1;#abortController=new AbortController();connectedCallback(){super.connectedCallback();const signal=this.#abortController.signal;document.addEventListener(ThemeEvents.mediaStartedPlaying,this.pauseMedia.bind(this),{signal});window.addEventListener(DialogCloseEvent.eventName,this.pauseMedia.bind(this),{signal})}
+disconnectedCallback(){super.disconnectedCallback();this.#abortController.abort()}
+updatePlayPauseHint(isPlaying){const toggleMediaButton=this.refs.toggleMediaButton;if(toggleMediaButton instanceof HTMLElement){toggleMediaButton.classList.remove('hidden');const playIcon=toggleMediaButton.querySelector('.icon-play');if(playIcon)playIcon.classList.toggle('hidden',isPlaying);const pauseIcon=toggleMediaButton.querySelector('.icon-pause');if(pauseIcon)pauseIcon.classList.toggle('hidden',!isPlaying);}}
+showDeferredMedia=()=>{this.loadContent(!0);this.isPlaying=!0;this.updatePlayPauseHint(this.isPlaying)};loadContent(focus=!0){if(this.getAttribute('data-media-loaded'))return;this.dispatchEvent(new MediaStartedPlayingEvent(this));const content=this.querySelector('template')?.content.firstElementChild?.cloneNode(!0);if(!content)return;this.setAttribute('data-media-loaded','true');this.appendChild(content);if(focus&&content instanceof HTMLElement){content.focus()}
+this.refs.deferredMediaPlayButton?.classList.add('deferred-media__playing');if(content instanceof HTMLVideoElement&&content.getAttribute('autoplay')){content.play()}}
+toggleMedia(){if(this.isPlaying){this.pauseMedia()}else{this.playMedia()}}
+playMedia(){const iframe=this.querySelector('iframe[data-video-type]');if(iframe){iframe.contentWindow?.postMessage(iframe.dataset.videoType==='youtube'?'{"event":"command","func":"playVideo","args":""}':'{"method":"play"}','*')}else{this.querySelector('video')?.play()}
+this.isPlaying=!0;this.updatePlayPauseHint(this.isPlaying)}
+pauseMedia(){const iframe=this.querySelector('iframe[data-video-type]');if(iframe){iframe.contentWindow?.postMessage(iframe.dataset.videoType==='youtube'?'{"event":"command","func":"'+'pauseVideo'+'","args":""}':'{"method":"pause"}','*')}else{this.querySelector('video')?.pause()}
+this.isPlaying=!1;if(this.getAttribute('data-media-loaded')){this.updatePlayPauseHint(this.isPlaying)}}}
+if(!customElements.get('deferred-media')){customElements.define('deferred-media',DeferredMedia)}
+class ProductModel extends DeferredMedia{#abortController=new AbortController();loadContent(){super.loadContent();Shopify.loadFeatures([{name:'model-viewer-ui',version:'1.0',onLoad:this.setupModelViewerUI.bind(this),},])}
+disconnectedCallback(){super.disconnectedCallback();this.#abortController.abort()}
+pauseMedia(){super.pauseMedia();this.modelViewerUI?.pause()}
+playMedia(){super.playMedia();this.modelViewerUI?.play()}
+async setupModelViewerUI(errors){if(errors)return;if(!Shopify.ModelViewerUI){await this.#waitForModelViewerUI()}
+if(!Shopify.ModelViewerUI)return;const element=this.querySelector('model-viewer');if(!element)return;const signal=this.#abortController.signal;this.modelViewerUI=new Shopify.ModelViewerUI(element);if(!this.modelViewerUI)return;this.playMedia();let pointerStartX=0;let pointerStartY=0;element.addEventListener('pointerdown',(event)=>{pointerStartX=event.clientX;pointerStartY=event.clientY},{signal});element.addEventListener('click',(event)=>{const distanceX=Math.abs(event.clientX-pointerStartX);const distanceY=Math.abs(event.clientY-pointerStartY);const totalDistance=Math.sqrt(distanceX*distanceX+distanceY*distanceY);if(totalDistance<10){this.pauseMedia()}},{signal})}
+async #waitForModelViewerUI(){const maxAttempts=10;const interval=50;for(let i=0;i<maxAttempts;i++){if(Shopify.ModelViewerUI){return}
+await new Promise((resolve)=>setTimeout(resolve,interval))}}}
+if(!customElements.get('product-model')){customElements.define('product-model',ProductModel)}

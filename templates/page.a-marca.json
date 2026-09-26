@@ -1,0 +1,87 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "pdp_editorial_pqcVje": {
+      "type": "pdp-editorial",
+      "blocks": {
+        "value_cjkWC6": {
+          "type": "value",
+          "settings": { "icon": "heart", "title": "Não é só moda.", "text": "" }
+        },
+        "value_4VBHQD": {
+          "type": "value",
+          "settings": { "icon": "leaf", "title": "É identidade.", "text": "" }
+        },
+        "value_Etr9R8": {
+          "type": "value",
+          "settings": { "icon": "users", "title": "É missão.", "text": "" }
+        },
+        "marquee_item_Q6HfzG": { "type": "marquee_item", "settings": { "text": "Identidade" } },
+        "marquee_item_NyqTV6": { "type": "marquee_item", "settings": { "text": "Missão" } },
+        "marquee_item_idEctb": { "type": "marquee_item", "settings": { "text": "Propósito" } },
+        "marquee_item_TBbApW": { "type": "marquee_item", "settings": { "text": "Fé" } },
+        "milestone_i8dUUU": {
+          "type": "milestone",
+          "settings": {
+            "image": "shopify://shop_images/Black_Retro_Polaroid_Frame_Happy_Holidays_Instagram_Story.png",
+            "year": "",
+            "title": "",
+            "text": "<p>O nosso encontro aconteceu justamente onde já estávamos inseridas. No universo das roupas, das imagens, da comunicação e das mensagens que circulam todos os dias. Foi ali que o Espírito Santo começou a nos inquietar sobre o vestir, sobre o que comunicamos sem dizer uma palavra, sobre como as roupas falam antes da boca abrir.</p><p>Quando olhamos para a Bíblia, isso se torna ainda mais claro. A veste não é apenas estética. Ela cobre, honra, protege, separa e identifica. Ela revela pertencimento. E se a Palavra nos orienta a fazer tudo para a honra e glória do Senhor, entendemos que o vestir também faz parte desse tudo.<br/></p>"
+          }
+        },
+        "milestone_Xmyik4": {
+          "type": "milestone",
+          "settings": {
+            "image": "shopify://shop_images/IMG_7299_c99f0869-7c45-4a64-85af-cac58c05fbd6.jpg",
+            "year": "",
+            "title": "",
+            "text": "<p></p><p>Não criamos camisetas apenas para vestir pessoas. Criamos peças para lembrar verdades. Para gerar conversa. Para provocar reflexão. Para anunciar o Reino de forma simples, cotidiana e acessível.<br/><br/>Aqui, cada estampa tem propósito.<br/>Cada palavra tem intenção.<br/>Cada peça carrega uma mensagem.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "value_cjkWC6","value_4VBHQD","value_Etr9R8","marquee_item_Q6HfzG","marquee_item_NyqTV6","marquee_item_idEctb","marquee_item_TBbApW","milestone_i8dUUU","milestone_Xmyik4"
+      ],
+      "name": "AM - Editorial Details",
+      "settings": {
+        "load_google_fonts": true,
+        "bg_color": "#faf6f2",
+        "text_color": "#2c2c2c",
+        "muted_text_color": "#6b6b6b",
+        "accent_color": "#90322e",
+        "badge_bg": "#90322e",
+        "hero_image": "shopify://shop_images/combo-melhores-amigas-1741637_ad5b29ff-abf5-42fb-9b8a-0c60fd2a5650.jpg",
+        "badge_text": "Nossa história!",
+        "heading": "Vestir o corpo Anunciar o [script]Reino [/script]",
+        "body": "<p>Nós somos Ludmila e Priscila. Irmãs de sangue, de fé e de propósito.<br/>Ludmila é formada em Moda. Priscila vem da Comunicação e das Relações Públicas. Dois olhares diferentes, que se encontram no mesmo lugar: anunciar de forma autêntica aquilo que acreditamos.</p>",
+        "button_label": "Conheça nossa coleção",
+        "button_link": "shopify://collections/t-shirts",
+        "marquee_bg": "#90322e",
+        "marquee_text_color": "#faf6f2",
+        "journey_heading": "",
+        "journey_subheading": "",
+        "philo_heading": "",
+        "philo_subheading": ""
+      }
+    },
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "content_direction": "column",
+        "gap": 0,
+        "color_scheme": "",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    }
+  },
+  "order": ["pdp_editorial_pqcVje","main"]
+}

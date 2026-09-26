@@ -1,0 +1,157 @@
+{% comment %}
+  Section: Micro-Manifesto Editorial - A MARCA
+  Posicionamento: Entre seções de produto (Pausa Visual)
+{% endcomment %}
+
+<style>
+  .micro-msg-{{ section.id }} {
+    padding: {{ section.settings.padding_v_desktop }}px 0;
+    background-color: {{ section.settings.bg_color }};
+    overflow: hidden;
+  }
+
+  .m-msg-container {
+    max-width: 600px; /* Largura restrita para estética editorial */
+    margin-inline: auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+    text-align: left; /* Alinhamento sofisticado à esquerda */
+  }
+
+  .m-msg-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Proximidade cria bloco de leitura único */
+  }
+
+  .m-msg-text {
+    font-family: var(--font-body-family), 'SoraCustom', sans-serif; /* Usa a fonte principal do site */
+    color: {{ section.settings.text_color }};
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin: 0;
+    
+    /* Estado inicial para animação */
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Hierarquia Sutil de Pesos */
+  .m-msg-1 { 
+    font-size: clamp(1.4rem, 2.5vw, 1.8rem); 
+    font-weight: 400; 
+  }
+  
+  .m-msg-2 { 
+    font-size: clamp(1.4rem, 2.5vw, 1.8rem); 
+    font-weight: 500;
+    color: {{ section.settings.accent_color | default: section.settings.text_color }};
+  }
+
+  /* Trigger da Animação */
+  .micro-msg-{{ section.id }}.is-visible .m-msg-text {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Mobile: Micro e Sutil */
+  @media (max-width: 768px) {
+    .micro-msg-{{ section.id }} {
+      padding: {{ section.settings.padding_v_mobile }}px 0;
+    }
+    .m-msg-1, .m-msg-2 {
+      font-size: 1.25rem;
+    }
+    .m-msg-container {
+      padding-inline: var(--am-header-x, var(--page-margin, 16px));
+    }
+  }
+
+  /* Respeito à preferência do sistema por movimento reduzido */
+  @media (prefers-reduced-motion: reduce) {
+    .m-msg-text {
+      transform: none !important;
+      transition: opacity 0.5s ease !important;
+    }
+  }
+</style>
+
+<section class="micro-msg-{{ section.id }}" id="msg-{{ section.id }}">
+  <div class="m-msg-container">
+    <div class="m-msg-content">
+      <p class="m-msg-text m-msg-1" style="transition-delay: 100ms;">
+        Não é só moda
+      </p>
+      <p class="m-msg-text m-msg-2" style="transition-delay: 300ms;">
+        É missão
+      </p>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+document.addEventListener("DOMContentLoaded", function() {
+    const section = document.querySelector('.micro-msg-{{ section.id }}');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          section.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    observer.observe(section);
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Micro-Mensagem Editorial",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Cor de Fundo",
+      "default": "transparent"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Cor do Texto",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Cor Destaque (2ª linha)",
+      "default": "#121212"
+    },
+    {
+      "type": "range",
+      "id": "padding_v_desktop",
+      "min": 40,
+      "max": 180,
+      "step": 10,
+      "unit": "px",
+      "label": "Espaço Vertical (Desktop)",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "padding_v_mobile",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Espaço Vertical (Mobile)",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Micro-Mensagem Editorial"
+    }
+  ]
+}
+{% endschema %}

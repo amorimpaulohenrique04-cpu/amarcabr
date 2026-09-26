@@ -1,0 +1,166 @@
+{% comment %}
+  A MARCA — Hero Atacado (Banner natural + botão)
+  - SEM qualquer definição de altura (imagem define a altura)
+  - Full-bleed 100vw
+  - Zera padding/margin do wrapper Shopify
+  - Botão sobre a imagem
+{% endcomment %}
+
+<section class="am-atacado-hero-natural section-{{ section.id }}">
+  <div class="am-atacado-hero-natural__bleed">
+    <div class="am-atacado-hero-natural__wrap" aria-label="Hero Atacado">
+
+      {% if section.settings.image_desktop != blank %}
+        <picture class="am-atacado-hero-natural__picture">
+          {% if section.settings.image_mobile != blank %}
+            <source
+              media="(max-width: 768px)"
+              srcset="{{ section.settings.image_mobile | image_url: width: 480 }} 480w,
+                      {{ section.settings.image_mobile | image_url: width: 768 }} 768w,
+                      {{ section.settings.image_mobile | image_url: width: 1024 }} 1024w,
+                      {{ section.settings.image_mobile | image_url: width: 1400 }} 1400w"
+              width="{{ section.settings.image_mobile.width }}"
+              height="{{ section.settings.image_mobile.height }}"
+            >
+          {% endif %}
+
+          <img
+            class="am-atacado-hero-natural__img"
+            src="{{ section.settings.image_desktop | image_url: width: 1400 }}"
+            srcset="{{ section.settings.image_desktop | image_url: width: 480 }} 480w,
+                    {{ section.settings.image_desktop | image_url: width: 768 }} 768w,
+                    {{ section.settings.image_desktop | image_url: width: 1024 }} 1024w,
+                    {{ section.settings.image_desktop | image_url: width: 1400 }} 1400w,
+                    {{ section.settings.image_desktop | image_url: width: 1800 }} 1800w,
+                    {{ section.settings.image_desktop | image_url: width: 2200 }} 2200w,
+                    {{ section.settings.image_desktop | image_url: width: 2600 }} 2600w"
+            sizes="100vw"
+            alt="{{ section.settings.image_desktop.alt | escape }}"
+            width="{{ section.settings.image_desktop.width }}"
+            height="{{ section.settings.image_desktop.height }}"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          >
+        </picture>
+      {% endif %}
+
+      {% if section.settings.button_label != blank %}
+        <a
+          href="{{ section.settings.button_link | default: '#' }}"
+          class="am-atacado-hero-natural__btn"
+        >
+          {{ section.settings.button_label | escape }}
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <style>
+    /* ================================
+       1) Zerar espaçamentos do tema
+       (wrapper Shopify é o que costuma criar o “vazio”)
+    ================================= */
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} > *{
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* ================================
+       2) Full bleed real
+    ================================= */
+    .section-{{ section.id }} .am-atacado-hero-natural__bleed{
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+
+    /* ================================
+       3) Wrapper RELATIVE para overlay
+       (SEM altura!)
+    ================================= */
+    .section-{{ section.id }} .am-atacado-hero-natural__wrap{
+      position: relative;
+      width: 100%;
+      overflow: visible;
+      background: #E8E6E3;
+    }
+
+    /* ================================
+       4) Imagem natural (sem crop)
+       (SEM height!)
+    ================================= */
+    .section-{{ section.id }} .am-atacado-hero-natural__picture,
+    .section-{{ section.id }} .am-atacado-hero-natural__img{
+      display: block;
+      width: 100%;
+      height: auto;     /* <- importante: altura natural */
+      max-height: none; /* <- garante que tema não limite */
+    }
+
+    /* ================================
+       5) Botão sobre a imagem
+       (posicionado em % para funcionar
+        em qualquer altura de banner)
+    ================================= */
+    .section-{{ section.id }} .am-atacado-hero-natural__btn{
+      position: absolute;
+      left: 50%;
+      bottom: 6%;                 /* <- relativo à altura do banner */
+      transform: translateX(-50%);
+      z-index: 5;
+
+      height: 44px;
+      width: min(320px, calc(100% - 48px));
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      background: #fff;
+      border: 1px solid rgba(28,28,28,.15);
+      border-radius: 2px;
+
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: rgba(28,28,28,.75);
+
+      transition: transform .15s ease, border-color .15s ease;
+    }
+
+    @media (hover:hover){
+      .section-{{ section.id }} .am-atacado-hero-natural__btn:hover{
+        transform: translateX(-50%) translateY(-1px);
+        border-color: rgba(28,28,28,.25);
+      }
+    }
+
+    /* Mobile: sobe um pouco o botão */
+    @media (max-width: 768px){
+      .section-{{ section.id }} .am-atacado-hero-natural__btn{
+        bottom: 8%;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "A MARCA — Hero Atacado",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "image_picker", "id": "image_desktop", "label": "Banner desktop" },
+    { "type": "image_picker", "id": "image_mobile", "label": "Banner mobile (opcional)" },
+    { "type": "text", "id": "button_label", "label": "Texto do botão", "default": "SOLICITAR ACESSO" },
+    { "type": "url", "id": "button_link", "label": "Link do botão" }
+  ],
+  "presets": [
+    { "name": "A MARCA — Hero Atacado (Natural)" }
+  ]
+}
+{% endschema %}

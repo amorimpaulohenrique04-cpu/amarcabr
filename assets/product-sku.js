@@ -1,0 +1,6 @@
+import{Component}from '@theme/component';import{ThemeEvents,VariantUpdateEvent}from '@theme/events';class ProductSkuComponent extends Component{requiredRefs=['skuContainer','sku'];connectedCallback(){super.connectedCallback();const target=this.closest('[id*="ProductInformation-"], [id*="QuickAdd-"], product-card');if(!target)return;target.addEventListener(ThemeEvents.variantUpdate,this.updateSku)}
+disconnectedCallback(){super.disconnectedCallback();const target=this.closest('[id*="ProductInformation-"], [id*="QuickAdd-"], product-card');if(!target)return;target.removeEventListener(ThemeEvents.variantUpdate,this.updateSku)}
+updateSku=(event)=>{if(event.detail.data.newProduct){this.dataset.productId=event.detail.data.newProduct.id}
+if(event.target instanceof HTMLElement&&event.target.dataset.productId!==this.dataset.productId){return}
+if(event.detail.resource){const variantSku=event.detail.resource.sku||'';if(variantSku){this.style.display='block';this.refs.sku.textContent=variantSku}else{this.style.display='none';this.refs.sku.textContent=''}}}}
+if(!customElements.get('product-sku-component')){customElements.define('product-sku-component',ProductSkuComponent)}

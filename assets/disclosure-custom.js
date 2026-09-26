@@ -1,0 +1,4 @@
+import{Component}from '@theme/component';class DisclosureCustom extends Component{requiredRefs=['disclosureTrigger','disclosureContent'];connectedCallback(){super.connectedCallback()}
+disconnectedCallback(){super.disconnectedCallback()}
+toggleDisclosure=()=>{const{disclosureTrigger:trigger,disclosureContent:content}=this.refs;const expanded=trigger.matches('[aria-expanded="true"]');trigger.setAttribute('aria-expanded',String(!expanded));trigger.setAttribute('aria-label',`${expanded ? trigger.dataset.disclosureOpen : trigger.dataset.disclosureClose}`);content.inert=expanded}}
+if(!customElements.get('disclosure-custom')){customElements.define('disclosure-custom',DisclosureCustom)}

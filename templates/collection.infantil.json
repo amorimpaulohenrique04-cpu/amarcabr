@@ -1,0 +1,211 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "section": {
+      "type": "section",
+      "name": "Collection heading",
+      "settings": { "pt": 0, "pb": 0, "mt": 0, "mb": 0 }
+    },
+    "kids_collection_b6Vctr": {
+      "type": "kids-collection",
+      "name": "Kids Hero",
+      "settings": {
+        "heading_line_1": "PEQUENOS",
+        "heading_highlight": "DISCÍPULOS",
+        "description": "<p> Conforto para brincar, liberdade para imaginar e mensagens que acompanham cada passo do dia a dia.</p>",
+        "background_word": "KIDS",
+        "image_1": "shopify://shop_images/IMG_0826.jpg",
+        "image_2": "shopify://shop_images/IMG_0521.jpg",
+        "image_3": "shopify://shop_images/IMG_0510.jpg",
+        "floating_badge": "MARCADINHOS",
+        "button_1_text": "EU QUERO",
+        "button_1_link": "shopify://products/t-shirt-infantil-glory-to-god",
+        "button_2_text": "VER LOOKBOOK",
+        "button_2_link": "shopify://collections/t-shirt-infantil-premium",
+        "color_bg": "#fff4cc",
+        "color_blue": "#7c8f5a",
+        "color_orange": "#c65a3a",
+        "color_green": "#22c55e",
+        "color_yellow": "#f4c430",
+        "color_pink": "#c65a3a"
+      }
+    },
+    "main": {
+      "type": "main-collection",
+      "blocks": {
+        "filters": {
+          "type": "filters",
+          "static": true,
+          "settings": {
+            "enable_filtering": true,
+            "filter_style": "horizontal",
+            "filter_width": "centered",
+            "text_label_case": "default",
+            "show_swatch_label": false,
+            "show_filter_label": false,
+            "enable_sorting": true,
+            "enable_grid_density": true,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "padding-block-start": 8,
+            "padding-block-end": 8,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0,
+            "facets_margin_bottom": 8,
+            "facets_margin_right": 20
+          },
+          "blocks": {}
+        },
+        "product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "adapt",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "product_title_4nY4eT": {
+              "type": "product-title",
+              "name": "t:names.product_title",
+              "settings": {
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "price_EzJzMm": {
+              "type": "price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h6",
+                "width": "100%",
+                "alignment": "left",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": ["card-gallery","product_title_4nY4eT","price_EzJzMm"]
+        }
+      },
+      "disabled": true,
+      "settings": {
+        "layout_type": "grid",
+        "product_card_size": "medium",
+        "mobile_product_card_size": "small",
+        "enable_infinite_scroll": true,
+        "products_per_page": 24,
+        "product_grid_width": "centered",
+        "full_width_on_mobile": true,
+        "columns_gap_horizontal": 16,
+        "columns_gap_vertical": 24,
+        "padding-inline-start": 0,
+        "padding-inline-end": 0,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 32
+      }
+    },
+    "custom_product_grid_L77f7t": {
+      "type": "custom-product-grid",
+      "name": "Grid Editorial V6",
+      "settings": {
+        "collection": "t-shirt-infantil-premium",
+        "products_to_show": 8,
+        "show_title": true,
+        "title_text": "{{ section.settings.collection.title }}",
+        "title_icon": "shopify://shop_images/SELO3.png",
+        "title_icon_size": 18,
+        "title_color": "#52201b",
+        "title_size": 26,
+        "title_weight": "500",
+        "title_gap": 10,
+        "section_max_width": 1200,
+        "hover_cta_label": "COMPRAR AGORA",
+        "cta_desktop_width": 160,
+        "cta_desktop_font_size": 11,
+        "cta_desktop_padding": 12,
+        "cta_mobile_size": 40,
+        "columns_desktop": 4,
+        "columns_tablet": 3,
+        "columns_mobile": "2",
+        "grid_gap": 20,
+        "image_ratio": "3/4",
+        "card_radius": 8,
+        "card_bg": "#ffffff",
+        "heading_color": "#000000",
+        "price_color": "#1a1a1a",
+        "sale_label": "Sale",
+        "sale_metafield_namespace": "custom",
+        "sale_metafield_key": "sale",
+        "badge_bg": "#000000",
+        "badge_text": "#ffffff",
+        "enable_hover_image": true,
+        "show_installments": true,
+        "installments_text": "[count]x de [price]",
+        "padding_top": 20,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": ["section","kids_collection_b6Vctr","main","custom_product_grid_L77f7t"]
+}

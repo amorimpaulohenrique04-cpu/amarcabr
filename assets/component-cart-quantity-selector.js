@@ -1,0 +1,3 @@
+import{QuantitySelectorComponent}from '@theme/component-quantity-selector';class CartQuantitySelectorComponent extends QuantitySelectorComponent{getEffectiveMax(){const{max}=this.getCurrentValues();return max}
+updateButtonStates(){const{minusButton,plusButton}=this.refs;const{min,value}=this.getCurrentValues();const effectiveMax=this.getEffectiveMax();minusButton.disabled=value<=min;plusButton.disabled=effectiveMax!==null&&value>=effectiveMax}}
+if(!customElements.get('cart-quantity-selector-component')){customElements.define('cart-quantity-selector-component',CartQuantitySelectorComponent)}

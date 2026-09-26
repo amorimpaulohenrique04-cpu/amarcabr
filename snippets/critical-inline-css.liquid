@@ -1,0 +1,162 @@
+/* ================================================================
+   CSS GLOBAL CRÍTICO - CARREGADO INLINE PARA MÁXIMA PERFORMANCE
+   ================================================================ */
+
+/* Reset básico e variáveis fundamentais */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'SoraCustom', sans-serif;
+  color: var(--color-foreground, #1a1a1a);
+  background: var(--color-background, #fff);
+  overflow-x: hidden;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  font-variation-settings: 'slnt' 0;
+}
+
+/* Layout crítico para evitar CLS */
+.content-for-layout {
+  flex: 1;
+}
+
+/* Variáveis globais críticas */
+:root {
+  /* Header variables - críticas para layout */
+  --am-header-x: 16px;
+  --am-header-max: 1240px;
+  --page-margin: var(--am-header-x);
+  --page-content-width: var(--am-header-max);
+  --page-width: calc(var(--am-header-max) + (var(--am-header-x) * 2));
+  
+  /* Performance variables */
+  --animation-speed: 0.2s;
+  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Responsive header variables */
+  @media (min-width: 750px) and (max-width: 989px) {
+    --am-header-x: 40px;
+  }
+  
+  @media (min-width: 990px) {
+    --am-header-x: 28px;
+  }
+}
+
+/* Imagens otimizadas */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  /* Prevenção de layout shift */
+  font-size: 0;
+}
+
+/* Links básicos */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity var(--animation-speed) var(--animation-easing);
+}
+
+/* Prevent flash of unstyled content */
+html {
+  scroll-behavior: smooth;
+}
+
+html[scroll-lock] {
+  overflow: hidden;
+}
+
+/* Skip link - acessibilidade */
+.skip-to-content-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  z-index: 9999;
+  color: var(--color-background);
+  background: var(--color-foreground);
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: top 0.3s;
+}
+
+.skip-to-content-link:focus {
+  top: 6px;
+}
+
+/* Prevent CLS para elementos interativos comuns */
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Loading states para evitar jarring */
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Utility classes críticas */
+.hidden {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+}
+
+/* Grid e layout críticos */
+.container {
+  max-width: var(--page-content-width);
+  margin-inline: auto;
+  padding-inline: var(--page-margin);
+}
+
+/* Performance optimizations */
+.isolate {
+  isolation: isolate;
+}
+
+.gpu-accelerate {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}

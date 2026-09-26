@@ -1,0 +1,288 @@
+{%- comment -%}
+  A MARCA — Search Overlay (Tan Pearl & Sora Edition - Fine Tuning)
+  Baseado na versão "Perfeita" + Ajuste de fonte fina nas sugestões.
+{%- endcomment -%}
+
+<div class="am-search" data-am-search data-limit="6">
+  <div class="am-search__wrapper">
+    
+    <div class="am-search__header">
+      <div class="am-search__field">
+        <span class="am-search__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="icon-search-editorial"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </span>
+        
+        <input
+          id="am-search-input"
+          class="am-search__input"
+          type="search"
+          name="q"
+          placeholder="Buscar..."
+          autocomplete="off"
+        >
+      </div>
+
+      <button type="button" class="am-search__close" id="am-close-btn-inner" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="icon-close-editorial"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="am-search__content">
+      
+      <div class="am-search__suggestions" data-am-suggestions>
+        <span class="am-label-editorial">Sugestões</span>
+        {%- assign suggestion_menu = linklists['search-suggestions'] -%}
+        <ul class="am-list-editorial">
+          {%- if suggestion_menu.links.size > 0 -%}
+            {%- for link in suggestion_menu.links -%}
+              <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+            {%- endfor -%}
+          {%- else -%}
+            <li><a href="/collections/all">Best Sellers</a></li>
+            <li><a href="/collections/novidades">New In</a></li>
+            <li><a href="/collections/promocao">Sale</a></li>
+          {%- endif -%}
+        </ul>
+      </div>
+
+      <div class="am-search__results-area" hidden>
+        <span class="am-label-editorial" data-results-label hidden>Resultados</span>
+        <div class="am-search__status" data-am-status hidden></div>
+        <ul class="am-search__list" data-am-list></ul>
+        <div class="am-search__footer" data-am-footer hidden>
+          <a class="am-link-viewall" href="{{ routes.search_url }}" data-am-viewall>
+            Ver todos os resultados
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  /* =========================================
+     A MARCA — DESIGN SYSTEM
+     ========================================= */
+
+  :root {
+    /* Fontes Nativas da Marca */
+    --font-premium-display: 'Tan Pearl', 'TanPearlCustom', var(--font-heading-family), serif; 
+    --font-premium-body: 'SoraCustom', var(--font-body-family), sans-serif;
+    
+    --color-bg-overlay: #FAFAF8;
+    --color-text-primary: #111111;
+    --color-text-secondary: #757575;
+  }
+
+  /* O overlay preenche o dialog via parents esticados (search-modal.liquid) */
+  .am-search {
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg-overlay);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .am-search__wrapper {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 40px 5%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  .am-search__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 50px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+
+  .am-search__field { flex: 1; display: flex; align-items: center; gap: 15px; }
+  .am-search__icon { color: var(--color-text-secondary); display: flex; }
+  .icon-search-editorial { width: 24px; height: 24px; }
+
+  /* INPUT: Tan Pearl (Mantido grande e chique) */
+  .am-search__input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    
+    font-family: var(--font-premium-display);
+    font-size: clamp(24px, 4vw, 36px); /* Tamanho levemente ajustado */
+    font-weight: 400;
+    color: var(--color-text-primary);
+    line-height: 1.1;
+  }
+  .am-search__input::placeholder { color: #C0C0C0; opacity: 1; font-weight: 300; }
+
+  /* BOTÃO FECHAR */
+  .am-search__close {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-primary);
+    transition: transform 0.2s ease;
+  }
+  .am-search__close:hover { transform: scale(1.1); }
+  .icon-close-editorial { width: 22px; height: 22px; }
+
+  /* SUGESTÕES (Labels) */
+  .am-label-editorial {
+    display: block;
+    font-family: var(--font-premium-body);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+  }
+
+  /* LISTA DE LINKS (AQUI ESTÁ A MUDANÇA QUE VOCÊ PEDIU) */
+  .am-list-editorial { list-style: none; padding: 0; margin: 0; }
+  .am-list-editorial li { margin-bottom: 10px; }
+  
+  .am-list-editorial a {
+    text-decoration: none;
+    
+    /* MUDANÇA: Usando a fonte do corpo (Sora) em vez da Display */
+    font-family: var(--font-premium-body); 
+    font-weight: 300; /* Light/Fina */
+    
+    /* Tamanho reduzido e elegante */
+    font-size: 16px; 
+    
+    letter-spacing: 0.05em;
+    color: var(--color-text-primary);
+    transition: opacity 0.2s, padding-left 0.2s;
+    display: inline-block;
+  }
+  
+  /* Um pouco maior no desktop, mas ainda delicado */
+  @media (min-width: 750px) {
+    .am-list-editorial a { font-size: 18px; }
+  }
+
+  .am-list-editorial a:hover { 
+    opacity: 0.6; 
+    padding-left: 5px; 
+  }
+
+  /* RESULTADOS (Produtos) */
+  .am-search__list { list-style: none; padding: 0; margin: 0; }
+  .am-search__item { border-bottom: 1px solid rgba(0,0,0,0.03); }
+  
+  .am-search__item a {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    padding: 15px 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .am-search__thumb {
+    width: 60px; height: 80px; 
+    background: #f0f0f0; 
+    display: block; 
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .am-search__thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;}
+  .am-search__item a:hover .am-search__thumb img { transform: scale(1.05); }
+
+  .am-search__title { 
+    font-family: var(--font-premium-display); 
+    font-size: 17px; 
+    margin-bottom: 4px;
+    display: block;
+  }
+  .am-search__price { 
+    font-family: var(--font-premium-body); 
+    font-size: 12px; 
+    color: var(--color-text-secondary); 
+  }
+
+  /* FOOTER */
+  .am-search__footer { margin-top: 30px; text-align: left; }
+  .am-link-viewall {
+    font-family: var(--font-premium-body);
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--color-text-primary); text-decoration: underline; text-underline-offset: 4px;
+  }
+
+  /* =========================================
+     ANIMAÇÃO — Conteúdo do search
+     Desktop: o dialog faz o slide, conteúdo só faz fade.
+     Mobile: conteúdo faz fade + slide sutil.
+     ========================================= */
+
+  @keyframes am-search-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .am-search {
+    animation: am-search-fade-in 250ms ease-out both;
+  }
+
+  .dialog-closing .am-search {
+    opacity: 0;
+    transition: opacity 150ms ease-in;
+    pointer-events: none !important;
+  }
+
+  .dialog-closing .am-search * {
+    pointer-events: none !important;
+  }
+
+  /* Acessibilidade: sem animação se o usuário preferir */
+  @media (prefers-reduced-motion: reduce) {
+    .am-search {
+      animation: none;
+    }
+    .dialog-closing .am-search {
+      transition: none;
+    }
+  }
+
+  /* MOBILE */
+  @media (max-width: 749px) {
+    .am-search__wrapper { padding: 20px 24px; }
+    .am-search__header { margin-bottom: 30px; }
+    .am-search__input { font-size: 24px; }
+  }
+
+  /* Resultados: entrada escalonada */
+  @keyframes am-slide-up-fade {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .am-search__item {
+    opacity: 0;
+    animation: am-slide-up-fade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .am-search__item:nth-child(1) { animation-delay: 0.04s; }
+  .am-search__item:nth-child(2) { animation-delay: 0.08s; }
+  .am-search__item:nth-child(3) { animation-delay: 0.12s; }
+  .am-search__item:nth-child(4) { animation-delay: 0.16s; }
+  .am-search__item:nth-child(5) { animation-delay: 0.20s; }
+  .am-search__item:nth-child(6) { animation-delay: 0.24s; }
+
+
+{% endstylesheet %}

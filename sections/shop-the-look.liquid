@@ -1,0 +1,412 @@
+<style>
+  /* --- Configurações Gerais --- */
+  #shopify-section-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.8 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.8 }}px;
+    background-color: {{ section.settings.bg_color }};
+    overflow: hidden;
+  }
+
+  @media (min-width: 750px) {
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .stl-container {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin-inline: auto;
+    padding-inline: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* --- Layout Desktop (Elegante & Espaçado) --- */
+  @media (min-width: 990px) {
+    .stl-container {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 70px; /* Mais respiro para o visual premium */
+    }
+
+    .stl-image-col { width: 48%; }
+    .stl-content-col { width: 42%; }
+  }
+
+  /* --- Coluna de Conteúdo com Entrada Suave --- */
+  .stl-content-col {
+    opacity: 0;
+    transform: translateY(20px);
+    /* Animação de entrada suave ao carregar */
+    animation: stlFadeUp 1s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards 0.3s;
+  }
+
+  @keyframes stlFadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- Imagem Principal --- */
+  .stl-image-wrapper {
+    position: relative;
+    width: 100%;
+    line-height: 0;
+    overflow: hidden;
+    opacity: 0; /* Fade in da imagem também */
+    animation: stlFadeIn 1.2s ease-out forwards;
+  }
+  @keyframes stlFadeIn { to { opacity: 1; } }
+
+  .stl-main-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: 2px;
+  }
+  
+  .stl-image-col:hover .stl-main-img {
+    transform: scale(1.025); /* Zoom muito sutil e lento */
+  }
+
+  /* Estilo Polaroid (Opcional) */
+  .style-polaroid .stl-main-img {
+    border: 12px solid #fff;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+  }
+
+  /* --- Sticker / Deco (Minimalista) --- */
+  .stl-deco-text {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    padding: 6px 14px;
+    font-family: var(--font-heading-family, serif);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    border-radius: 1px;
+  }
+
+  .stl-deco-text::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+  }
+
+  /* --- Tipografia (Com o elemento Premium) --- */
+  .stl-subheading {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-bottom: 16px;
+    color: rgba(0,0,0,0.6);
+    display: block;
+    font-weight: 500;
+  }
+
+  /* Wrapper para o título e a linha animada */
+  .stl-heading-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 32px;
+  }
+
+  .stl-heading {
+    font-family: var(--font-heading-family, serif);
+    font-style: normal;
+    font-size: {{ section.settings.heading_size }}px;
+    margin: 0;
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: #000;
+  }
+
+  /* A LINHA PREMIUM ANIMADA */
+  .stl-heading-wrapper::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -14px; /* Distância do texto */
+    width: 0; /* Começa invisível */
+    height: 1px; /* Muito fina */
+    background-color: #000;
+    opacity: 0.25; /* Bem sutil */
+    /* Animação de "desenhar" a linha */
+    animation: stlDrawLine 1.5s ease-out forwards 0.6s;
+  }
+
+  @keyframes stlDrawLine {
+    to { width: 60px; } /* Define um tamanho fixo elegante, não a largura total */
+  }
+
+  /* --- Lista de Produtos (Clean & Interativa) --- */
+  .stl-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid rgba(0,0,0,0.06); /* Linha superior sutil */
+  }
+
+  .stl-product-card {
+    display: flex;
+    align-items: center;
+    background: transparent;
+    padding: 14px 0;
+    transition: background-color 0.3s ease;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    text-decoration: none;
+    position: relative;
+  }
+
+  .stl-product-card:hover {
+    background: transparent;
+  }
+
+  /* Imagem do produto com interação premium */
+  .stl-p-image {
+    width: 56px;
+    height: 72px;
+    object-fit: cover;
+    margin-right: 18px;
+    background-color: #f7f7f7;
+    flex: 0 0 auto;
+    border-radius: 1px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+  
+  /* Hover: Imagem flutua levemente e ganha sombra */
+  .stl-product-card:hover .stl-p-image {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .stl-p-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+  }
+
+  .stl-p-title {
+    font-family: var(--font-body-family, sans-serif);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+    color: #000;
+    line-height: 1.3;
+    transition: opacity 0.3s;
+  }
+  .stl-product-card:hover .stl-p-title { opacity: 0.7; }
+
+  .stl-p-price {
+    font-size: 12px;
+    color: rgba(0,0,0,0.55);
+  }
+
+  /* CTA Minimalista (Sublinhado animado fluido) */
+  .stl-btn-wrap {
+    display: inline-block;
+    width: fit-content;
+    margin-top: 6px;
+    position: relative;
+    padding-bottom: 2px;
+    overflow: hidden;
+  }
+
+  .stl-btn {
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 10px;
+    color: #000;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* A linha que desliza */
+  .stl-btn-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #000;
+    transform: translateX(-101%); /* Começa fora da tela à esquerda */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.6;
+  }
+  
+  .stl-product-card:hover .stl-btn-wrap::after {
+    transform: translateX(0); /* Desliza para a posição */
+  }
+
+  /* --- Mobile Otimizado (Compacto) --- */
+  @media (max-width: 989px) {
+    .stl-container { gap: 28px; padding-inline: 16px; }
+    
+    .stl-heading {
+      font-size: clamp(26px, 5vw, 34px);
+    }
+    .stl-heading-wrapper { margin-bottom: 28px; }
+    
+    /* Imagem controlada no mobile */
+    .stl-main-img {
+      max-height: 60vh;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4/5;
+      /* Reseta estilos complexos no mobile para leveza */
+      transform: none !important; box-shadow: none !important; border: none !important;
+    }
+    
+    .stl-deco-text { bottom: 12px; left: 12px; padding: 5px 12px; font-size: 9px; }
+
+    .stl-product-card { padding: 12px 0; }
+    .stl-p-image { width: 50px; height: 64px; margin-right: 14px; }
+    /* No mobile, removemos o efeito de flutuar para ser mais direto */
+    .stl-product-card:hover .stl-p-image { transform: none; box-shadow: none; }
+  }
+</style>
+
+<div class="shop-the-look-section">
+  <div class="stl-container">
+
+    <div class="stl-image-col {% if section.settings.image_style == 'polaroid' %}style-polaroid{% endif %}">
+      <div class="stl-image-wrapper">
+        {% if section.settings.image != blank %}
+          {{ section.settings.image | image_url: width: 800 | image_tag:
+            class: 'stl-main-img',
+            loading: 'lazy',
+            decoding: 'async',
+            widths: '400, 600, 800, 1000',
+            sizes: '(max-width: 989px) 100vw, 48vw'
+          }}
+        {% else %}
+          {{ 'collection-1' | placeholder_svg_tag: 'stl-main-img' }}
+        {% endif %}
+
+        {% if section.settings.show_deco and section.settings.deco_text != blank %}
+          <div class="stl-deco-text">{{ section.settings.deco_text }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="stl-content-col">
+      {% if section.settings.subheading != blank %}
+        <span class="stl-subheading">{{ section.settings.subheading }}</span>
+      {% endif %}
+
+      <div class="stl-heading-wrapper">
+        <h2 class="stl-heading">{{ section.settings.title }}</h2>
+      </div>
+
+      <div class="stl-products-list">
+        {% for block in section.blocks %}
+          {% assign product = block.settings.product %}
+
+          {% if product != blank %}
+            <a href="{{ product.url }}" class="stl-product-card" {{ block.shopify_attributes }}>
+              
+              {% if product.featured_image %}
+                {{ product.featured_image | image_url: width: 180 | image_tag: class: 'stl-p-image', loading: 'lazy' }}
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'stl-p-image' }}
+              {% endif %}
+
+              <div class="stl-p-info">
+                <span class="stl-p-title">{{ product.title }}</span>
+                <span class="stl-p-price">{{ product.price | money }}</span>
+                <div class="stl-btn-wrap">
+                  <span class="stl-btn">{{ section.settings.btn_text }}</span>
+                </div>
+              </div>
+            </a>
+          {% else %}
+            <div class="stl-product-card" {{ block.shopify_attributes }}>
+              {{ 'product-1' | placeholder_svg_tag: 'stl-p-image' }}
+              <div class="stl-p-info">
+                <span class="stl-p-title">Exemplo de Produto</span>
+                <span class="stl-p-price">R$ 0,00</span>
+                <div class="stl-btn-wrap"><span class="stl-btn">Editar</span></div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Shop the Look - Premium",
+  "settings": [
+    { "type": "header", "content": "Layout Premium" },
+    { "type": "color", "id": "bg_color", "label": "Cor de Fundo", "default": "#ffffff" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 5, "unit": "px", "label": "Espaçamento Topo", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 5, "unit": "px", "label": "Espaçamento Base", "default": 80 },
+
+    { "type": "header", "content": "Imagem Editorial" },
+    { "type": "image_picker", "id": "image", "label": "Foto do Look" },
+    {
+      "type": "select",
+      "id": "image_style",
+      "label": "Estilo da Borda",
+      "options": [
+        { "value": "clean", "label": "Sem Borda (Clean)" },
+        { "value": "polaroid", "label": "Moldura Branca (Polaroid)" }
+      ],
+      "default": "clean"
+    },
+    { "type": "text", "id": "deco_text", "label": "Tag da Foto", "default": "THE EDIT" },
+    { "type": "checkbox", "id": "show_deco", "label": "Mostrar Tag", "default": true },
+
+    { "type": "header", "content": "Tipografia" },
+    { "type": "text", "id": "subheading", "label": "Subtítulo", "default": "Nossa Curadoria" },
+    { "type": "text", "id": "title", "label": "Título Principal", "default": "A elegância dos detalhes." },
+    { "type": "range", "id": "heading_size", "min": 28, "max": 72, "step": 2, "unit": "px", "label": "Tamanho Título (Desk)", "default": 48 },
+    { "type": "text", "id": "btn_text", "label": "Texto do Link", "default": "Comprar" }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Produto",
+      "limit": 5,
+      "settings": [
+        { "type": "product", "id": "product", "label": "Escolher Produto" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the Look (Premium)",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

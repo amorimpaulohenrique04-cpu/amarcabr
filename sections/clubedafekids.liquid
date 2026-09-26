@@ -1,0 +1,511 @@
+{% comment %}
+  CLUBE DA FÉ KIDS — inscrições esgotadas
+  Versão simplificada sem formulário, Pix, upload ou scripts.
+  O CTA direciona para o produto CHILD OF GOD.
+{% endcomment %}
+
+{%- liquid
+  assign s = section.settings
+-%}
+
+<style>
+  #clube-fe-kids-{{ section.id }} {
+    --cfk-bg: {{ s.bg }};
+    --cfk-surface: {{ s.surface }};
+    --cfk-ink: {{ s.ink }};
+    --cfk-muted: {{ s.muted }};
+    --cfk-accent: {{ s.coral }};
+    --cfk-blue: {{ s.blue }};
+    --cfk-border: rgba(13, 69, 105, .13);
+    --cfk-logo-width: {{ s.hero_logo_width }}px;
+    --cfk-logo-width-mobile: {{ s.hero_logo_width_mobile }}px;
+
+    background: var(--cfk-bg);
+    color: var(--cfk-ink);
+    font-family: var(--font-body-family, Inter, Arial, sans-serif);
+  }
+
+  #clube-fe-kids-{{ section.id }} *,
+  #clube-fe-kids-{{ section.id }} *::before,
+  #clube-fe-kids-{{ section.id }} *::after {
+    box-sizing: border-box;
+  }
+
+  #clube-fe-kids-{{ section.id }} a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero,
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-wrap {
+    width: min(1160px, calc(100% - 40px));
+    margin-inline: auto;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero {
+    min-height: 520px;
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    gap: 50px;
+    align-items: center;
+    padding: 50px 0 66px;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__eyebrow {
+    margin: 0 0 11px;
+    color: var(--cfk-blue);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero h1 {
+    margin: 0;
+    font-size: clamp(56px, 6.5vw, 88px);
+    line-height: .9;
+    letter-spacing: -.07em;
+    font-weight: 820;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero h1 span {
+    display: block;
+    color: var(--cfk-accent);
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero-logo {
+    width: min(100%, var(--cfk-logo-width));
+    margin: 0;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero-logo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__lead {
+    max-width: 470px;
+    margin: 24px 0 28px;
+    color: var(--cfk-muted);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__cta {
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--cfk-accent);
+    color: #fff;
+    padding: 0 24px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 780;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__cta:hover {
+    transform: translateY(-1px);
+    opacity: .92;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__cta svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero-media {
+    min-height: 430px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px;
+    background: #dff3ff;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__hero-image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    object-fit: cover;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-wrap {
+    max-width: 860px;
+    padding: 18px 0 88px;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(30px, 5vw, 54px);
+    border: 1px solid var(--cfk-border);
+    border-radius: 30px;
+    background: var(--cfk-surface);
+    text-align: center;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout::before,
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout::before {
+    width: 150px;
+    height: 150px;
+    top: -82px;
+    right: -58px;
+    background: color-mix(in srgb, var(--cfk-accent) 14%, transparent);
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout::after {
+    width: 110px;
+    height: 110px;
+    bottom: -62px;
+    left: -40px;
+    background: color-mix(in srgb, var(--cfk-blue) 12%, transparent);
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    margin-bottom: 18px;
+    padding: 0 13px;
+    border-radius: 999px;
+    background: #eef8ff;
+    color: var(--cfk-blue);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout h2 {
+    max-width: 650px;
+    margin: 0 auto;
+    font-size: clamp(34px, 5vw, 54px);
+    line-height: .98;
+    letter-spacing: -.055em;
+    font-weight: 820;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-copy {
+    max-width: 610px;
+    margin: 20px auto 0;
+    color: var(--cfk-muted);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-copy strong {
+    color: var(--cfk-ink);
+    font-weight: 760;
+  }
+
+  #clube-fe-kids-{{ section.id }} .cfk-simple__soldout .cfk-simple__cta {
+    margin-top: 28px;
+  }
+
+  @media (max-width: 800px) {
+    #clube-fe-kids-{{ section.id }} .cfk-simple__hero {
+      grid-template-columns: 1fr;
+      gap: 28px;
+      padding: 36px 0 42px;
+      text-align: center;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__lead {
+      margin-inline: auto;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__hero-media {
+      min-height: 390px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    #clube-fe-kids-{{ section.id }} .cfk-simple__hero,
+    #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-wrap {
+      width: min(100% - 28px, 1160px);
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__hero h1 {
+      font-size: clamp(50px, 17vw, 70px);
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__hero-logo {
+      width: min(100%, var(--cfk-logo-width-mobile));
+      margin-inline: auto;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__hero-media {
+      min-height: 330px;
+      border-radius: 24px;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-wrap {
+      padding: 4px 0 64px;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__soldout {
+      padding: 30px 20px;
+      border-radius: 24px;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__soldout-copy {
+      font-size: 15px;
+    }
+
+    #clube-fe-kids-{{ section.id }} .cfk-simple__cta {
+      width: 100%;
+    }
+  }
+</style>
+
+<section id="clube-fe-kids-{{ section.id }}" class="cfk-simple">
+  <div class="cfk-simple__hero">
+    <div class="cfk-simple__hero-copy">
+      <p class="cfk-simple__eyebrow">{{ s.eyebrow | escape }}</p>
+
+      {% if s.hero_logo != blank %}
+        <h1 class="cfk-simple__sr-only">
+          {{ s.hero_logo_alt | default: 'Clube da Fé Kids' | escape }}
+        </h1>
+
+        <div class="cfk-simple__hero-logo">
+          {{
+            s.hero_logo
+            | image_url: width: 1400
+            | image_tag:
+              loading: 'eager',
+              widths: '320, 480, 640, 800, 1000, 1200, 1400',
+              sizes: '(max-width: 600px) 86vw, 520px',
+              alt: s.hero_logo_alt
+          }}
+        </div>
+      {% else %}
+        <h1>
+          {{ s.title_line_1 | escape }}
+          <span>{{ s.title_line_2 | escape }}</span>
+        </h1>
+      {% endif %}
+
+      <p class="cfk-simple__lead">{{ s.hero_text | escape }}</p>
+
+      <a href="{{ s.product_url | default: '/products/t-shirt-unissex-child-of-god' }}" class="cfk-simple__cta">
+        {{ s.product_button_label | escape }}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M14 7l5 5-5 5"></path>
+        </svg>
+      </a>
+    </div>
+
+    {% if s.hero_image != blank %}
+      <div class="cfk-simple__hero-media">
+        {{
+          s.hero_image
+          | image_url: width: 1600
+          | image_tag:
+            class: 'cfk-simple__hero-image',
+            loading: 'eager',
+            widths: '480, 720, 960, 1200, 1600',
+            sizes: '(max-width: 800px) 100vw, 52vw',
+            alt: s.hero_image.alt
+        }}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="cfk-simple__soldout-wrap">
+    <div class="cfk-simple__soldout">
+      <span class="cfk-simple__soldout-badge">Vagas esgotadas</span>
+
+      <h2>Que alegria! As vagas voaram 💛</h2>
+
+      <div class="cfk-simple__soldout-copy">
+        <p>
+          As inscrições para o <strong>Clube da Fé Kids estão esgotadas!</strong>
+          Nosso coração fica muito feliz em ver tantas famílias querendo viver esse momento com a gente.
+        </p>
+        <p>
+          Mas a experiência <strong>CHILD OF GOD</strong> não termina aqui. A coleção foi criada para lembrar aos pequenos,
+          todos os dias, de algo que nunca muda: <strong>eles são filhos de Deus.</strong>
+        </p>
+      </div>
+
+      <a href="{{ s.product_url | default: '/products/t-shirt-unissex-child-of-god' }}" class="cfk-simple__cta">
+        {{ s.product_button_label | escape }}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M14 7l5 5-5 5"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Clube da Fé Kids",
+  "tag": "section",
+  "class": "section-clube-fe-kids",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Clube da Fé Kids"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_logo",
+      "label": "Lettering / logo da hero (PNG)"
+    },
+    {
+      "type": "text",
+      "id": "hero_logo_alt",
+      "label": "Texto alternativo do lettering",
+      "default": "Clube da Fé Kids"
+    },
+    {
+      "type": "range",
+      "id": "hero_logo_width",
+      "min": 220,
+      "max": 650,
+      "step": 10,
+      "unit": "px",
+      "label": "Largura do lettering — desktop",
+      "default": 520
+    },
+    {
+      "type": "range",
+      "id": "hero_logo_width_mobile",
+      "min": 180,
+      "max": 420,
+      "step": 10,
+      "unit": "px",
+      "label": "Largura do lettering — mobile",
+      "default": 340
+    },
+    {
+      "type": "text",
+      "id": "title_line_1",
+      "label": "Título fallback — linha 1",
+      "default": "Clube da Fé"
+    },
+    {
+      "type": "text",
+      "id": "title_line_2",
+      "label": "Título fallback — linha 2",
+      "default": "Kids"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_text",
+      "label": "Texto da hero",
+      "default": "Uma manhã para brincar, aprender e crescer na fé. As vagas desta edição já foram preenchidas."
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Foto principal"
+    },
+    {
+      "type": "header",
+      "content": "CHILD OF GOD"
+    },
+    {
+      "type": "text",
+      "id": "product_url",
+      "label": "Link do produto",
+      "default": "/products/t-shirt-unissex-child-of-god"
+    },
+    {
+      "type": "text",
+      "id": "product_button_label",
+      "label": "Texto do botão",
+      "default": "Conheça CHILD OF GOD"
+    },
+    {
+      "type": "header",
+      "content": "Cores"
+    },
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Fundo",
+      "default": "#FFF9F2"
+    },
+    {
+      "type": "color",
+      "id": "surface",
+      "label": "Card",
+      "default": "#FFFCF7"
+    },
+    {
+      "type": "color",
+      "id": "ink",
+      "label": "Texto principal",
+      "default": "#0D4569"
+    },
+    {
+      "type": "color",
+      "id": "muted",
+      "label": "Texto secundário",
+      "default": "#586A75"
+    },
+    {
+      "type": "color",
+      "id": "blue",
+      "label": "Azul",
+      "default": "#227EBE"
+    },
+    {
+      "type": "color",
+      "id": "coral",
+      "label": "Coral",
+      "default": "#FF6657"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Clube da Fé Kids — Esgotado"
+    }
+  ],
+  "limit": 1,
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

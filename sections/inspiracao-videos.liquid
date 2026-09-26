@@ -1,0 +1,356 @@
+{%- style -%}
+  .section-inspiracao-{{ section.id }} {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .inspire-container {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+    margin-inline: auto;
+    overflow: hidden;
+  }
+
+ .inspire-title {
+  text-align: center;
+  font-family: var(--font-heading-family);
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
+  font-weight: 450;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 2.2rem;
+  color: var(--color-foreground);
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  padding-bottom: 18px;
+}
+
+  .inspire-title::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(520px, 78%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,0,0,.16), transparent);
+}
+
+  .inspire-carousel {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .inspire-carousel::-webkit-scrollbar { display: none; }
+
+  .inspire-carousel-wrap{
+    position: relative;
+  }
+
+  .inspire-nav{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.10);
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    box-shadow: 0 6px 18px rgba(0,0,0,.10);
+  }
+  .inspire-nav svg{ width: 18px; height: 18px; }
+  .inspire-nav[disabled]{ opacity: .35; cursor: default; }
+
+  .inspire-prev{ left: 6px; }
+  .inspire-next{ right: 6px; }
+
+  @media(min-width: 750px){
+    .inspire-carousel-wrap.has-overflow .inspire-nav{ display: flex; }
+  }
+
+
+  .inspire-card {
+    flex: 0 0 280px;
+    scroll-snap-align: center;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1a1a1a; 
+    transition: transform 0.3s ease;
+  }
+
+  @media(min-width: 750px) {
+    .inspire-card { flex: 0 0 320px; }
+  }
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16; 
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+  }
+
+  .inspire-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.5s ease;
+  }
+
+  .video-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+    font-family: var(--font-body-family);
+    z-index: 2;
+    pointer-events: none;
+  }
+{%- endstyle -%}
+
+<section class="section-inspiracao-{{ section.id }}">
+  <div class="inspire-container">
+    {% if section.settings.title != blank %}
+      <h2 class="inspire-title">{{ section.settings.title | escape }}</h2>
+    {% endif %}
+
+    <div class="inspire-carousel-wrap js-inspire-wrap">
+      <button type="button" class="inspire-nav inspire-prev js-inspire-prev" aria-label="Anterior" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 19L8.5 12L15.5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="inspire-carousel js-inspire-carousel">
+      {%- for block in section.blocks -%}
+        {%- liquid
+           # Tenta pegar o vídeo de dois IDs possíveis para evitar que suma
+           assign video_obj = block.settings.video | default: block.settings.video_url
+           assign poster_image = block.settings.cover_image | default: video_obj.preview_image
+        -%}
+        
+        <div class="inspire-card" {{ block.shopify_attributes }}>
+          <div class="video-wrapper js-video-wrapper" 
+               {% if poster_image %}style="background-image: url('{{ poster_image | image_url: width: 600 }}');"{% endif %}>
+            
+            {% if video_obj != blank %}
+              {%- liquid
+                assign mp4_source = video_obj.sources | where: 'mime_type', 'video/mp4' | first
+              -%}
+              <video
+                class="inspire-video js-inspire-video"
+                playsinline
+                muted
+                loop
+                preload="none"
+                {% if poster_image %}poster="{{ poster_image | image_url: width: 600 }}"{% endif %}
+                {% if mp4_source %}data-src="{{ mp4_source.url }}"{% endif %}
+                data-lazy-video
+              ></video>
+            {% endif %}
+
+            {% if block.settings.caption != blank %}
+              <div class="video-overlay">
+                <span>{{ block.settings.caption | escape }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {%- endfor -%}
+      </div>
+      <button type="button" class="inspire-nav inspire-next js-inspire-next" aria-label="Próximo" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 19L15.5 12L8.5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+(function() {
+    const initVideos = () => {
+      const ensureVideoSrc = (video) => {
+        if (!video || video.dataset.loaded === '1') return;
+        const src = video.dataset.src;
+        if (!src) return;
+        const hasSource = video.querySelector('source');
+        if (!hasSource) {
+          const s = document.createElement('source');
+          s.src = src;
+          s.type = 'video/mp4';
+          video.appendChild(s);
+        }
+        // Load once after setting source
+        video.load();
+        video.dataset.loaded = '1';
+      };
+
+      const lazyLoadVideosNearViewport = (rootEl, videos) => {
+        if (!('IntersectionObserver' in window)) {
+          videos.forEach(ensureVideoSrc);
+          return;
+        }
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              ensureVideoSrc(entry.target);
+              io.unobserve(entry.target);
+            }
+          });
+        }, { root: rootEl || null, rootMargin: '250px 0px', threshold: 0.01 });
+
+        videos.forEach(v => io.observe(v));
+      };
+
+      const isMobile = window.innerWidth < 750;
+      const carousel = document.querySelector('.js-inspire-carousel');
+      if (!carousel) return;
+
+      const videos = carousel.querySelectorAll('.js-inspire-video');
+      if (!videos.length) return;
+
+      // Prevent MP4 downloads on initial load: hydrate sources only when near viewport
+      lazyLoadVideosNearViewport(isMobile ? carousel : null, videos);
+
+      if (isMobile) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting) {
+              videos.forEach(v => {
+                if (v !== video) v.pause();
+              });
+              ensureVideoSrc(video);
+              video.play().catch(() => {});
+            } else {
+              video.pause();
+            }
+          });
+        }, { root: carousel, rootMargin: '0px', threshold: 0.75 });
+
+        videos.forEach(v => observer.observe(v));
+      } else {
+        document.querySelectorAll('.js-video-wrapper').forEach(wrapper => {
+          const video = wrapper.querySelector('video');
+          if(!video) return;
+          wrapper.addEventListener('mouseenter', () => { ensureVideoSrc(video); video.play().catch(() => {}); });
+          wrapper.addEventListener('mouseleave', () => {
+            video.pause();
+            video.currentTime = 0;
+          });
+        });
+      }
+    };
+
+
+    const initCarousel = () => {
+      const sectionEl = document.querySelector('.section-inspiracao-{{ section.id }}');
+      if (!sectionEl) return;
+
+      const wrap = sectionEl.querySelector('.js-inspire-wrap');
+      const carousel = sectionEl.querySelector('.js-inspire-carousel');
+      const prev = sectionEl.querySelector('.js-inspire-prev');
+      const next = sectionEl.querySelector('.js-inspire-next');
+
+      if (!wrap || !carousel || !prev || !next) return;
+
+      const getStep = () => {
+        const card = carousel.querySelector('.inspire-card');
+        if (!card) return Math.round(carousel.clientWidth * 0.9);
+        const styles = getComputedStyle(carousel);
+        const gap = parseFloat(styles.gap || styles.columnGap || 16) || 16;
+        return Math.round(card.getBoundingClientRect().width + gap);
+      };
+
+      const update = () => {
+        const canScroll = carousel.scrollWidth > carousel.clientWidth + 2;
+        wrap.classList.toggle('has-overflow', canScroll);
+
+        if (!canScroll) {
+          prev.disabled = true;
+          next.disabled = true;
+          return;
+        }
+
+        const left = carousel.scrollLeft;
+        const maxLeft = carousel.scrollWidth - carousel.clientWidth;
+
+        prev.disabled = left <= 2;
+        next.disabled = left >= (maxLeft - 2);
+      };
+
+      const onPrev = () => {
+        if (prev.disabled) return;
+        carousel.scrollBy({ left: -getStep(), behavior: 'smooth' });
+      };
+
+      const onNext = () => {
+        if (next.disabled) return;
+        carousel.scrollBy({ left: getStep(), behavior: 'smooth' });
+      };
+
+      prev.addEventListener('click', onPrev);
+      next.addEventListener('click', onNext);
+
+      let raf = null;
+      carousel.addEventListener('scroll', () => {
+        if (raf) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(update);
+      });
+
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(update, 100);
+      }, { passive: true });
+      update();
+    };
+
+    document.addEventListener('DOMContentLoaded', () => { initVideos(); initCarousel(); });
+    // Reinicia caso o editor da Shopify mude algo
+    if (window.Shopify && window.Shopify.designMode) {
+      document.addEventListener('shopify:section:load', () => { initVideos(); initCarousel(); });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Inspiração (Vídeos)",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Título", "default": "Inspire-se" },
+    { "type": "color", "id": "bg_color", "label": "Cor de Fundo", "default": "#ffffff" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Espaçamento Topo", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Espaçamento Base", "default": 36 }
+  ],
+  "blocks": [
+    {
+      "type": "video_slide",
+      "name": "Vídeo",
+      "settings": [
+        { "type": "video", "id": "video", "label": "Vídeo (MP4)" },
+        { "type": "image_picker", "id": "cover_image", "label": "Capa (Opcional)" },
+        { "type": "text", "id": "caption", "label": "Legenda", "default": "Ver Look" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Inspiração (Vídeos)" }]
+}
+{% endschema %}

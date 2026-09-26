@@ -1,0 +1,363 @@
+<!doctype html>
+<html
+  class="no-js {% if request.design_mode %}shopify-design-mode{% endif %}"
+  lang="{{ request.locale.iso_code }}"
+>
+  <head>
+  <meta name="facebook-domain-verification" content="8qoje7jzjpn6ohaqmrs1vtax7bho3v" />
+  <meta charset="utf-8">
+    <script>document.documentElement.classList.remove('no-js');document.documentElement.classList.add('js');</script>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="{{ settings.colors_background_1 | default: '#ffffff' }}">
+
+    {%- comment -%} OTIMIZAÇÕES DE REDE ESTRATÉGICAS {%- endcomment -%}
+    <!-- Preconnect para recursos críticos -->
+    <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+<!-- DNS prefetch para recursos não-críticos -->
+    <link rel="dns-prefetch" href="//www.googletagmanager.com">
+    <link rel="dns-prefetch" href="//www.google-analytics.com">
+    <link rel="dns-prefetch" href="//connect.facebook.net">
+
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- comment -%} PRELOAD RECURSOS CRÍTICOS PARA LCP OTIMIZADO {%- endcomment -%}
+    <!-- Apenas a fonte realmente crítica acima da dobra. Inter permanece disponível via @font-face e carrega sob demanda. -->
+    {{ 'Sora-Regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
+
+    <!-- CSS crítico do header -->
+    <link rel="preload" href="{{ 'am-header-critical.css' | asset_url }}" as="style">
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    {%- if template.name == 'index' -%}
+      <title>Camisetas Cristãs Premium e Moda Cristã | A MARCA</title>
+      <meta name="description" content="Vista sua fé com propósito. Descubra camisetas cristãs premium, autorais e infantis em algodão de alta qualidade. A MARCA envia para todo o Brasil.">
+    {%- else -%}
+      <title>
+        {{ page_title }}
+        {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+        {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+        {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+      </title>
+      {% if page_description %}
+        <meta name="description" content="{{ page_description | escape }}">
+      {% endif %}
+    {%- endif -%}
+
+    {% render 'meta-tags' %}
+    {% render 'seo-structured-data' %}
+
+    {%- comment -%} 
+      CSS CRÍTICO INLINE + FONTES - Bloco único para reduzir parsing overhead
+      Contém estilos essenciais above-the-fold + @font-face declarations
+    {%- endcomment -%}
+    <style>
+      {% render 'critical-inline-css' %}
+
+      @font-face {
+        font-family: 'SoraCustom';
+        src: url("{{ 'Sora-Regular.woff2' | asset_url }}") format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F;
+      }
+
+      @font-face {
+        font-family: 'TanPearlCustom';
+        src: url("{{ 'tan-pearl.woff2' | asset_url }}") format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+        unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F;
+      }
+
+      @font-face {
+        font-family: 'Inter';
+        src: url("{{ 'Inter.woff2' | asset_url }}") format('woff2');
+        font-weight: 300 400 500 600 700;
+        font-display: swap;
+      }
+
+      @font-face {
+        font-family: 'Regiba';
+        src: url("{{ 'Regiba.woff2' | asset_url }}") format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Typography system otimizado */
+      h2, h3, h4, h5, h6, .header__menu-item {
+        font-family: 'SoraCustom', sans-serif !important;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      body, p, a, li, input, textarea, select {
+        font-family: 'SoraCustom', sans-serif;
+      }
+
+      input[type="search"], .search-modal__input {
+        font-family: 'SoraCustom', sans-serif !important;
+        text-transform: none !important;
+        font-size: 16px !important;
+      }
+    </style>
+
+    {%- comment -%} CSS NÃO-CRÍTICO - Carregado de forma lazy para não bloquear render {%- endcomment -%}
+    {%- render 'stylesheets' -%}
+
+    <!-- CSS Mobile drawer - carregado condicionalmente -->
+    <link rel="preload" href="{{ 'am-mobile-drawer.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 989px)'">
+    <noscript><link rel="stylesheet" href="{{ 'am-mobile-drawer.css' | asset_url }}" media="screen and (max-width: 989px)"></noscript>
+
+    <!-- Carregamento inteligente de CSS baseado no template. Um único hint evita preload duplicado no PDP. -->
+    {%- if template.name == 'product' -%}
+      <link rel="preload" href="{{ 'am-product.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+      <noscript>{{ 'am-product.css' | asset_url | stylesheet_tag }}</noscript>
+    {%- endif -%}
+
+
+    {%- comment -%}
+      NOTA: Verifique se 'render fonts' carrega fontes nativas do Shopify. 
+      Se sim, remova essa linha para evitar carregamento duplo, 
+      já que estamos forçando fontes customizadas acima.
+    {%- endcomment -%}
+    {%- render 'fonts' -%} 
+
+    {%- render 'theme-styles-variables' -%}
+    {%- render 'color-schemes' -%}
+
+    {%- comment -%} PERFORMANCE: Prefetch navegação provável {%- endcomment -%}
+    {%- comment -%}
+      ROLLBACK (mantido comentado): Prefetch injetado no <head> (pode competir com LCP em conexões lentas)
+      {%- if template == 'index' -%}
+        <link rel="prefetch" href="{{ routes.collections_url }}">
+      {%- endif -%}
+      {%- if template.name == 'collection' -%}
+        {%- for product in collection.products limit: 3 -%}
+          <link rel="prefetch" href="{{ product.url }}">
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endcomment -%}
+
+    {%- comment -%}
+      PERFORMANCE (novo, baixo risco): adia prefetch para idle (pós-load) para não competir com LCP/FCP.
+      Mantém o mesmo comportamento (prefetch dos mesmos destinos), só muda o timing.
+    {%- endcomment -%}
+    <script>
+      window.addEventListener('load', function () {
+        var r = ('requestIdleCallback' in window) ? window.requestIdleCallback : function (cb) { setTimeout(cb, 1500); };
+        r(function () {
+          try {
+            var links = [];
+            {%- if template == 'index' -%}
+              links.push("{{ routes.collections_url }}");
+            {%- endif -%}
+            {%- if template.name == 'collection' -%}
+              {%- for product in collection.products limit: 3 -%}
+                links.push("{{ product.url }}");
+              {%- endfor -%}
+            {%- endif -%}
+            for (var i = 0; i < links.length; i++) {
+              var l = document.createElement('link');
+              l.rel = 'prefetch';
+              l.href = links[i];
+              document.head.appendChild(l);
+            }
+          } catch (e) {}
+        }, { timeout: 4000 });
+      });
+    </script>
+
+    {{ content_for_header }}
+
+    {%- comment -%} Scroll lock unificado (refcount) {%- endcomment -%}
+    <script src="{{ 'scroll-lock.js' | asset_url }}" defer></script>
+
+    {%- comment -%} Scripts do Tema {%- endcomment -%}
+    {%- render 'scripts' -%}
+
+    {%- if request.design_mode -%}
+      {%- render 'theme-editor' -%}
+    {%- endif -%}
+
+    {%- comment -%} CSS de produto já é carregado condicionalmente acima {%- endcomment -%}
+  </head>
+
+  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
+
+    <div id="header-group">
+      {% sections 'header-group' %}
+    </div>
+
+    <main id="MainContent" class="content-for-layout" role="main" tabindex="-1" style="contain:style;">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+    {% render 'search-modal' %}
+    {% sections 'popup-group' %}
+
+    {%- comment -%} SCRIPTS NÃO-CRÍTICOS - Carregados após render inicial {%- endcomment -%}
+    <script src="{{ 'autoplay-fix.js' | asset_url }}" defer></script>
+    <script src="{{ 'tiny-img-link-preloader.js' | asset_url }}" defer></script>
+
+    {%- comment -%} Service Worker + Web Vitals - otimizados para não impactar métricas {%- endcomment -%}
+    <script>
+      // Carregamento ultra-lazy de scripts de analytics
+      function loadNonCriticalScripts() {
+        // Service Worker
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+          navigator.serviceWorker.register('{{ "sw.js" | asset_url }}', {
+            scope: '/',
+            updateViaCache: 'none'
+          }).catch(function() {/* silently fail */});
+        }
+
+        // Web Vitals tracking
+        const script = document.createElement('script');
+        script.src = '{{ "web-vitals-tracking.js" | asset_url }}';
+        script.type = 'module';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
+      // Execute após todos os recursos críticos
+      if (document.readyState === 'complete') {
+        // Página já carregada completamente
+        setTimeout(loadNonCriticalScripts, 1000);
+      } else {
+        window.addEventListener('load', function() {
+          const idleCallback = window.requestIdleCallback || 
+            function(cb) { setTimeout(cb, 2000); };
+
+          idleCallback(loadNonCriticalScripts, { timeout: 5000 });
+        });
+      }
+    </script>
+
+    {%- comment -%} Cart Drawer init sob demanda para reduzir JS global inicial {%- endcomment -%}
+    <script>
+      (function () {
+        var cartLoaderPromise = null;
+        var cartModuleReady = false;
+        var queuedCartEvents = [];
+        var replayScheduled = false;
+
+        function replayQueuedCartEvents() {
+          if (!cartModuleReady || replayScheduled || !queuedCartEvents.length) return;
+          replayScheduled = true;
+
+          requestAnimationFrame(function () {
+            replayScheduled = false;
+            var events = queuedCartEvents.slice();
+            queuedCartEvents.length = 0;
+
+            events.forEach(function (entry) {
+              try {
+                var detail = entry.detail && typeof entry.detail === 'object'
+                  ? Object.assign({}, entry.detail, { __amCartReplay: true })
+                  : { __amCartReplay: true };
+                document.dispatchEvent(new CustomEvent(entry.type, {
+                  bubbles: true,
+                  detail: detail
+                }));
+              } catch (_) {}
+            });
+          });
+        }
+
+        function queueCartEvent(type, detail) {
+          queuedCartEvents.push({ type: type, detail: detail || {} });
+          if (queuedCartEvents.length > 10) queuedCartEvents.shift();
+          loadCartDrawerController()
+            .then(replayQueuedCartEvents)
+            .catch(function () {});
+        }
+
+        function loadCartDrawerController() {
+          if (cartLoaderPromise) return cartLoaderPromise;
+
+          cartLoaderPromise = new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = "{{ 'am-cart-drawer-init.js' | asset_url }}";
+            s.defer = true;
+            s.onload = function () {
+              cartModuleReady = true;
+              resolve();
+              replayQueuedCartEvents();
+            };
+            s.onerror = function (err) {
+              cartLoaderPromise = null;
+              reject(err);
+            };
+            document.head.appendChild(s);
+          });
+
+          return cartLoaderPromise;
+        }
+
+        function isCartTrigger(target) {
+          return !!(target && target.closest && target.closest('[data-cart-drawer-open],[data-cart-toggle],a[href="/cart"],a[href^="/cart?"]'));
+        }
+
+        function isAddToCartTrigger(target) {
+          return !!(target && target.closest && target.closest('[name="add"], [data-add-to-cart], [data-product-form-submit], button[type="submit"][name="add"]'));
+        }
+
+        function isCartAddForm(form) {
+          if (!form || form.nodeName !== 'FORM') return false;
+          var action = String(form.getAttribute('action') || form.action || '');
+          return /\/cart\/add\b/i.test(action);
+        }
+
+        document.addEventListener('pointerdown', function (e) {
+          if (isCartTrigger(e.target) || isAddToCartTrigger(e.target)) {
+            loadCartDrawerController().catch(function () {});
+          }
+        }, { passive: true });
+
+        document.addEventListener('submit', function (e) {
+          if (!isCartAddForm(e.target)) return;
+          loadCartDrawerController().catch(function () {});
+        }, { capture: true, passive: true });
+
+        document.addEventListener('click', function (e) {
+          if (!isCartTrigger(e.target) || cartModuleReady) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          queueCartEvent('cart:open', {});
+        }, { capture: true, passive: false });
+
+        document.addEventListener('cart:update', function (e) {
+          if (cartModuleReady) return;
+          queueCartEvent('cart:update', e.detail || {});
+        }, { passive: true });
+
+        document.addEventListener('cart:refresh', function (e) {
+          if (cartModuleReady) return;
+          queueCartEvent('cart:refresh', e.detail || {});
+        }, { passive: true });
+
+        document.addEventListener('cart:open', function (e) {
+          if (cartModuleReady) return;
+          queueCartEvent('cart:open', e.detail || {});
+        }, { passive: true });
+      })();
+    </script>
+
+    {% section 'cart-drawer' %}
+
+
+</body>
+</html>

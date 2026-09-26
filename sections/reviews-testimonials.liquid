@@ -1,0 +1,292 @@
+{% comment %}
+  Section: Testemunhos — Carrossel Editorial Revisado (A MARCA)
+  Fase 4: usa a fonte de destaque já disponibilizada pelo tema, sem chamada externa ao Google Fonts.
+{% endcomment %}
+
+<style>
+  .section-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.bg_color }};
+    overflow: hidden;
+    line-height: 1.5;
+  }
+
+  /* Reutiliza a fonte accent nativa do tema para evitar uma conexão/fonte externa duplicada. */
+  .section-{{ section.id }} .playfair-text,
+  .section-{{ section.id }} h2, 
+  .section-{{ section.id }} p,
+  .section-{{ section.id }} a,
+  .section-{{ section.id }} blockquote {
+    font-family: var(--font-accent--family, "Playfair Display", serif) !important;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .section-{{ section.id }} .custom-container.am-page-width {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin-inline: auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+    position: relative;
+  }
+
+  .section-{{ section.id }} .grid-title {
+    margin: 0 0 40px 0;
+    text-align: center;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    font-size: clamp(26px, 4vw, {{ section.settings.title_size }}px);
+    color: {{ section.settings.text_color }};
+  }
+
+  .section-{{ section.id }} .carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .section-{{ section.id }} .carousel-track {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scrollbar-width: none;
+    width: 100%;
+    padding: 10px 0;
+  }
+
+  .section-{{ section.id }} .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-{{ section.id }} .testimonial-card {
+    flex: 0 0 33.333%;
+    scroll-snap-align: start;
+    padding: 30px 40px;
+    border-left: 1px solid color-mix(in srgb, {{ section.settings.text_color }} 15%, transparent);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .section-{{ section.id }} .testimonial-card:first-child {
+    border-left: none;
+  }
+
+  .section-{{ section.id }} .client-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .section-{{ section.id }} .client-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    flex-shrink: 0;
+    background-color: #f0f0f0;
+    pointer-events: none;
+  }
+
+  .section-{{ section.id }} .client-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .section-{{ section.id }} .client-usage {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: color-mix(in srgb, {{ section.settings.text_color }} 60%, transparent);
+    margin-top: 4px;
+  }
+
+  .section-{{ section.id }} .testimonial-quote {
+    font-size: clamp(16px, 1.5vw, 18px);
+    line-height: 1.7;
+    font-style: italic;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    position: relative;
+  }
+
+  .section-{{ section.id }} .nav-button {
+    background: white;
+    border: 1px solid color-mix(in srgb, {{ section.settings.text_color }} 10%, transparent);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .section-{{ section.id }} .nav-button:hover {
+    background: {{ section.settings.text_color }};
+    color: {{ section.settings.bg_color }};
+  }
+
+  .section-{{ section.id }} .prev-btn { left: -20px; }
+  .section-{{ section.id }} .next-btn { right: -20px; }
+
+  .section-{{ section.id }} .section-cta {
+    margin-top: 50px;
+    text-align: center;
+  }
+
+  .section-{{ section.id }} .section-cta a {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: {{ section.settings.text_color }};
+    border-bottom: 1px solid {{ section.settings.text_color }};
+    padding-bottom: 6px;
+    transition: opacity 0.3s;
+  }
+
+  @media (max-width: 1024px) {
+    .section-{{ section.id }} .testimonial-card { flex: 0 0 50%; }
+    .section-{{ section.id }} .nav-button { display: none; }
+  }
+
+  @media (max-width: 767px) {
+    .section-{{ section.id }} .testimonial-card { 
+      flex: 0 0 85%; 
+      padding: 20px 25px;
+    }
+  }
+</style>
+
+<section class="section-{{ section.id }}" aria-labelledby="title-{{ section.id }}">
+  <div class="custom-container am-page-width">
+    {% if section.settings.title != blank %}
+      <h2 id="title-{{ section.id }}" class="grid-title">{{ section.settings.title | escape }}</h2>
+    {% endif %}
+
+    <div class="carousel-wrapper">
+      <button class="nav-button prev-btn" aria-label="Anterior" type="button">❮</button>
+      
+      <div class="carousel-track" id="track-{{ section.id }}" role="list">
+        {% for block in section.blocks %}
+          <article class="testimonial-card" role="listitem" {{ block.shopify_attributes }}>
+            <div class="client-info">
+              {% if block.settings.client_image != blank %}
+                <img 
+                  src="{{ block.settings.client_image | image_url: width: 100, height: 100, crop: 'center' }}" 
+                  alt="{{ block.settings.client_name | escape }}"
+                  class="client-avatar" 
+                  loading="lazy"
+                  width="50"
+                  height="50"
+                >
+              {% else %}
+                <div class="client-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: sans-serif;">{{ forloop.index }}</div>
+              {% endif %}
+              <div>
+                <p class="client-name">{{ block.settings.client_name | escape }}</p>
+                {% if block.settings.product_name != blank %}
+                  <div class="client-usage">{{ block.settings.usage_label | escape }} <strong>{{ block.settings.product_name | escape }}</strong></div>
+                {% endif %}
+              </div>
+            </div>
+            <blockquote class="testimonial-quote">
+              "{{ block.settings.quote | escape }}"
+            </blockquote>
+          </article>
+        {% endfor %}
+      </div>
+
+      <button class="nav-button next-btn" aria-label="Próximo" type="button">❯</button>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+(function() {
+    const boundKey = '__rtCarousel_{{ section.id }}';
+    const initCarousel = () => {
+      const track = document.getElementById('track-{{ section.id }}');
+      if (!track || track[boundKey]) return;
+      track[boundKey] = true;
+
+      const nextBtn = track.closest('.carousel-wrapper')?.querySelector('.next-btn');
+      const prevBtn = track.closest('.carousel-wrapper')?.querySelector('.prev-btn');
+      if (!nextBtn || !prevBtn) return;
+
+      const scrollAmount = () => track.offsetWidth * 0.8;
+
+      nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+      }, { passive: true });
+
+      prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+      }, { passive: true });
+    };
+
+    document.addEventListener('DOMContentLoaded', initCarousel);
+    document.addEventListener('shopify:section:load', function(e) {
+      var target = e?.target;
+      if (target && typeof target.querySelector === 'function' && target.querySelector('#track-{{ section.id }}')) {
+        initCarousel();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Testemunhos Carrossel",
+  "settings": [
+    { "type": "checkbox", "id": "use_google_font", "label": "Carregar Playfair Display", "default": true },
+    { "type": "text", "id": "title", "label": "Título", "default": "Vozes d'A MARCA" },
+    { "type": "range", "id": "title_size", "min": 20, "max": 80, "step": 2, "unit": "px", "label": "Tamanho Máx Título", "default": 40 },
+    { "type": "color", "id": "bg_color", "label": "Fundo", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Cor Texto", "default": "#121212" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Espaço Superior", "default": 60 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Espaço Inferior", "default": 60 }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Depoimento",
+      "settings": [
+        { "type": "image_picker", "id": "client_image", "label": "Foto do Cliente" },
+        { "type": "textarea", "id": "quote", "label": "Depoimento", "default": "A elegância está na fé." },
+        { "type": "text", "id": "client_name", "label": "Nome", "default": "Gabriel M." },
+        { "type": "text", "id": "usage_label", "label": "Rótulo", "default": "Veste:" },
+        { "type": "text", "id": "product_name", "label": "Peça", "default": "SALVATION" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testemunhos Carrossel",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}

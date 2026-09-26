@@ -1,0 +1,21 @@
+{% # theme-check-disable %}
+{%- comment -%}
+  PERFORMANCE: Shopify native font preloads desabilitados no storefront.
+  O tema usa fontes customizadas (SoraCustom, Inter, etc.) que sobrescrevem
+  as fontes do font picker. Preloads mantidos apenas no editor.
+{%- endcomment -%}
+{%- if request.design_mode -%}
+  {%- unless settings.type_body_font.system? -%}
+    <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endunless -%}
+  {%- unless settings.type_subheading_font.system? -%}
+    <link rel="preload" as="font" href="{{ settings.type_subheading_font | font_url }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endunless -%}
+  {%- unless settings.type_heading_font.system? -%}
+    <link rel="preload" as="font" href="{{ settings.type_heading_font | font_url }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endunless -%}
+  {%- unless settings.type_accent_font.system? -%}
+    <link rel="preload" as="font" href="{{ settings.type_accent_font | font_url }}" type="font/woff2" crossorigin fetchpriority="low">
+  {%- endunless -%}
+{%- endif -%}
+{% # theme-check-enable %}

@@ -1,0 +1,3 @@
+import{buildSectionSelector,normalizeSectionId,sectionRenderer}from '@theme/section-renderer';import{requestIdleCallback,onDocumentReady}from '@theme/utilities';async function hydrateSection(sectionId,url){const normalizedId=normalizeSectionId(sectionId);const section=document.getElementById(buildSectionSelector(normalizedId));if(!section||section.dataset.hydrated==='true'){return}
+await sectionRenderer.renderSection(normalizedId,{cache:!1,url});section.dataset.hydrated='true'}
+export async function hydrate(sectionId,url){onDocumentReady(()=>{requestIdleCallback(()=>hydrateSection(sectionId,url))})}

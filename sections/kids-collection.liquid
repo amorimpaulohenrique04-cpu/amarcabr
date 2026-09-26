@@ -1,0 +1,658 @@
+
+{% comment %}
+  Kids Collection Hero - Refatorado V4 (Aesthetic Update)
+  - Estética Hand-Drawn / Collage
+  - Bordas pretas e sombras duras (Hard Shadows)
+  - Elementos decorativos estilo 'Doodle'
+{% endcomment %}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --kids-bg: {{ section.settings.color_bg }};
+    --kids-blue: {{ section.settings.color_blue }};
+    --kids-orange: {{ section.settings.color_orange }};
+    --kids-green: {{ section.settings.color_green }};
+    --kids-yellow: {{ section.settings.color_yellow }};
+    --kids-pink: {{ section.settings.color_pink }};
+    --kids-title-size-mobile: {{ section.settings.title_size_mobile }}px;
+    --kids-title-size-desktop: {{ section.settings.title_size_desktop }}px;
+    --kids-desc-size-mobile: {{ section.settings.desc_size_mobile }}px;
+    --kids-desc-size-desktop: {{ section.settings.desc_size_desktop }}px;
+    
+    /* Cores de contorno para o estilo cartoon */
+    --kids-stroke: #18181b; 
+    position: relative;
+    z-index: 1;
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--kids-bg);
+    padding: 1rem 0;
+  }
+  
+  /* --- BACKGROUND PATTERN (Polka Dots) --- */
+  #shopify-section-{{ section.id }} .kids-hero__pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    /* Padrão de bolinhas coloridas (Polka Dots) */
+    background-image: 
+      radial-gradient(var(--kids-orange) 3px, transparent 3px),
+      radial-gradient(var(--kids-blue) 3px, transparent 3px);
+    background-size: 50px 50px;
+    background-position: 0 0, 25px 25px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- AJUSTE DE ESPAÇO --- */
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero {
+      padding-top: 2rem; 
+      padding-bottom: 3rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .kids-hero {
+      padding: 4rem 0;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__bg-word {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+  }
+  #shopify-section-{{ section.id }} .kids-hero__bg-word span {
+    font-weight: 900;
+    font-size: 14vw;
+    line-height: 1;
+    color: var(--kids-stroke);
+    opacity: 0.03;
+    letter-spacing: -0.05em;
+    transform: rotate(-5deg);
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__container {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+  
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero__header {
+      margin-bottom: 1.5rem;
+      padding-inline: 0.5rem;
+    }
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__header {
+      margin-bottom: 3rem;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__title {
+    /* Fonte mais divertida/arredondada se disponível no sistema */
+    font-family: "Cooper Black", "Fredoka One", "Chalkboard SE", "Comic Sans MS", sans-serif;
+    font-size: var(--kids-title-size-mobile);
+    font-weight: 900;
+    color: var(--kids-stroke);
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    text-transform: uppercase;
+    /* Sombra dura estilo cartoon */
+    text-shadow: 2px 2px 0px rgba(255,255,255,0.8), 4px 4px 0px rgba(0,0,0,0.1);
+    transform: rotate(-1deg);
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__title {
+      font-size: var(--kids-title-size-desktop);
+      text-shadow: 3px 3px 0px rgba(255,255,255,0.8), 6px 6px 0px rgba(0,0,0,0.1);
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__title-highlight {
+    display: inline-block;
+    color: var(--kids-orange);
+    position: relative;
+    /* Sublinhado rabiscado (simulado) */
+    text-decoration: underline;
+    text-decoration-color: var(--kids-yellow);
+    text-decoration-style: wavy;
+    text-decoration-thickness: 3px;
+    transform: skewX(-5deg);
+  }
+
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero__title br { display: block; }
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__title br { display: none; }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__desc {
+    margin-top: 0.5rem;
+    color: #4b5563;
+    max-width: 32rem;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 600;
+    font-size: var(--kids-desc-size-mobile);
+    line-height: 1.4;
+    text-align: center;
+    background: white;
+    padding: 0.25rem 0.75rem;
+    border: 2px solid var(--kids-stroke);
+    border-radius: 99% 1% 95% 5% / 2% 95% 5% 90%; /* Borda orgânica */
+    box-shadow: 3px 3px 0px var(--kids-stroke);
+    transform: rotate(1deg);
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__desc {
+      font-size: var(--kids-desc-size-desktop);
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+    align-items: center;
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__grid {
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  /* --- CARROSSEL MOBILE --- */
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero__grid {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-left: 1.5rem; 
+      padding-right: 3rem; 
+      margin-left: -1rem;
+      margin-right: -1rem;
+      width: calc(100% + 2rem);
+      padding-bottom: 20px; /* Espaço para sombras */
+    }
+    #shopify-section-{{ section.id }} .kids-hero__grid::-webkit-scrollbar {
+      display: none;
+      height: 0;
+    }
+    
+    #shopify-section-{{ section.id }} .kids-hero__col-left,
+    #shopify-section-{{ section.id }} .kids-hero__col-center,
+    #shopify-section-{{ section.id }} .kids-hero__col-right {
+      flex: 0 0 75vw; 
+      width: 75vw;
+      max-width: 75vw;
+      scroll-snap-align: center;
+      display: flex;
+      justify-content: center;
+    }
+  }
+
+  /* Desktop Grid Logic */
+  #shopify-section-{{ section.id }} .kids-hero__col-left { display: flex; justify-content: center; }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__col-left { grid-column: span 4; justify-content: flex-end; }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__col-center { display: flex; justify-content: center; position: relative; z-index: 20; }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__col-center { grid-column: span 4; }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__col-right { display: flex; justify-content: center; }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__col-right { grid-column: span 4; justify-content: flex-start; }
+  }
+
+  /* --- CARD E IMAGENS (Estilo Polaroid/Sticker) --- */
+  #shopify-section-{{ section.id }} .kids-hero__img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.1; 
+    transition: transform 0.3s ease;
+  }
+  
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero__img-wrap {
+      height: auto; 
+    }
+  }
+  
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__img-wrap {
+      height: 16rem;
+      max-width: 16rem;
+      transform: rotate(-4deg);
+      aspect-ratio: auto;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__img-wrap--right { transform: rotate(4deg); }
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero__img-wrap--right { transform: none; }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__img-bg {
+    position: absolute;
+    inset: 0;
+    /* Borda e sombra estilo cartoon */
+    border: 3px solid var(--kids-stroke);
+    border-radius: 1rem;
+    background-color: white; /* Moldura branca tipo foto */
+    transform: translate(6px, 6px);
+    box-shadow: none;
+    z-index: 0;
+  }
+  /* Usar cores como "fundo" do cartão */
+  #shopify-section-{{ section.id }} .kids-hero__img-bg--blue { background-color: var(--kids-blue); }
+  #shopify-section-{{ section.id }} .kids-hero__img-bg--pink { background-color: var(--kids-pink); transform: translate(-6px, 6px); }
+  
+  #shopify-section-{{ section.id }} .kids-hero__img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.8rem;
+    border: 3px solid var(--kids-stroke); /* Contorno preto na foto */
+    background: white;
+    z-index: 1;
+    /* Sombra dura projetada */
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.9); 
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__img-badge {
+    position: absolute;
+    top: -1rem;
+    left: -1rem;
+    width: 3rem;
+    height: 3rem;
+    /* Estilo Sticker irregular */
+    border-radius: 50% 40% 60% 40%;
+    background: var(--kids-yellow);
+    border: 3px solid var(--kids-stroke);
+    box-shadow: 2px 2px 0px var(--kids-stroke);
+    color: var(--kids-stroke);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1rem;
+    transform: rotate(-15deg);
+    z-index: 10;
+  }
+
+  /* --- IMAGEM CENTRAL --- */
+  #shopify-section-{{ section.id }} .kids-hero__center-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.15;
+  }
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .kids-hero__center-wrap {
+      width: 100%;
+      height: 19rem;
+      max-width: 19rem;
+      aspect-ratio: auto;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__center-bg {
+    position: absolute;
+    inset: 0;
+    background: var(--kids-yellow);
+    border: 3px solid var(--kids-stroke);
+    border-radius: 1.5rem;
+    /* Efeito de cartão solto atrás */
+    transform: rotate(3deg) scale(1.02);
+    box-shadow: 8px 8px 0px var(--kids-stroke);
+    z-index: 0;
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__center-img {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 1.25rem;
+    border: 3px solid var(--kids-stroke);
+    z-index: 1;
+    background: white;
+    /* Pequena rotação oposta para dar dinamismo */
+    transform: rotate(-2deg);
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__floating-cta {
+    position: absolute;
+    bottom: -1rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    background: white;
+    padding: 0.5rem 1rem;
+    /* Borda orgânica */
+    border-radius: 20px 255px 20px 255px / 255px 20px 255px 20px;
+    box-shadow: 4px 4px 0px var(--kids-stroke);
+    border: 2px solid var(--kids-stroke);
+    white-space: nowrap;
+    z-index: 10;
+  }
+  #shopify-section-{{ section.id }} .kids-hero__floating-cta span {
+    font-weight: 800;
+    color: var(--kids-orange);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* --- BOTÕES --- */
+  #shopify-section-{{ section.id }} .kids-hero__btns {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+    width: 100%;
+  }
+  
+  @media (min-width: 640px) {
+    #shopify-section-{{ section.id }} .kids-hero__btns {
+      flex-direction: row;
+      justify-content: center;
+      gap: 1rem;
+      width: auto;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__btn {
+    display: inline-block;
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 0.8rem 2rem;
+    /* Formato irregular "hand drawn" */
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    position: relative;
+  }
+  
+  #shopify-section-{{ section.id }} .kids-hero__btn:hover { 
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--kids-stroke) !important;
+  }
+  #shopify-section-{{ section.id }} .kids-hero__btn:active { 
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--kids-stroke) !important;
+  }
+  
+  #shopify-section-{{ section.id }} .kids-hero__btn--primary {
+    background: var(--kids-orange);
+    color: white;
+    border: 2px solid var(--kids-stroke);
+    box-shadow: 4px 4px 0px var(--kids-stroke);
+  }
+  
+  #shopify-section-{{ section.id }} .kids-hero__btn--secondary {
+    background: white;
+    color: var(--kids-blue);
+    border: 2px solid var(--kids-stroke);
+    box-shadow: 4px 4px 0px var(--kids-stroke);
+  }
+
+  /* Decoração (Doodles) */
+  #shopify-section-{{ section.id }} .kids-hero__decor-svg { 
+    position: absolute; 
+    color: inherit; 
+    filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1));
+  }
+  
+  @media (max-width: 767px) {
+    #shopify-section-{{ section.id }} .kids-hero__decor-svg { z-index: -1; opacity: 0.8; }
+  }
+
+  #shopify-section-{{ section.id }} .kids-hero__decor-svg--float { animation: kids-float 4s ease-in-out infinite; }
+  #shopify-section-{{ section.id }} .kids-hero__decor-svg--wiggle { animation: kids-wiggle 3s ease-in-out infinite; }
+  #shopify-section-{{ section.id }} .kids-hero__decor-svg--spin { animation: kids-spin 12s linear infinite; }
+  #shopify-section-{{ section.id }} .kids-hero__decor-svg--pulse { animation: kids-pulse-scale 2s ease-in-out infinite; }
+
+  @keyframes kids-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+  }
+  @keyframes kids-wiggle {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+  @keyframes kids-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes kids-pulse-scale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+</style>
+
+<section class="kids-hero" id="kids-hero-{{ section.id }}">
+  <!-- Background Pattern -->
+  <div class="kids-hero__pattern" aria-hidden="true"></div>
+
+  <!-- Elementos Decorativos Hand-Drawn (Baseados nas referências) -->
+  <div class="kids-hero__decor" aria-hidden="true">
+    
+    <!-- Sol Desenhado (Canto Sup. Esq.) -->
+    <span class="kids-hero__decor-svg kids-hero__decor-svg--spin" style="top: 2rem; left: 1rem; width: 60px; color: var(--kids-yellow);">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="50" cy="50" r="25" fill="currentColor" fill-opacity="0.2"/>
+        <path d="M50 10V20 M50 80V90 M10 50H20 M80 50H90 M22 22L30 30 M70 70L78 78 M78 22L70 30 M22 78L30 70"/>
+      </svg>
+    </span>
+
+    <!-- Rabisco Mola (Abaixo do Título Esquerda) -->
+    <span class="kids-hero__decor-svg kids-hero__decor-svg--wiggle" style="top: 25%; left: -20px; width: 50px; color: var(--kids-orange); transform: rotate(45deg);">
+      <svg viewBox="0 0 100 50" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 25 Q 15 5, 25 25 T 45 25 T 65 25 T 85 25"/>
+      </svg>
+    </span>
+
+    <!-- Estrela Desenhada (Canto Sup. Dir.) -->
+    <span class="kids-hero__decor-svg kids-hero__decor-svg--pulse" style="top: 3rem; right: 2rem; width: 40px; color: var(--kids-blue);">
+      <svg viewBox="0 0 100 100" fill="currentColor" stroke="var(--kids-stroke)" stroke-width="3" stroke-linejoin="round">
+        <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" />
+      </svg>
+    </span>
+
+    <!-- Coração Rabiscado (Canto Inf. Dir.) -->
+    <span class="kids-hero__decor-svg kids-hero__decor-svg--float" style="bottom: 15%; right: 1rem; width: 50px; color: var(--kids-pink);">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M50 30 C 20 0, 0 40, 50 90 C 100 40, 80 0, 50 30" fill="currentColor" fill-opacity="0.2"/>
+        <!-- Linhas de preenchimento rabiscado -->
+        <path d="M20 40 L 40 50 M 60 50 L 80 40" stroke-width="3" opacity="0.6"/>
+      </svg>
+    </span>
+    
+    <!-- Asterisco/Flor (Canto Inf. Esq.) -->
+    <span class="kids-hero__decor-svg kids-hero__decor-svg--spin" style="bottom: 5rem; left: 10%; width: 35px; color: var(--kids-green);">
+      <svg viewBox="0 0 50 50" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+        <line x1="25" y1="5" x2="25" y2="45" />
+        <line x1="5" y1="25" x2="45" y2="25" />
+        <line x1="10" y1="10" x2="40" y2="40" />
+        <line x1="40" y1="10" x2="10" y2="40" />
+      </svg>
+    </span>
+
+  </div>
+
+  <div class="kids-hero__bg-word" aria-hidden="true">
+    <span>{{ section.settings.background_word | default: 'KIDS' }}</span>
+  </div>
+
+  <div class="kids-hero__container">
+    <div class="kids-hero__inner">
+      <header class="kids-hero__header">
+        <div class="kids-hero__text">
+          <h1 class="kids-hero__title">
+            {{ section.settings.heading_line_1 }}
+            <br>
+            <span class="kids-hero__title-highlight">{{ section.settings.heading_highlight | default: 'FUN' }}</span>
+          </h1>
+          {% if section.settings.description != blank %}
+            <p class="kids-hero__desc">{{ section.settings.description }}</p>
+          {% endif %}
+        </div>
+      </header>
+
+      <div class="kids-hero__grid">
+        <div class="kids-hero__col-left">
+          <div class="kids-hero__img-wrap">
+            <div class="kids-hero__img-bg kids-hero__img-bg--blue"></div>
+            {% if section.settings.image_1 != blank %}
+              <img class="kids-hero__img" src="{{ section.settings.image_1 | image_url: width: 600 }}" alt="" width="300" height="330" loading="lazy">
+            {% else %}
+              <div class="kids-hero__img" style="background: #e5e7eb;"></div>
+            {% endif %}
+            <div class="kids-hero__img-badge" aria-hidden="true">#1</div>
+          </div>
+        </div>
+
+        <div class="kids-hero__col-center">
+          <div class="kids-hero__center-wrap">
+            <div class="kids-hero__center-bg"></div>
+            {% if section.settings.image_2 != blank %}
+              <img class="kids-hero__center-img" src="{{ section.settings.image_2 | image_url: width: 600 }}" alt="" width="300" height="350" loading="lazy">
+            {% else %}
+              <div class="kids-hero__center-img" style="background: #e5e7eb;"></div>
+            {% endif %}
+            {% if section.settings.floating_badge != blank %}
+              <div class="kids-hero__floating-cta">
+                <span>{{ section.settings.floating_badge }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="kids-hero__col-right">
+          <div class="kids-hero__img-wrap kids-hero__img-wrap--right">
+            <div class="kids-hero__img-bg kids-hero__img-bg--pink"></div>
+            {% if section.settings.image_3 != blank %}
+              <img class="kids-hero__img" src="{{ section.settings.image_3 | image_url: width: 600 }}" alt="" width="300" height="330" loading="lazy">
+            {% else %}
+              <div class="kids-hero__img" style="background: #e5e7eb;"></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="kids-hero__btns">
+        {% if section.settings.button_1_text != blank %}
+          <a href="{{ section.settings.button_1_link | default: '#' }}" class="kids-hero__btn kids-hero__btn--primary">
+            {{ section.settings.button_1_text }}
+          </a>
+        {% endif %}
+        {% if section.settings.button_2_text != blank %}
+          <a href="{{ section.settings.button_2_link | default: '#' }}" class="kids-hero__btn kids-hero__btn--secondary">
+            {{ section.settings.button_2_text }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Kids Collection Hero",
+  "tag": "section",
+  "class": "section-kids-hero",
+  "settings": [
+    { "type": "header", "content": "Texto" },
+    { "type": "text", "id": "heading_line_1", "label": "Título", "default": "LET'S HAVE" },
+    { "type": "text", "id": "heading_highlight", "label": "Destaque", "default": "FUN" },
+    { "type": "textarea", "id": "description", "label": "Descrição", "default": "Prepare-se para muita diversão com nossa nova coleção cheia de cores e alegria!" },
+    { "type": "range", "id": "title_size_mobile", "label": "Tamanho do título (mobile)", "min": 20, "max": 48, "step": 1, "default": 28, "unit": "px" },
+    { "type": "range", "id": "title_size_desktop", "label": "Tamanho do título (desktop)", "min": 28, "max": 72, "step": 1, "default": 40, "unit": "px" },
+    { "type": "range", "id": "desc_size_mobile", "label": "Tamanho da descrição (mobile)", "min": 10, "max": 20, "step": 1, "default": 12, "unit": "px" },
+    { "type": "range", "id": "desc_size_desktop", "label": "Tamanho da descrição (desktop)", "min": 12, "max": 28, "step": 1, "default": 16, "unit": "px" },
+    { "type": "text", "id": "background_word", "label": "Palavra Fundo", "default": "KIDS" },
+    { "type": "header", "content": "Imagens" },
+    { "type": "image_picker", "id": "image_1", "label": "Img Esquerda" },
+    { "type": "image_picker", "id": "image_2", "label": "Img Centro" },
+    { "type": "image_picker", "id": "image_3", "label": "Img Direita" },
+    { "type": "text", "id": "floating_badge", "label": "Badge", "default": "Ofertas" },
+    { "type": "header", "content": "Botões" },
+    { "type": "text", "id": "button_1_text", "label": "Botão 1", "default": "COMPRAR" },
+    { "type": "url", "id": "button_1_link", "label": "Link 1" },
+    { "type": "text", "id": "button_2_text", "label": "Botão 2", "default": "VER MAIS" },
+    { "type": "url", "id": "button_2_link", "label": "Link 2" },
+    { "type": "header", "content": "Cores" },
+    { "type": "color", "id": "color_bg", "label": "Fundo", "default": "#FFF9E5" },
+    { "type": "color", "id": "color_blue", "label": "Azul", "default": "#2563eb" },
+    { "type": "color", "id": "color_orange", "label": "Laranja", "default": "#f97316" },
+    { "type": "color", "id": "color_green", "label": "Verde", "default": "#22c55e" },
+    { "type": "color", "id": "color_yellow", "label": "Amarelo", "default": "#eab308" },
+    { "type": "color", "id": "color_pink", "label": "Rosa", "default": "#ec4899" }
+  ],
+  "presets": [{ "name": "Kids Collection Hero" }]
+}
+{% endschema %}

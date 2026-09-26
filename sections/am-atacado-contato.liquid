@@ -1,0 +1,240 @@
+{% comment %}
+  A MARCA — Atacado: Contato (editorial + form funcional)
+  - Usa form 'contact' nativo Shopify
+  - Layout editorial high fashion: 2 colunas (desktop), 1 coluna (mobile)
+{% endcomment %}
+
+{{ 'am-atacado.css' | asset_url | stylesheet_tag }}
+
+{%- assign _anchor = section.settings.anchor_id | default: '' | strip | handleize -%}
+{%- if _anchor == blank -%}{%- assign _anchor = 'contato-atacado' -%}{%- endif -%}
+
+<section id="{{ _anchor }}" class="am-atacado am-atacado-contact am-anchor color-{{ section.settings.color_scheme }}">
+  <div class="am-atacado-contact__wrap">
+
+    <div class="am-atacado-contact__media">
+    {%- assign _alt = section.settings.image.alt | default: section.settings.title | escape -%}
+
+{% if section.settings.image != blank %}
+  {{
+    section.settings.image
+    | image_url: width: 2200
+    | image_tag:
+      loading: 'lazy',
+      widths: '750, 1100, 1500, 2200',
+      alt: _alt,
+      class: 'am-atacado-contact__img'
+  }}
+{% else %}
+  <div class="am-atacado-contact__img am-atacado-contact__img--placeholder"></div>
+{% endif %}
+    </div>
+
+    <div class="am-atacado-contact__content">
+      {% if section.settings.eyebrow != blank %}
+        <p class="am-eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+
+      {% if section.settings.title != blank %}
+        <h1 class="am-title am-title--xl">{{ section.settings.title }}</h1>
+      {% endif %}
+
+      {% if section.settings.lead != blank %}
+        <p class="am-lead">{{ section.settings.lead }}</p>
+      {% endif %}
+
+      {% if section.settings.note != blank %}
+        <div class="am-text am-atacado-contact__note">{{ section.settings.note }}</div>
+      {% endif %}
+
+      {%- form 'contact', id: 'amAtacadoContact', class: 'am-form', novalidate: 'novalidate' -%}
+
+        {%- if form.posted_successfully? -%}
+          <div class="am-form__alert am-form__alert--success" role="status">
+            {{ section.settings.success_message }}
+          </div>
+        {%- endif -%}
+
+        {%- if form.errors -%}
+          <div class="am-form__alert am-form__alert--error" role="alert">
+            {{ section.settings.error_message }}
+            <ul class="am-form__errors">
+              {%- for field in form.errors -%}
+                <li>{{ form.errors.translated_fields[field] }}: {{ form.errors.messages[field] }}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+
+        <div class="am-form__grid">
+
+          <div class="am-field">
+            <label class="am-label" for="amContactName">
+              {{ section.settings.label_name }} <span class="am-req" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="amContactName"
+              class="am-input"
+              type="text"
+              name="contact[name]"
+              autocomplete="name"
+              value="{{ form.name }}"
+              required
+            >
+          </div>
+
+          <div class="am-field">
+            <label class="am-label" for="amContactEmail">
+              {{ section.settings.label_email }} <span class="am-req" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="amContactEmail"
+              class="am-input"
+              type="email"
+              name="contact[email]"
+              autocomplete="email"
+              spellcheck="false"
+              autocapitalize="off"
+              value="{{ form.email }}"
+              required
+            >
+          </div>
+
+          <div class="am-field">
+            <label class="am-label" for="amContactPhone">
+              {{ section.settings.label_phone }}
+            </label>
+            <input
+              id="amContactPhone"
+              class="am-input"
+              type="tel"
+              name="contact[phone]"
+              autocomplete="tel"
+              value="{{ form.phone }}"
+              inputmode="tel"
+            >
+          </div>
+
+          <div class="am-field">
+            <label class="am-label" for="amContactStore">
+              {{ section.settings.label_store }} <span class="am-req" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="amContactStore"
+              class="am-input"
+              type="text"
+              name="contact[store_name]"
+              value="{{ form.store_name }}"
+              required
+            >
+          </div>
+
+          <div class="am-field">
+            <label class="am-label" for="amContactCity">
+              {{ section.settings.label_city }}
+            </label>
+            <input
+              id="amContactCity"
+              class="am-input"
+              type="text"
+              name="contact[city]"
+              value="{{ form.city }}"
+              autocomplete="address-level2"
+            >
+          </div>
+
+          <div class="am-field">
+            <label class="am-label" for="amContactChannel">
+              {{ section.settings.label_channel }}
+            </label>
+            <select id="amContactChannel" class="am-select" name="contact[channel]">
+              <option value="">{{ section.settings.channel_placeholder }}</option>
+              <option value="Loja fisica">Loja física</option>
+              <option value="Multimarcas">Multimarcas</option>
+              <option value="Online">Online</option>
+              <option value="Fisico + Online">Físico + Online</option>
+            </select>
+          </div>
+
+          <div class="am-field am-field--full">
+            <label class="am-label" for="amContactSocial">
+              {{ section.settings.label_social }}
+            </label>
+            <input
+              id="amContactSocial"
+              class="am-input"
+              type="text"
+              name="contact[social]"
+              value="{{ form.social }}"
+              placeholder="@ / site / link"
+            >
+          </div>
+
+          <div class="am-field am-field--full">
+            <label class="am-label" for="amContactMessage">
+              {{ section.settings.label_message }} <span class="am-req" aria-hidden="true">*</span>
+            </label>
+            <textarea
+              id="amContactMessage"
+              class="am-textarea"
+              name="contact[body]"
+              rows="6"
+              required
+              placeholder="{{ section.settings.message_placeholder }}"
+            >{{ form.body }}</textarea>
+            <p class="am-help">{{ section.settings.helper_text }}</p>
+          </div>
+
+          <div class="am-field am-field--full">
+            <button type="submit" class="am-btn am-btn--primary">
+              {{ section.settings.cta_label }}
+            </button>
+            <p class="am-disclaimer">{{ section.settings.disclaimer }}</p>
+          </div>
+
+        </div>
+      {%- endform -%}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "AM — Atacado: Contato",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Âncora (id)", "default": "contato-atacado" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "Esquema de cores", "default": "scheme-1" },
+
+    { "type": "image_picker", "id": "image", "label": "Imagem editorial (hero)" },
+
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "ATACADO" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Contato para parcerias" },
+    { "type": "textarea", "id": "lead", "label": "Subtítulo", "default": "Acesso por análise de perfil. A MARCA cresce com critério — propósito, estilo e posicionamento." },
+    { "type": "textarea", "id": "note", "label": "Nota curta", "default": "Preencha com calma. Respondemos em até 2 dias úteis." },
+
+    { "type": "text", "id": "cta_label", "label": "Texto do botão", "default": "Solicitar informações" },
+
+    { "type": "text", "id": "label_name", "label": "Label: Nome", "default": "Seu nome" },
+    { "type": "text", "id": "label_email", "label": "Label: Email", "default": "Seu e-mail" },
+    { "type": "text", "id": "label_phone", "label": "Label: Telefone", "default": "Telefone (opcional)" },
+    { "type": "text", "id": "label_store", "label": "Label: Loja", "default": "Nome da loja" },
+    { "type": "text", "id": "label_city", "label": "Label: Cidade/UF", "default": "Cidade / UF (opcional)" },
+    { "type": "text", "id": "label_channel", "label": "Label: Canal", "default": "Canal principal (opcional)" },
+    { "type": "text", "id": "channel_placeholder", "label": "Placeholder: Canal", "default": "Selecione" },
+    { "type": "text", "id": "label_social", "label": "Label: Social/Site", "default": "Instagram / site (opcional)" },
+
+    { "type": "text", "id": "label_message", "label": "Label: Mensagem", "default": "Conte sobre sua loja e intenção" },
+    { "type": "textarea", "id": "message_placeholder", "label": "Placeholder: Mensagem", "default": "Ex: perfil do público, marcas do mix, região, volume mensal aproximado, links..." },
+    { "type": "textarea", "id": "helper_text", "label": "Texto de ajuda", "default": "Dica: inclua links e como você apresenta marcas com propósito." },
+
+    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer", "default": "Ao enviar, você concorda em ser contatado(a) pela equipe da A MARCA." },
+
+    { "type": "text", "id": "success_message", "label": "Mensagem de sucesso", "default": "Recebido. Obrigado — sua solicitação chegou para nossa curadoria." },
+    { "type": "text", "id": "error_message", "label": "Mensagem de erro", "default": "Confira os campos obrigatórios e tente novamente." }
+  ],
+  "presets": [
+    { "name": "AM — Atacado: Contato" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,57 @@
+{%- doc -%}
+  Renders the <img> element using provided image object
+  PERFORMANCE: Width descriptors, sizes, decoding async, aspect-ratio para CLS
+
+  @param {object} image - image object
+  @param {number} [height] - custom image height
+  @param {string} [class] - additional classes
+  @param {string} [text_fallback] - text to display if image is blank
+  @param {boolean} [unset_image_tag] - if true, ignores the image focal point
+  @param {string} [style] - additional styles
+  @param {string} [loading] - loading attr: 'lazy' (default) or 'eager'
+  @param {string} [fetchpriority] - fetchpriority attr: 'high', 'low' or 'auto'
+  @param {string} [sizes] - sizes attribute for responsive images
+
+  @example
+  {% render 'image', image: product.featured_image, height: 300, class: 'product-image' %}
+{%- enddoc -%}
+{% if image != blank %}
+  {% assign image_height = height | default: image.height %}
+  {% assign style_value = style | default: '' %}
+
+  {%- comment -%} Width descriptors para srcset (melhor que 1x/2x/3x) {%- endcomment -%}
+  {% capture image_srcset -%}
+    {{ image | image_url: width: 400 }} 400w,
+    {{ image | image_url: width: 800 }} 800w,
+    {{ image | image_url: width: 1200 }} 1200w,
+    {{ image | image_url: width: 1600 }} 1600w,
+    {{ image | image_url: width: 2400 }} 2400w
+  {%- endcapture %}
+
+  {% assign sizes_attr = sizes | default: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw' %}
+
+  {% if unset_image_tag %}
+    {% assign style_value = style_value | append: 'object-position: inherit;' %}
+  {% endif %}
+
+  {%- comment -%} aspect-ratio evita CLS {%- endcomment -%}
+  {% if image.aspect_ratio and image.aspect_ratio > 0 %}
+    {% assign style_value = style_value | append: 'aspect-ratio: ' | append: image.aspect_ratio | append: ';' %}
+  {% endif %}
+
+  <img
+    src="{{ image | image_url: width: 800 }}"
+    srcset="{{ image_srcset }}"
+    sizes="{{ sizes_attr }}"
+    width="{{ image.width }}"
+    height="{{ image.height }}"
+    loading="{{ loading | default: 'lazy' }}"
+    decoding="async"
+    {% if fetchpriority %}fetchpriority="{{ fetchpriority }}"{% endif %}
+    class="{{ class }}"
+    {% if style_value != '' %}style="{{ style_value }}"{% endif %}
+    alt="{{ image.alt | escape }}"
+  >
+{% elsif text_fallback %}
+  {{ text_fallback }}
+{% endif %}

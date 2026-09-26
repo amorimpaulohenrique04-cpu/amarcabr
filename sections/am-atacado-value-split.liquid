@@ -1,0 +1,184 @@
+{% comment %}
+  Política de Privacidade Minimalista
+  Gerado por PrivacyDesign.io
+{% endcomment %}
+
+<style>
+  .policy-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
+    font-family: 'Inter', sans-serif;
+    color: #1a1a1a;
+    background-color: #f9f9f9;
+  }
+  .policy-section {
+    background: white;
+    border-radius: 40px;
+    padding: 40px;
+    margin-bottom: 24px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+  .policy-hero {
+    text-align: center;
+    padding: 80px 40px;
+    background: white;
+    border-radius: 48px;
+    margin-bottom: 40px;
+  }
+  .policy-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+  }
+  .policy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 768px) {
+    .policy-grid { grid-template-columns: 1fr; }
+    .policy-title { font-size: 2.5rem; }
+  }
+  .contact-btn {
+    display: inline-block;
+    background: #000;
+    color: #fff;
+    padding: 16px 40px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: 32px;
+  }
+</style>
+
+<div class="policy-container">
+  <header class="policy-hero">
+    <h1 class="policy-title">{{ section.settings.title }}</h1>
+
+    <p style="color: #666; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+      {{ section.settings.intro }}
+    </p>
+
+    {% if section.settings.last_updated != blank %}
+      <div style="margin-top: 32px; font-size: 0.8rem; color: #999; text-transform: uppercase; letter-spacing: 0.1em;">
+        Atualizado em: {{ section.settings.last_updated }}
+      </div>
+    {% endif %}
+  </header>
+
+  <div class="policy-grid">
+    <div class="policy-section">
+      <h2 style="font-size: 1.5rem; margin-bottom: 16px;">01. Coleta de Dados</h2>
+      <p style="color: #444; line-height: 1.6;">{{ section.settings.collected }}</p>
+    </div>
+
+    <div class="policy-section">
+      <h2 style="font-size: 1.5rem; margin-bottom: 16px;">02. Uso dos Dados</h2>
+      <p style="color: #444; line-height: 1.6;">{{ section.settings.use_of_data }}</p>
+    </div>
+
+    <div class="policy-section">
+      <h2 style="font-size: 1.5rem; margin-bottom: 16px;">03. Cookies</h2>
+      <p style="color: #444; line-height: 1.6;">{{ section.settings.cookies_policy }}</p>
+    </div>
+
+    <div class="policy-section">
+      <h2 style="font-size: 1.5rem; margin-bottom: 16px;">04. Segurança</h2>
+      <p style="color: #444; line-height: 1.6;">{{ section.settings.security_policy }}</p>
+    </div>
+  </div>
+
+  <section class="policy-section" style="text-align: center; padding: 80px 40px;">
+    <h2 style="font-size: 2.5rem; margin-bottom: 16px;">Precisa de ajuda?</h2>
+
+    {% if section.settings.store_name != blank %}
+      <p style="color: #666;">Entre em contato com o suporte da {{ section.settings.store_name }}</p>
+    {% endif %}
+
+    {% if section.settings.email != blank %}
+      <a href="mailto:{{ section.settings.email | escape }}" class="contact-btn">Enviar E-mail</a>
+    {% endif %}
+
+    {% if section.settings.address != blank %}
+      <div style="margin-top: 24px; color: #999; font-size: 0.9rem;">
+        {{ section.settings.address }}
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "Política de Privacidade",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título da Página",
+      "default": "Política de Privacidade"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Introdução",
+      "default": "Explique aqui como sua loja trata dados pessoais e a finalidade de uso."
+    },
+    {
+      "type": "textarea",
+      "id": "collected",
+      "label": "Dados Coletados",
+      "default": "Descreva quais dados são coletados (ex.: nome, e-mail, endereço, telefone)."
+    },
+    {
+      "type": "textarea",
+      "id": "use_of_data",
+      "label": "Uso dos Dados",
+      "default": "Explique como os dados são utilizados (ex.: processar pedidos, suporte, marketing)."
+    },
+    {
+      "type": "textarea",
+      "id": "cookies_policy",
+      "label": "Cookies",
+      "default": "Descreva a política de cookies e tecnologias de rastreamento."
+    },
+    {
+      "type": "textarea",
+      "id": "security_policy",
+      "label": "Segurança / Terceiros",
+      "default": "Explique medidas de segurança e compartilhamento com terceiros (ex.: gateways, transportadoras)."
+    },
+    {
+      "type": "text",
+      "id": "last_updated",
+      "label": "Última atualização",
+      "default": "02/02/2026"
+    },
+    {
+      "type": "text",
+      "id": "store_name",
+      "label": "Nome da loja",
+      "default": "A MARCA"
+    },
+    {
+      "type": "textarea",
+      "id": "address",
+      "label": "Endereço",
+      "default": "Sua cidade/UF ou endereço comercial (se aplicável)."
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "E-mail de Contato",
+      "default": "contato@sualoja.com"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Política de Privacidade"
+    }
+  ]
+}
+{% endschema %}

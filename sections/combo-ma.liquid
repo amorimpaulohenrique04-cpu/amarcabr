@@ -1,0 +1,922 @@
+{% comment %}
+  Combo Pais e Filhos (PDP Section)
+  Extra T-shirt: estoque do infantil conectado, preço do produto fixo, multi-quantidade
+{% endcomment %}
+
+<section
+  class="lx-wrap"
+  style="
+    --lx-bg: {{ section.settings.page_bg }};
+    --lx-card: {{ section.settings.card_bg }};
+    --lx-border: {{ section.settings.border_color }};
+    --lx-text: {{ section.settings.text_color }};
+    --lx-muted: {{ section.settings.muted_color }};
+    --lx-radius: {{ section.settings.radius }}px;
+    --lx-shadow: {{ section.settings.shadow }};
+    --lx-max: var(--am-header-max, 1240px);
+    --lx-px: var(--am-header-x, 16px);
+    --font-h: {{ settings.type_header_font.family }}, sans-serif;
+    --font-b: {{ settings.type_body_font.family }}, sans-serif;
+  "
+>
+
+<style>
+/* ═══ Base ═══ */
+.lx-wrap{opacity:0;animation:lxIn .3s ease .05s forwards;background:var(--lx-bg);color:var(--lx-text);padding:clamp(24px,5vw,80px) var(--lx-px);font-family:var(--font-b);overflow:visible!important;position:relative;z-index:1}
+@keyframes lxIn{to{opacity:1}}
+.lx-container{max-width:var(--lx-max);margin:0 auto;padding-inline:var(--lx-px);box-sizing:border-box;overflow:visible!important}
+.lx-card{background:var(--lx-card);border:1px solid var(--lx-border);border-radius:var(--lx-radius);box-shadow:var(--lx-shadow)}
+
+/* ═══ Bento ═══ */
+.lx-bento{display:grid;gap:12px;grid-template-columns:1fr;margin-bottom:32px}
+.lx-intro{padding:22px 20px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.lx-h1{font-family:var(--font-h);font-weight:400;letter-spacing:-.02em;font-size:clamp(22px,2.5vw,52px);line-height:1.15;margin:0 0 10px}
+.lx-italic{font-style:italic;font-family:serif;font-weight:400;display:inline-block}
+.lx-p{color:var(--lx-muted);font-size:13px;line-height:1.45;margin:0 0 0;margin-inline:auto}
+.lx-p:not(:last-child){margin-bottom:18px}
+.lx-btn{display:inline-flex;align-items:center;gap:10px;background:#111;color:#fff;text-decoration:none;border-radius:999px;padding:12px 20px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;transition:transform .25s,box-shadow .25s;margin:0 auto}
+.lx-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+
+/* Hero */
+.lx-heroMedia{position:relative;min-height:260px}
+.lx-heroFrame{position:relative;overflow:hidden;border-radius:calc(var(--lx-radius) + 4px);border:1px solid rgba(255,255,255,.5);background:#f0f0f0;box-shadow:0 20px 50px rgba(0,0,0,.06);height:100%}
+.lx-heroImg{width:100%;height:100%;object-fit:cover;transition:transform .8s ease;display:block}
+.lx-heroMedia:hover .lx-heroImg{transform:scale(1.03)}
+.lx-heroFallback{width:100%;height:100%;background:#eee;min-height:260px}
+.lx-heroImg--dynamic{position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .5s ease,transform .8s ease;pointer-events:none}
+.lx-heroImg--dynamic.is-active{opacity:1;pointer-events:auto}
+.lx-badge{position:absolute;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);padding:6px 12px;border-radius:999px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 10px rgba(0,0,0,.05);pointer-events:none;z-index:3}
+.lx-dot{width:5px;height:5px;border-radius:50%;background:#111}
+.lx-badge--topleft{top:16px;left:16px}
+.lx-badge--bottomright{bottom:16px;right:16px}
+.lx-badge--bottomleft{bottom:16px;left:16px}
+
+/* Side cards */
+.lx-side{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lx-miniStat,.lx-miniPromo{padding:14px;display:flex;flex-direction:column;justify-content:space-between;min-height:auto}
+.lx-miniStatText{font-weight:500;font-size:12px;color:#111;line-height:1.3;margin:0}
+.lx-miniRow{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.lx-avatars{display:flex}
+.lx-avatar{width:26px;height:26px;border-radius:50%;border:2px solid #fff;margin-left:-8px;object-fit:cover}
+.lx-avatar:first-child{margin-left:0}
+.lx-arrow{font-size:18px;opacity:.6}
+.lx-miniPromo{position:relative;overflow:hidden}
+.lx-miniPromoTop{position:relative;z-index:2}
+.lx-miniPromoTitle{margin:0;font-family:var(--font-h);font-size:13px;color:#fff;letter-spacing:.02em;line-height:1.1}
+.lx-pill{display:inline-block;font-size:8px;padding:3px 6px;border-radius:4px;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.2);margin-top:6px}
+.lx-miniPromoImg{position:absolute;right:-25%;bottom:-10%;width:90%;transform:rotate(8deg);transition:transform .5s;filter:drop-shadow(0 10px 20px rgba(0,0,0,.2));pointer-events:none}
+.lx-miniPromo:hover .lx-miniPromoImg{transform:rotate(0deg) scale(1.05)}
+.lx-miniPromoFoot{color:rgba(255,255,255,.8);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-top:24px;position:relative;z-index:2}
+
+/* ═══ Combo builder ═══ */
+.lx-combo{padding:clamp(20px,4vw,48px);margin-top:16px;overflow:visible!important}
+.lx-comboHead{text-align:center;margin-bottom:24px;max-width:600px;margin-inline:auto}
+.lx-eyebrow{display:block;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--lx-muted);font-weight:700;margin-bottom:8px}
+.lx-h2{margin:0;font-family:var(--font-h);font-weight:400;font-size:clamp(22px,2.5vw,38px)}
+.lx-sub{margin:8px 0 0;color:var(--lx-muted);font-size:13px;padding:0 10px}
+
+/* Grid */
+.lx-comboGrid{position:relative;display:grid;grid-template-columns:1fr;gap:12px;margin:24px 0;overflow:visible!important}
+.lx-connector{display:none}
+
+/* Slots */
+.lx-slot{position:relative;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:12px;transition:border-color .2s,opacity .3s;overflow:visible!important}
+.lx-slot:hover:not(.is-waiting){border-color:rgba(0,0,0,.15)}
+.lx-slot.is-waiting{pointer-events:none;user-select:none}
+.lx-slot.is-waiting .lx-slotBody{visibility:hidden}
+.lx-waitingMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--lx-muted);text-transform:uppercase;border-radius:16px;background:rgba(255,255,255,.88);z-index:5;transition:opacity .3s;pointer-events:none}
+.lx-slot:not(.is-waiting) .lx-waitingMsg{opacity:0;visibility:hidden}
+.lx-slotBody{display:flex;gap:12px;align-items:center;position:relative}
+
+/* Thumbnails */
+.lx-thumb{width:64px;height:64px;border-radius:10px;background:#fafafa;border:1px solid rgba(0,0,0,.05);overflow:hidden;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center}
+.lx-thumbPh{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f7f7f7}
+.lx-thumbPhNum{font-family:var(--font-h);font-size:18px;opacity:.5;color:#bbb}
+.lx-thumbImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.lx-thumbImg:not([hidden]){opacity:1}
+
+/* Controls / Selectors */
+.lx-controls{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+.lx-csel{position:relative;width:100%}
+.lx-csel[hidden]{display:none}
+.lx-csel-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-family:inherit;font-size:12px;color:var(--lx-text);cursor:pointer;transition:border-color .2s,background .15s,box-shadow .3s;text-align:left;min-height:42px}
+.lx-csel-trigger:hover{border-color:#bbb;background:#fafafa}
+.lx-csel-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px;font-weight:500}
+.lx-csel-chevron{flex-shrink:0;color:#999;transition:transform .2s}
+.lx-csel.is-open .lx-csel-chevron{transform:rotate(180deg)}
+.lx-csel-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 12px 24px rgba(0,0,0,.12);z-index:9999;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .2s cubic-bezier(.16,1,.3,1),visibility .2s,transform .2s cubic-bezier(.16,1,.3,1);overflow:hidden;pointer-events:none;max-height:250px}
+.lx-csel.is-open .lx-csel-dropdown{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+.lx-csel-list{list-style:none;margin:0;padding:0;max-height:250px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lx-csel-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:12px;color:var(--lx-text);cursor:pointer;transition:background .1s;border-bottom:1px solid #f5f5f5}
+.lx-csel-opt:last-child{border-bottom:none}
+.lx-csel-opt:hover{background:#f7f7f7}
+.lx-csel-opt.is-selected{background:#f0f0f0;font-weight:600}
+.lx-csel-opt[data-disabled="true"]{opacity:.5;cursor:not-allowed;background:#fff}
+.lx-csel-optImg{width:24px;height:24px;border-radius:4px;object-fit:cover;border:1px solid rgba(0,0,0,.1);flex-shrink:0}
+.lx-csel-optText{flex:1}
+.lx-csel-optMeta{font-size:10px;color:var(--lx-muted);margin-top:2px}
+.lx-csel.is-locked .lx-csel-trigger{cursor:default;pointer-events:none;opacity:.7}
+.lx-csel.is-locked .lx-csel-chevron{visibility:hidden}
+
+/* ═══ Nudge ═══ */
+@keyframes lxPulse{0%{box-shadow:0 0 0 0 rgba(175,125,70,.25)}50%{box-shadow:0 0 0 6px rgba(175,125,70,.06)}100%{box-shadow:0 0 0 0 transparent}}
+.lx-csel-trigger.is-nudge{border-color:#c4956a!important;animation:lxPulse .65s ease 2}
+@keyframes lxShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(1px)}}
+.lx-slot.is-nudge-slot{animation:lxShake .45s ease}
+
+/* ═══ Hint ═══ */
+.lx-atcHint{
+  display:flex;align-items:center;gap:8px;justify-content:center;
+  background:rgba(175,130,75,.07);border:1px solid rgba(175,130,75,.14);border-radius:10px;
+  padding:0 16px;font-size:12.5px;color:#96724a;font-weight:500;
+  max-height:0;opacity:0;overflow:hidden;
+  transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s ease,margin .3s ease,padding .3s ease;
+  margin-top:0;text-align:left;line-height:1.45;
+}
+.lx-atcHint.is-visible{max-height:56px;opacity:1;margin-top:10px;padding:10px 16px}
+.lx-atcHint svg{flex-shrink:0;opacity:.65;min-width:14px}
+
+
+
+/* ═══ FIX MOBILE SELECT / ZOOM ═══ */
+@media(max-width:989px){
+  .lx-wrap{-webkit-text-size-adjust:100%}
+  .lx-csel,
+  .lx-controls,
+  .lx-slot,
+  .lx-slotBody,
+  .lx-extra-row{min-width:0}
+  .lx-csel-trigger,
+  .lx-csel-opt{font-size:16px;line-height:1.25}
+  .lx-csel-trigger{min-height:48px;padding:12px 14px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .lx-csel-dropdown{top:calc(100% + 6px);left:0;right:0;max-width:100%;transform-origin:top center}
+  .lx-thumb{flex:0 0 64px}
+  .lx-controls{overflow:visible}
+  .lx-extra-row .lx-csel-trigger{min-height:46px}
+}
+
+/* ═══ Footer ═══ */
+.lx-divider{height:1px;background:rgba(0,0,0,.06);margin:20px 0;position:relative;z-index:1}
+.lx-comboFoot{display:flex;flex-direction:column;gap:16px;align-items:stretch;text-align:center;position:relative;z-index:1}
+.lx-total{display:flex;flex-direction:column;align-items:center}
+.lx-totalLabel{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--lx-muted);font-weight:700}
+.lx-totalValue{font-family:var(--font-h);font-weight:400;font-size:28px;line-height:1;margin-top:4px}
+.lx-totalHint{color:var(--lx-muted);font-size:11px;margin-top:4px}
+
+/* ATC Button */
+.lx-atcBtn{width:100%;border:0;border-radius:999px;padding:16px 20px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;background:#111;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
+.lx-atcBtn:hover:not(.is-disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.lx-atcBtn.is-disabled{background:#e0ddd8;color:#a09890;cursor:pointer}
+
+/* ═══ Extra add-on ═══ */
+.lx-extra{margin:16px 0 0;background:#fafaf8;border:1.5px dashed rgba(0,0,0,.1);border-radius:14px;padding:16px;transition:border-color .25s,background .25s;overflow:visible;position:relative;z-index:20}
+.lx-extra[hidden]{display:none}
+.lx-extra.is-active{border-color:#111;border-style:solid;background:#f5f4f0}
+.lx-extra--entering{animation:lxExtraIn .35s ease forwards}
+@keyframes lxExtraIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.lx-extra-header{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;position:relative}
+.lx-extra-input{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+.lx-extra-checkmark{width:22px;height:22px;border:2px solid #ccc;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;background:#fff}
+.lx-extra-input:checked+.lx-extra-checkmark{background:#111;border-color:#111}
+.lx-extra-input:checked+.lx-extra-checkmark::after{content:'';display:block;width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px}
+.lx-extra-thumb{width:44px;height:44px;border-radius:8px;overflow:hidden;flex-shrink:0;border:1px solid rgba(0,0,0,.06);background:#f0f0f0}
+.lx-extra-thumbImg{width:100%;height:100%;object-fit:cover;display:block}
+.lx-extra-info{flex:1;display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
+.lx-extra-title{font-size:13px;font-weight:600;color:var(--lx-text);line-height:1.3}
+.lx-extra-subtitle{font-size:11px;color:var(--lx-muted);margin-top:1px}
+.lx-extra-designName{font-size:11px;color:#111;font-weight:600;margin-top:2px}
+.lx-extra-price{font-size:14px;font-weight:700;color:#111;white-space:nowrap;font-family:var(--font-h)}
+.lx-extra-priceUnit{font-size:10px;font-weight:400;color:var(--lx-muted)}
+.lx-extra-body{padding-top:16px;margin-top:16px;border-top:1px solid rgba(0,0,0,.06);overflow:visible}
+.lx-extra-body[hidden]{display:none}
+.lx-extra-rows{display:flex;flex-direction:column;gap:10px;overflow:visible}
+.lx-extra-row{display:flex;align-items:center;gap:10px;animation:lxRowIn .25s ease forwards;overflow:visible;position:relative;z-index:21}
+@keyframes lxRowIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.lx-extra-rowNum{font-size:11px;font-weight:700;color:var(--lx-muted);min-width:20px;text-align:center;flex-shrink:0}
+.lx-extra-row .lx-csel{flex:1;overflow:visible}
+.lx-extra-rowDel{width:30px;height:30px;border-radius:8px;border:1px solid rgba(0,0,0,.08);background:#fff;color:#bbb;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0;line-height:1}
+.lx-extra-rowDel:hover{border-color:#e00;color:#e00;background:#fff5f5}
+.lx-extra-addBtn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:none;border:1.5px dashed rgba(0,0,0,.12);border-radius:10px;padding:12px 16px;font-size:12px;font-weight:600;color:var(--lx-muted);cursor:pointer;transition:all .2s;margin-top:12px;font-family:inherit;position:relative;z-index:1}
+.lx-extra-addBtn:hover{border-color:#111;color:#111;background:rgba(0,0,0,.02)}
+.lx-extra-addBtn svg{flex-shrink:0}
+.lx-extra-count{font-size:11px;color:var(--lx-muted);margin-top:10px;text-align:center}
+.lx-extra-count b{color:var(--lx-text);font-weight:700}
+
+/* ═══ Features ═══ */
+.lx-features{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}
+.lx-featureCard{padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.lx-featureImg{width:80px;height:auto;margin-bottom:16px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.1))}
+.lx-h4{margin:0;font-family:var(--font-h);font-weight:400;font-size:18px}
+.lx-kicker{margin:8px 0 0;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.5)}
+.lx-featureQuote{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.lx-quote{margin:0 0 16px;font-family:var(--font-h);font-style:italic;font-size:clamp(18px,2vw,24px);color:rgba(0,0,0,.7);line-height:1.4}
+.lx-stars{font-size:11px;letter-spacing:.1em;color:#111}
+.lx-testimonial{padding:24px;position:relative;overflow:hidden}
+.lx-testimonialText{font-weight:500;font-size:15px;line-height:1.4;color:#111;margin:0 0 20px;position:relative;z-index:1}
+.lx-person{display:flex;gap:12px;align-items:center}
+.lx-personImg{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.8)}
+.lx-personName{font-size:12px;font-weight:700;color:#111}
+.lx-personSub{font-size:10px;color:rgba(0,0,0,.6);margin-top:2px}
+.lx-testimonialMark{position:absolute;right:-10px;bottom:-30px;font-size:120px;opacity:.08;line-height:1;pointer-events:none}
+.lx-testimonialArrow{position:absolute;right:16px;top:16px;font-size:18px;opacity:.6}
+
+/* ═══ Responsivo — Pequeno (< 400px) ═══ */
+@media(max-width:399px){
+  .lx-side{grid-template-columns:1fr}
+  .lx-thumb{width:56px;height:56px;border-radius:8px}
+  .lx-h1{font-size:20px}
+  .lx-h2{font-size:20px}
+  .lx-atcBtn{padding:14px 16px;font-size:10px}
+  .lx-totalValue{font-size:24px}
+  .lx-extra-info{flex-direction:column;align-items:flex-start;gap:2px}
+  .lx-heroMedia{min-height:220px}
+  .lx-combo{padding:16px}
+  .lx-atcHint{font-size:11.5px;gap:6px}
+  .lx-atcHint.is-visible{padding:9px 12px}
+}
+
+/* ═══ Responsivo — Tablet (768px+) ═══ */
+@media(min-width:768px){
+  .lx-comboGrid{gap:20px}
+  .lx-thumb{width:80px;height:80px}
+  .lx-totalValue{font-size:32px}
+  .lx-atcBtn{max-width:420px;margin-inline:auto}
+  .lx-miniPromoTitle{font-size:16px}
+  .lx-miniStatText{font-size:14px}
+}
+
+/* ═══ Responsivo — Desktop (990px+) ═══ */
+@media(min-width:990px){
+  .lx-bento{grid-template-columns:4fr 5fr 3fr;align-items:stretch;gap:16px}
+  .lx-intro{text-align:left;padding:48px}
+  .lx-h1{line-height:1.1;margin-bottom:16px}
+  .lx-p{margin-inline:0;max-width:40ch;line-height:1.6}
+  .lx-btn{margin:0;padding:14px 24px;font-size:12px}
+  .lx-heroMedia{min-height:300px}
+  .lx-side{display:flex;flex-direction:column;gap:16px}
+  .lx-miniStat{padding:24px;min-height:180px}
+  .lx-miniPromo{padding:24px;min-height:220px}
+  .lx-miniStatText{font-size:15px;line-height:1.4}
+  .lx-miniPromoTitle{font-size:20px}
+  .lx-miniPromoImg{right:-15%;bottom:-15%;width:75%}
+  .lx-avatar{width:36px;height:36px;margin-left:-10px}
+  .lx-avatar:first-child{margin-left:0}
+  .lx-comboGrid{grid-template-columns:1fr 1fr;gap:40px;margin:32px 0}
+  .lx-connector{display:flex;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--lx-border);align-items:center;justify-content:center;color:var(--lx-muted);z-index:2;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+  .lx-slot{padding:16px}
+  .lx-slotBody{align-items:flex-start;gap:16px}
+  .lx-thumb{width:88px;height:88px;border-radius:12px}
+  .lx-csel-trigger{padding:12px 14px;font-size:13px;min-height:auto;border-radius:10px}
+  .lx-combo{padding:48px}
+  .lx-comboFoot{flex-direction:row;justify-content:space-between;text-align:left}
+  .lx-total{align-items:flex-start}
+  .lx-totalValue{font-size:36px}
+  .lx-atcBtn{max-width:400px;padding:18px 32px;font-size:12px}
+  .lx-atcHint{justify-content:center}
+  .lx-extra{padding:20px 24px}
+  .lx-extra-title{font-size:14px}
+  .lx-features{grid-template-columns:3fr 5fr 4fr;align-items:stretch;gap:24px;margin-top:40px}
+  .lx-featureCard{padding:32px}
+  .lx-featureImg{width:100px;margin-bottom:20px}
+  .lx-h4{font-size:20px}
+  .lx-testimonial{padding:32px}
+  .lx-testimonialText{font-size:18px;margin-bottom:24px}
+  .lx-personImg{width:48px;height:48px}
+  .lx-personName{font-size:13px}
+  .lx-personSub{font-size:11px}
+}
+</style>
+
+<div class="lx-container">
+
+  <!-- ═══ BENTO HERO ═══ -->
+  <div class="lx-bento">
+    <div class="lx-card lx-intro">
+      <h1 class="lx-h1">
+        {{ section.settings.hero_title }}
+        <span class="lx-italic">{{ section.settings.hero_title_italic }}</span>
+      </h1>
+      <div class="lx-p">{{ section.settings.hero_body }}</div>
+      {%- if section.settings.hero_button_label != blank and section.settings.hero_button_link != blank -%}
+        <a class="lx-btn" href="{{ section.settings.hero_button_link }}">
+          {{ section.settings.hero_button_label }} <span aria-hidden="true">→</span>
+        </a>
+      {%- endif -%}
+    </div>
+    <div class="lx-heroMedia">
+      <div class="lx-heroFrame">
+        <img class="lx-heroImg lx-heroImg--dynamic" data-hero-dynamic src="" alt="Produto selecionado" loading="eager">
+        {%- if section.settings.hero_image != blank -%}
+          {{ section.settings.hero_image | image_url: width: 1600 | image_tag: class: "lx-heroImg", loading: "lazy", alt: section.settings.hero_image.alt | default: "Imagem principal" }}
+        {%- else -%}
+          <div class="lx-heroFallback"></div>
+        {%- endif -%}
+        {%- if section.settings.badge_1 != blank -%}<div class="lx-badge lx-badge--topleft"><span class="lx-dot"></span>{{ section.settings.badge_1 }}</div>{%- endif -%}
+        {%- if section.settings.badge_2 != blank -%}<div class="lx-badge lx-badge--bottomright"><span class="lx-dot"></span>{{ section.settings.badge_2 }}</div>{%- endif -%}
+        {%- if section.settings.badge_3 != blank -%}<div class="lx-badge lx-badge--bottomleft"><span class="lx-dot"></span>{{ section.settings.badge_3 }}</div>{%- endif -%}
+      </div>
+    </div>
+    <div class="lx-side">
+      <div class="lx-card lx-miniStat" style="background:{{ section.settings.stat_card_bg }}">
+        <p class="lx-miniStatText">{{ section.settings.stat_text }}</p>
+        <div class="lx-miniRow">
+          <div class="lx-avatars">
+            {%- if section.settings.avatar_1 != blank -%}{{ section.settings.avatar_1 | image_url: width: 80 | image_tag: class: "lx-avatar", loading: "lazy" }}{%- endif -%}
+            {%- if section.settings.avatar_2 != blank -%}{{ section.settings.avatar_2 | image_url: width: 80 | image_tag: class: "lx-avatar", loading: "lazy" }}{%- endif -%}
+          </div>
+          <span class="lx-arrow">↗</span>
+        </div>
+      </div>
+      <div class="lx-card lx-miniPromo" style="background:{{ section.settings.promo_card_bg }}">
+        <div class="lx-miniPromoTop">
+          <h3 class="lx-miniPromoTitle">{{ section.settings.promo_title }}</h3>
+          {%- if section.settings.promo_tag != blank -%}<span class="lx-pill">{{ section.settings.promo_tag }}</span>{%- endif -%}
+        </div>
+        {%- if section.settings.promo_image != blank -%}{{ section.settings.promo_image | image_url: width: 1000 | image_tag: class: "lx-miniPromoImg", loading: "lazy", alt: "Promo" }}{%- endif -%}
+        {%- if section.settings.promo_footer != blank -%}<div class="lx-miniPromoFoot">{{ section.settings.promo_footer }}</div>{%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DATA ═══ -->
+  {%- assign current_variant = product.selected_or_first_available_variant -%}
+  {%- assign mf_products_1 = blank -%}
+  {%- if product.metafields.custom.combo_products != blank -%}{%- assign mf_products_1 = product.metafields.custom.combo_products.value -%}{%- endif -%}
+
+  {%- capture lx_products_1_json -%}
+  [{%- if mf_products_1 != blank -%}
+      {%- for p in mf_products_1 -%}{%- if p != blank -%}{%- unless forloop.first -%},{%- endunless -%}
+          {%- assign p_img_url = '' -%}{%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 1200 -%}{%- endif -%}
+          {%- assign child_ref = p.metafields.custom.kids_product.value -%}
+          {"id":{{ p.id | json }},"handle":{{ p.handle | json }},"title":{{ p.title | json }},"url":{{ p.url | json }},"featured_image":{{ p_img_url | json }},"child_product_id":{% if child_ref != blank %}{{ child_ref.id | json }}{% else %}null{% endif %},"variants":[
+              {%- for v in p.variants -%}{%- unless forloop.first -%},{%- endunless -%}{%- assign v_img = v.featured_image | default: p.featured_image -%}{%- assign v_img_url = '' -%}{%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 1200 -%}{%- endif -%}
+              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }},"featured_image":{{ v_img_url | json }}}
+              {%- endfor -%}]}
+      {%- endif -%}{%- endfor -%}
+  {%- else -%}
+      {%- for block in section.blocks -%}{%- if block.type == 'combo_product' and block.settings.product != blank -%}
+          {%- assign p = block.settings.product -%}{%- unless forloop.first -%},{%- endunless -%}
+          {%- assign p_img_url = '' -%}{%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 1200 -%}{%- endif -%}
+          {%- assign child_ref = p.metafields.custom.kids_product.value -%}
+          {"id":{{ p.id | json }},"handle":{{ p.handle | json }},"title":{{ p.title | json }},"url":{{ p.url | json }},"featured_image":{{ p_img_url | json }},"child_product_id":{% if child_ref != blank %}{{ child_ref.id | json }}{% else %}null{% endif %},"variants":[
+              {%- for v in p.variants -%}{%- unless forloop.first -%},{%- endunless -%}{%- assign v_img = v.featured_image | default: p.featured_image -%}{%- assign v_img_url = '' -%}{%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 1200 -%}{%- endif -%}
+              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }},"featured_image":{{ v_img_url | json }}}
+              {%- endfor -%}]}
+      {%- endif -%}{%- endfor -%}
+  {%- endif -%}]
+  {%- endcapture -%}
+
+  {%- assign mf_products_2 = blank -%}
+  {%- if product.metafields.custom.combo_products2 != blank -%}{%- assign mf_products_2 = product.metafields.custom.combo_products2.value -%}{%- endif -%}
+  {%- capture lx_products_2_json -%}
+  [{%- if mf_products_2 != blank -%}
+      {%- for p in mf_products_2 -%}{%- if p != blank -%}{%- unless forloop.first -%},{%- endunless -%}
+          {%- assign p_img_url = '' -%}{%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 600 -%}{%- endif -%}
+          {"id":{{ p.id | json }},"handle":{{ p.handle | json }},"title":{{ p.title | json }},"url":{{ p.url | json }},"featured_image":{{ p_img_url | json }},"variants":[
+              {%- for v in p.variants -%}{%- unless forloop.first -%},{%- endunless -%}{%- assign v_img = v.featured_image | default: p.featured_image -%}{%- assign v_img_url = '' -%}{%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 600 -%}{%- endif -%}
+              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }},"featured_image":{{ v_img_url | json }}}
+              {%- endfor -%}]}
+      {%- endif -%}{%- endfor -%}
+  {%- endif -%}]
+  {%- endcapture -%}
+
+  {%- assign extra_product = section.settings.extra_kids_product -%}
+  {%- capture extra_product_json -%}
+  {%- if extra_product != blank -%}
+  {"id":{{ extra_product.id | json }},"title":{{ extra_product.title | json }},"featured_image":{{ extra_product.featured_image | image_url: width: 400 | json }},"variants":[
+    {%- for v in extra_product.variants -%}{%- unless forloop.first -%},{%- endunless -%}
+    {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }}}
+    {%- endfor -%}]}
+  {%- endif -%}
+  {%- endcapture -%}
+
+  <!-- ═══ COMBO BUILDER ═══ -->
+  <div class="lx-combo lx-card">
+    <div class="lx-comboHead">
+      <span class="lx-eyebrow">{{ section.settings.combo_eyebrow }}</span>
+      <h2 class="lx-h2">{{ section.settings.combo_title }}</h2>
+      <p class="lx-sub">{{ section.settings.combo_subtitle }}</p>
+    </div>
+
+    <div class="lx-comboGrid"
+         data-lx-base-price="{{ current_variant.price }}"
+         data-lx-extra-product="{{ extra_product_json | strip_newlines | escape }}">
+      <div class="lx-connector" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V13M13 7L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+
+      {%- for i in (1..2) -%}
+        {%- assign slot_json = '' -%}
+        {%- if i == 1 -%}{%- assign slot_json = lx_products_1_json -%}
+        {%- else -%}{%- assign slot_json = lx_products_2_json -%}{%- if slot_json == '[]' or slot_json == blank -%}{%- assign slot_json = lx_products_1_json -%}{%- endif -%}{%- endif -%}
+        <div class="lx-slot" data-slot="{{ i }}" data-products="{{ slot_json | strip_newlines | escape }}">
+          <div class="lx-slotBody">
+            <div class="lx-thumb" data-thumb>
+              <div class="lx-thumbPh"><span class="lx-thumbPhNum">{{ i }}</span></div>
+              <img class="lx-thumbImg" data-thumb-img alt="" loading="lazy" hidden>
+            </div>
+            <div class="lx-controls">
+              <div class="lx-csel" data-csel="product">
+                <button type="button" class="lx-csel-trigger" data-trigger>
+                  <span class="lx-csel-label" data-label>{{ section.settings.choice_label }} {{ i }}</span>
+                  <svg class="lx-csel-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="lx-csel-dropdown"><ul class="lx-csel-list" data-list></ul></div>
+                <input type="hidden" data-input-product>
+              </div>
+              <div class="lx-csel lx-csel--variant" data-csel="variant" hidden>
+                <button type="button" class="lx-csel-trigger" data-trigger>
+                  <span class="lx-csel-label" data-label>{{ section.settings.select_variant_placeholder }}</span>
+                  <svg class="lx-csel-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="lx-csel-dropdown"><ul class="lx-csel-list" data-list></ul></div>
+                <input type="hidden" data-input-variant>
+              </div>
+            </div>
+          </div>
+          {%- if i == 2 -%}<div class="lx-waitingMsg" data-waiting-msg>Escolha o produto adulto primeiro</div>{%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <!-- Extra -->
+    <div class="lx-extra" data-extra-wrap hidden>
+      <label class="lx-extra-header">
+        <input type="checkbox" class="lx-extra-input" data-extra-checkbox>
+        <span class="lx-extra-checkmark"></span>
+        <div class="lx-extra-thumb">
+          <img class="lx-extra-thumbImg" data-extra-thumb src="" alt="" loading="lazy">
+        </div>
+        <div class="lx-extra-info">
+          <div>
+            <span class="lx-extra-title">{{ section.settings.extra_label | default: 'Adicionar T-shirt Infantil Extra' }}</span>
+            <div class="lx-extra-subtitle">{{ section.settings.extra_sublabel | default: 'Mesma estampa, outro tamanho' }}</div>
+            <div class="lx-extra-designName" data-extra-design></div>
+          </div>
+          <span class="lx-extra-price" data-extra-price></span>
+        </div>
+      </label>
+      <div class="lx-extra-body" data-extra-body hidden>
+        <div class="lx-extra-rows" data-extra-rows></div>
+        <button type="button" class="lx-extra-addBtn" data-extra-add>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V13M13 7L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Adicionar mais uma camiseta
+        </button>
+        <div class="lx-extra-count" data-extra-count hidden></div>
+      </div>
+    </div>
+
+    <div class="lx-divider"></div>
+
+    <!-- Footer -->
+    <div class="lx-comboFoot">
+      <div class="lx-total">
+        <span class="lx-totalLabel">{{ section.settings.total_label }}</span>
+        <div class="lx-totalValue" data-total>{{ current_variant.price | money }}</div>
+        {%- if section.settings.total_hint != blank -%}<div class="lx-totalHint">{{ section.settings.total_hint }}</div>{%- endif -%}
+      </div>
+      <div class="lx-atc" data-atc-form>
+        <button class="lx-atcBtn is-disabled" type="button" data-atc-btn>
+          <span data-atc-label>{{ section.settings.atc_label }}</span>
+        </button>
+        <div class="lx-atcHint" data-atc-hint aria-live="polite">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M7 4V7.5M7 9.5V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <span data-atc-hint-text></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FEATURES ═══ -->
+  <div class="lx-features">
+    <div class="lx-card lx-featureCard" style="background:{{ section.settings.feature_left_bg }}">
+      {%- if section.settings.feature_left_image != blank -%}{{ section.settings.feature_left_image | image_url: width: 500 | image_tag: class: "lx-featureImg", loading: "lazy", alt: "Feature" }}{%- endif -%}
+      <h4 class="lx-h4">{{ section.settings.feature_left_title }}</h4>
+      <p class="lx-kicker">{{ section.settings.feature_left_kicker }}</p>
+    </div>
+    <div class="lx-featureQuote">
+      <p class="lx-quote">{{ section.settings.quote_text }}</p>
+      <div class="lx-stars">★★★★★ <span class="lx-rating">{{ section.settings.rating_text }}</span></div>
+    </div>
+    <div class="lx-card lx-testimonial" style="background:{{ section.settings.testimonial_bg }}">
+      <p class="lx-testimonialText">{{ section.settings.testimonial_text }}</p>
+      <div class="lx-person">
+        {%- if section.settings.testimonial_avatar != blank -%}{{ section.settings.testimonial_avatar | image_url: width: 100 | image_tag: class: "lx-personImg", loading: "lazy", alt: "Cliente" }}{%- endif -%}
+        <div>
+          <div class="lx-personName">{{ section.settings.testimonial_name }}</div>
+          <div class="lx-personSub">{{ section.settings.testimonial_sub }}</div>
+        </div>
+      </div>
+      <span class="lx-testimonialMark" aria-hidden="true">❞</span>
+      <span class="lx-testimonialArrow" aria-hidden="true">↗</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var R = document.currentScript.closest('.lx-wrap');
+  if(!R) return;
+
+  /* ═══ Refs ═══ */
+  var grid      = R.querySelector('.lx-comboGrid'),
+      btn       = R.querySelector('[data-atc-btn]'),
+      btnLabel  = R.querySelector('[data-atc-label]'),
+      totalEl   = R.querySelector('[data-total]'),
+      hintEl    = R.querySelector('[data-atc-hint]'),
+      hintText  = R.querySelector('[data-atc-hint-text]'),
+      heroDyn   = R.querySelector('[data-hero-dynamic]'),
+      basePrice = parseInt(grid.dataset.lxBasePrice)||0,
+      comboVid  = {{ current_variant.id | json }},
+      slots     = R.querySelectorAll('.lx-slot'),
+      ready     = false,
+      childMissing = false,
+      slot1Img  = null,
+      hintT     = null,
+      mobileMq  = window.matchMedia('(max-width: 989px)');
+
+  /* ═══ Helpers ═══ */
+  function money(c){var v=(Math.round(c)/100).toFixed(2).split('.'),i=v[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');return'R$ '+i+','+v[1]}
+
+  function isMobile(){return mobileMq.matches}
+
+  function heroImg(u){if(!heroDyn)return;u?(heroDyn.src=u,heroDyn.classList.add('is-active')):heroDyn.classList.remove('is-active')}
+
+  function closeAll(){R.querySelectorAll('.lx-csel.is-open').forEach(function(e){e.classList.remove('is-open')})}
+  function openSelect(cs){if(!cs||cs.hidden)return;closeAll();cs.classList.add('is-open')}
+  document.addEventListener('pointerdown',function(e){if(!e.target.closest('.lx-csel'))closeAll()},{passive:true});
+  window.addEventListener('resize',closeAll,{passive:true});
+  window.addEventListener('orientationchange',closeAll,{passive:true});
+  window.addEventListener('scroll',closeAll,{passive:true});
+
+  /* ═══ Hint ═══ */
+  function showHint(m){
+    if(!hintEl)return;
+    hintText.textContent=m;
+    hintEl.classList.add('is-visible');
+    clearTimeout(hintT);
+    hintT=setTimeout(hideHint,5000);
+  }
+  function hideHint(){if(hintEl)hintEl.classList.remove('is-visible');clearTimeout(hintT)}
+
+  function nudge(slot,type){
+    if(!slot)return;
+    slot.classList.remove('is-nudge-slot');void slot.offsetWidth;slot.classList.add('is-nudge-slot');
+    setTimeout(function(){slot.classList.remove('is-nudge-slot')},500);
+    var c=slot.querySelector('[data-csel="'+type+'"]');
+    if(!c)return;
+    var t=c.querySelector('.lx-csel-trigger');
+    if(!t)return;
+    t.classList.remove('is-nudge');void t.offsetWidth;t.classList.add('is-nudge');
+    setTimeout(function(){t.classList.remove('is-nudge')},2000);
+  }
+
+  function getHint(){
+    var d1=slotData(slots[0]),d2=slotData(slots[1]);
+    if(!d1.p) return{m:'Escolha a estampa desejada para montar seu combo',s:slots[0],t:'product'};
+    if(!d1.v) return{m:'Selecione o tamanho adulto para continuar',s:slots[0],t:'variant'};
+    if(d2.p&&!d2.v) return{m:'Falta selecionar o tamanho infantil',s:slots[1],t:'variant'};
+    if(!d2.p&&!slots[1].classList.contains('is-waiting')) return{m:'Selecione o produto infantil',s:slots[1],t:'product'};
+    var xa=exChk&&exChk.checked&&exW&&!exW.hidden;
+    if(xa){var u=exRows.filter(function(r){return!r.fv});if(u.length)return{m:'Defina o tamanho da camiseta extra',s:null,t:null}}
+    return{m:'Complete as seleções acima',s:null,t:null};
+  }
+
+  /* ═══ Extra ═══ */
+  var exW=R.querySelector('[data-extra-wrap]'),exChk=R.querySelector('[data-extra-checkbox]'),
+      exBody=R.querySelector('[data-extra-body]'),exRowsC=R.querySelector('[data-extra-rows]'),
+      exAdd=R.querySelector('[data-extra-add]'),exCount=R.querySelector('[data-extra-count]'),
+      exThumb=R.querySelector('[data-extra-thumb]'),exPrice=R.querySelector('[data-extra-price]'),
+      exDesign=R.querySelector('[data-extra-design]'),
+      exRows=[],exKidsV=[],exChildT='',exUnit=0,exFixed=null;
+
+  try{var ep=grid.dataset.lxExtraProduct;if(ep)exFixed=JSON.parse(ep)}catch(e){}
+
+  function normSizeTitle(t){
+    return String(t||'').toLowerCase().replace(/\s+/g,' ').trim();
+  }
+
+  function sizeDigits(t){
+    var m=String(t||'').match(/\d+/);
+    return m?m[0]:'';
+  }
+
+  function findFixed(childVariant){
+    if(!exFixed||!exFixed.variants||!childVariant)return null;
+
+    var raw=normSizeTitle(childVariant.title);
+    var num=sizeDigits(childVariant.title);
+    var i,v;
+
+    for(i=0;i<exFixed.variants.length;i++){
+      v=exFixed.variants[i];
+      if(normSizeTitle(v.title)===raw)return v;
+    }
+
+    if(num){
+      for(i=0;i<exFixed.variants.length;i++){
+        v=exFixed.variants[i];
+        if(sizeDigits(v.title)===num)return v;
+      }
+    }
+
+    return null;
+  }
+
+  function sizes(){
+    return exKidsV.map(function(k){
+      var f=findFixed(k);
+      var childOk=!!k.available;
+      var fixedOk=!!(f&&f.available);
+      return{
+        title:k.title,
+        label:k.title==='Default Title'?'Único':k.title,
+        ok:childOk&&fixedOk,
+        childOk:childOk,
+        fixedOk:fixedOk,
+        noF:!f,
+        fv:f
+      };
+    });
+  }
+
+  function updCount(){
+    exRows.forEach(function(r,i){var n=r.el.querySelector('.lx-extra-rowNum');if(n)n.textContent=(i+1)+'ª'});
+    if(!exCount)return;
+    var f=exRows.filter(function(r){return r.fv}).length;
+    if(exRows.length){exCount.hidden=false;exCount.innerHTML='<b>'+exRows.length+'</b> camiseta'+(exRows.length>1?'s':'')+' extra'+(exRows.length>1?'s':'')+(f<exRows.length?' · <span style="color:#c00">'+(exRows.length-f)+' sem tamanho</span>':'')}
+    else exCount.hidden=true;
+  }
+
+  function addRow(auto){
+    var row={el:null,fv:null},div=document.createElement('div');div.className='lx-extra-row';
+    var sz=sizes();if(!sz.some(function(s){return s.ok})&&exRows.length)return;
+
+    div.innerHTML='<span class="lx-extra-rowNum">'+(exRows.length+1)+'ª</span><div class="lx-csel"><button type="button" class="lx-csel-trigger" data-trigger><span class="lx-csel-label" data-label>{{ section.settings.extra_size_placeholder | default: "Selecione o tamanho" }}</span><svg class="lx-csel-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="lx-csel-dropdown"><ul class="lx-csel-list"></ul></div></div><button type="button" class="lx-extra-rowDel" data-row-del title="Remover">×</button>';
+
+    var cs=div.querySelector('.lx-csel'),ls=cs.querySelector('.lx-csel-list'),lb=cs.querySelector('[data-label]'),tr=cs.querySelector('[data-trigger]'),dl=div.querySelector('[data-row-del]');
+
+    sz.forEach(function(s){
+      var li=document.createElement('li');
+      var meta='';
+      li.className='lx-csel-opt';
+      if(!s.ok)li.setAttribute('data-disabled','true');
+
+      if(!s.ok){
+        if(s.noF)meta='Sem variante correspondente no produto extra';
+        else if(!s.childOk)meta='Esgotado no infantil selecionado';
+        else if(!s.fixedOk)meta='Indisponível no produto extra';
+        else meta='Indisponível';
+      }
+
+      li.innerHTML='<div class="lx-csel-optText"><div>'+s.label+'</div>'+(meta?'<div class="lx-csel-optMeta">'+meta+'</div>':'')+'</div>';
+      li.addEventListener('click',function(e){e.stopPropagation();if(!s.ok)return;var p=ls.querySelector('.is-selected');if(p)p.classList.remove('is-selected');li.classList.add('is-selected');lb.textContent=s.label;cs.classList.remove('is-open');row.fv=s.fv;updCount();sync()});
+      ls.appendChild(li);
+    });
+
+    tr.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();var o=cs.classList.contains('is-open');closeAll();if(!o)cs.classList.add('is-open')});
+    dl.addEventListener('click',function(){var i=exRows.indexOf(row);if(i>-1){exRows.splice(i,1);div.remove();updCount();if(!exRows.length){exChk.checked=false;exBody.hidden=true;exW.classList.remove('is-active')}sync()}});
+
+    row.el=div;exRows.push(row);exRowsC.appendChild(div);updCount();sync();
+    if(auto!==false&&!isMobile())setTimeout(function(){openSelect(cs)},120);
+  }
+
+  function setupEx(child){
+    if(!exW||!exFixed||!exFixed.variants.length)return;
+    exChildT=child.title||'';exKidsV=child.variants||[];
+    if(exThumb)exThumb.src=child.featured_image||exFixed.featured_image||'';
+    if(exDesign)exDesign.textContent=child.title||'';
+    exUnit=exFixed.variants[0].price||0;
+    if(exPrice)exPrice.innerHTML='+ '+money(exUnit)+' <span class="lx-extra-priceUnit">/un</span>';
+    exChk.checked=false;exBody.hidden=true;exW.classList.remove('is-active');
+    exRows=[];exRowsC.innerHTML='';if(exCount)exCount.hidden=true;
+    exW.hidden=false;exW.classList.remove('lx-extra--entering');void exW.offsetWidth;exW.classList.add('lx-extra--entering');
+    sync();
+  }
+
+  function hideEx(){
+    if(!exW)return;exW.hidden=true;exChildT='';exKidsV=[];exRows=[];
+    if(exRowsC)exRowsC.innerHTML='';if(exChk)exChk.checked=false;
+    if(exBody)exBody.hidden=true;if(exW)exW.classList.remove('is-active');sync();
+  }
+
+  if(exChk)exChk.addEventListener('change',function(){var c=exChk.checked;exBody.hidden=!c;exW.classList.toggle('is-active',c);if(c){if(!exRows.length)addRow(true)}else{exRows=[];exRowsC.innerHTML='';if(exCount)exCount.hidden=true}sync()});
+  if(exAdd)exAdd.addEventListener('click',function(){addRow(true)});
+
+  /* ═══ Selectors ═══ */
+  function renderOpts(cs,items,type,cb){
+    var ls=cs.querySelector('[data-list]');ls.innerHTML='';
+    items.forEach(function(it){
+      var li=document.createElement('li');li.className='lx-csel-opt';
+      if(type==='variant'&&!it.available)li.setAttribute('data-disabled','true');
+      var lab=it.title,sub='';
+      if(type==='variant'){lab=it.title==='Default Title'?'Único':it.title;if(!it.available)sub='Esgotado'}
+      var h='';if(type==='product'&&it.featured_image)h+='<img src="'+it.featured_image+'" class="lx-csel-optImg" loading="lazy">';
+      h+='<div class="lx-csel-optText"><div>'+lab+'</div>';if(sub)h+='<div class="lx-csel-optMeta">'+sub+'</div>';h+='</div>';
+      li.innerHTML=h;
+      li.addEventListener('click',function(e){e.stopPropagation();if(li.hasAttribute('data-disabled'))return;var p=ls.querySelector('.is-selected');if(p)p.classList.remove('is-selected');li.classList.add('is-selected');cs.querySelector('[data-label]').textContent=lab;var hi=cs.querySelector('input[type="hidden"]');if(hi)hi.value=it.id;cs.classList.remove('is-open');hideHint();cb(it)});
+      ls.appendChild(li);
+    });
+  }
+
+  function lockChild(parent){
+    var s2=slots[1],ps=s2.querySelector('[data-csel="product"]'),vs=s2.querySelector('[data-csel="variant"]'),
+        pi=ps.querySelector('input[type="hidden"]'),vi=vs.querySelector('input[type="hidden"]'),
+        pl=ps.querySelector('[data-label]'),ti=s2.querySelector('[data-thumb-img]');
+
+    childMissing=false;s2._locked=false;ps.classList.remove('is-locked');s2.classList.remove('is-waiting');
+
+    var cid=parent.child_product_id;
+    if(!cid){childMissing=true;pi.value='';vi.value='';pl.textContent='{{ section.settings.choice_label }} 2';vs.hidden=true;ti.hidden=true;s2.classList.add('is-waiting');hideEx();sync();return}
+
+    var pool=s2._prods||[],cp=null;
+    for(var i=0;i<pool.length;i++)if(String(pool[i].id)===String(cid)){cp=pool[i];break}
+    if(!cp){childMissing=true;pi.value='';vi.value='';pl.textContent='{{ section.settings.choice_label }} 2';vs.hidden=true;ti.hidden=true;s2.classList.add('is-waiting');hideEx();sync();return}
+
+    pl.textContent=cp.title;pi.value=cp.id;
+    cp.featured_image?(ti.src=cp.featured_image,ti.hidden=false):ti.hidden=true;
+    s2._locked=true;ps.classList.add('is-locked');
+    vs.hidden=false;vi.value='';vs.querySelector('[data-label]').textContent='{{ section.settings.select_variant_placeholder }}';
+    vs.style.opacity='0';setTimeout(function(){vs.style.opacity='1'},50);
+
+    renderOpts(vs,cp.variants,'variant',function(v){if(v.featured_image)ti.src=v.featured_image;sync()});
+    if(cp.variants.length===1&&cp.variants[0].available){var o=vs.querySelectorAll('.lx-csel-opt');if(o.length)o[0].click()}
+    setupEx(cp);sync();
+  }
+
+  function initSlot(slot,idx){
+    var prods=[];try{prods=JSON.parse(slot.dataset.products||'[]')}catch(e){}
+    slot._prods=prods;slot._locked=false;
+    if(idx===1)slot.classList.add('is-waiting');
+    var ps=slot.querySelector('[data-csel="product"]'),vs=slot.querySelector('[data-csel="variant"]'),
+        vi=vs.querySelector('input'),ti=slot.querySelector('[data-thumb-img]');
+
+    ps.querySelector('[data-trigger]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(slot._locked||slot.classList.contains('is-waiting'))return;var o=ps.classList.contains('is-open');closeAll();if(!o)ps.classList.add('is-open')});
+
+    renderOpts(ps,prods,'product',function(p){
+      p.featured_image?(ti.src=p.featured_image,ti.hidden=false):ti.hidden=true;
+      if(idx===0){slot1Img=p.featured_image||null;heroImg(slot1Img)}
+      vs.hidden=false;vi.value='';vs.querySelector('[data-label]').textContent='{{ section.settings.select_variant_placeholder }}';
+      vs.style.opacity='0';setTimeout(function(){vs.style.opacity='1'},50);
+      renderOpts(vs,p.variants,'variant',function(v){if(v.featured_image)ti.src=v.featured_image;if(idx===0)heroImg(v.featured_image||slot1Img);sync()});
+      if(p.variants.length===1&&p.variants[0].available){var o=vs.querySelectorAll('.lx-csel-opt');if(o.length)o[0].click()}
+      else if(!isMobile()) setTimeout(function(){openSelect(vs)},120);
+      if(idx===0)lockChild(p);
+      sync();
+    });
+
+    vs.querySelector('[data-trigger]').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(slot.classList.contains('is-waiting'))return;var o=vs.classList.contains('is-open');closeAll();if(!o)vs.classList.add('is-open')});
+  }
+
+  function slotData(s){
+    var lp=s._prods||[],pid=s.querySelector('[data-csel="product"] input').value,vid=s.querySelector('[data-csel="variant"] input').value,p=null,v=null;
+    for(var i=0;i<lp.length;i++)if(String(lp[i].id)===String(pid)){p=lp[i];break}
+    if(p)for(var j=0;j<p.variants.length;j++)if(String(p.variants[j].id)===String(vid)){v=p.variants[j];break}
+    return{p:p,v:v};
+  }
+
+  function sync(){
+    var d1=slotData(slots[0]),d2=slotData(slots[1]),
+        xa=exChk&&exChk.checked&&exW&&!exW.hidden,ef=0;
+    if(xa)exRows.forEach(function(r){if(r.fv)ef++});
+    var xv=!xa||(xa&&exRows.length&&ef===exRows.length);
+    ready=!!(d1.p&&d1.v&&d2.p&&d2.v&&xv&&!childMissing);
+    btn.classList.toggle('is-disabled',!ready);
+    if(ready)hideHint();
+    var tot=basePrice;if(xa)tot+=ef*exUnit;
+    totalEl.textContent=money(tot);
+  }
+
+  /* ═══ ATC ═══ */
+  btn.addEventListener('click',function(e){
+    if(!ready){
+      e.preventDefault();e.stopPropagation();
+      var h=getHint();
+      showHint(h.m);
+      if(h.s){
+        nudge(h.s,h.t);
+        var r=h.s.getBoundingClientRect();
+        if(r.top<0||r.bottom>window.innerHeight)h.s.scrollIntoView({behavior:'smooth',block:'center'});
+      }
+      return;
+    }
+
+    (async function(){
+      var d1=slotData(slots[0]),d2=slotData(slots[1]);
+      if(!d1.v||!d2.v)return;
+      var orig=btnLabel.textContent;
+      btn.classList.add('is-disabled');btnLabel.textContent='Adicionando...';
+
+      var items=[{id:comboVid,quantity:1,properties:{
+        '_combo_choice_1_product':d1.p?d1.p.title:'','_combo_choice_1_variant':d1.v?d1.v.title:'',
+        '_combo_choice_2_product':d2.p?d2.p.title:'','_combo_choice_2_variant':d2.v?d2.v.title:''
+      }}];
+
+      var xa=exChk&&exChk.checked&&exW&&!exW.hidden;
+      if(xa&&exRows.length){
+        var map={};
+        exRows.forEach(function(r){if(!r.fv)return;var k=String(r.fv.id);if(!map[k])map[k]={id:parseInt(r.fv.id),qty:0};map[k].qty++});
+        Object.keys(map).forEach(function(k){items.push({id:map[k].id,quantity:map[k].qty,properties:{'_combo_extra':'T-shirt Infantil Extra','_estampa':exChildT}})});
+      }
+
+      try{
+        var sids=[];document.querySelectorAll('cart-items-component[data-section-id]').forEach(function(el){if(el.dataset.sectionId)sids.push(el.dataset.sectionId)});
+        var body={items:items};if(sids.length){body.sections=sids.join(',');body.sections_url=window.location.pathname}
+        var res=await fetch('/cart/add.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        var data=await res.json();if(!res.ok)throw new Error(data.message||data.description||'Falha');
+
+        var hsi=sids[0]||'header_section';
+        function dc(s){document.dispatchEvent(new CustomEvent('cart:update',{bubbles:true,detail:{resource:{},sourceId:'combo',data:{source:'combo',itemCount:items.length,sections:s||undefined}}}))}
+        function oc(){try{document.dispatchEvent(new CustomEvent('cart:open',{bubbles:true}));return}catch(_){}var b=document.querySelector('[data-cart-drawer-open]');if(b)b.click()}
+        if(data.sections&&data.sections[hsi]){dc(data.sections);oc()}
+        else{var u=new URL(window.location.href);u.searchParams.set('sections',hsi);fetch(u).then(function(r){return r.json()}).then(function(j){if(j&&j[hsi])dc(j);oc()}).catch(oc)}
+        btnLabel.textContent='Adicionado ✓';
+      }catch(err){btnLabel.textContent='Erro';alert(err.message||'Erro')}
+      setTimeout(function(){btn.classList.toggle('is-disabled',!ready);btnLabel.textContent=orig},2000);
+    })();
+  });
+
+  slots.forEach(initSlot);
+})();
+</script>
+
+</section>
+
+{% schema %}
+{
+  "name": "Combo Pais e filhos2",
+  "settings": [
+    { "type": "range", "id": "max_width", "label": "Largura máxima (px)", "min": 980, "max": 1400, "step": 10, "default": 1200 },
+    { "type": "color", "id": "page_bg", "label": "Background da seção", "default": "#f6f2ee" },
+    { "type": "color", "id": "card_bg", "label": "Background dos cards", "default": "#ffffff" },
+    { "type": "color", "id": "border_color", "label": "Cor da borda", "default": "#e5e5e5" },
+    { "type": "color", "id": "text_color", "label": "Cor do texto", "default": "#1a1a1a" },
+    { "type": "color", "id": "muted_color", "label": "Cor do texto secundário", "default": "#666666" },
+    { "type": "range", "id": "radius", "label": "Raio (px)", "min": 12, "max": 48, "step": 2, "default": 24 },
+    { "type": "text", "id": "shadow", "label": "Box-shadow", "default": "0 20px 40px rgba(0,0,0,0.06)" },
+    { "type": "header", "content": "Hero" },
+    { "type": "text", "id": "hero_title", "label": "Título", "default": "Revele o Potencial" },
+    { "type": "text", "id": "hero_title_italic", "label": "Título (Itálico)", "default": "da sua Pele" },
+    { "type": "richtext", "id": "hero_body", "label": "Corpo", "default": "<p>Descrição curta e elegante.</p>" },
+    { "type": "text", "id": "hero_button_label", "label": "Botão", "default": "Comprar Agora" },
+    { "type": "url", "id": "hero_button_link", "label": "Link" },
+    { "type": "image_picker", "id": "hero_image", "label": "Imagem Hero (fallback)" },
+    { "type": "text", "id": "badge_1", "label": "Badge 1" },
+    { "type": "text", "id": "badge_2", "label": "Badge 2" },
+    { "type": "text", "id": "badge_3", "label": "Badge 3" },
+    { "type": "header", "content": "Cards Laterais" },
+    { "type": "color", "id": "stat_card_bg", "label": "BG Stat", "default": "#e8e4e0" },
+    { "type": "text", "id": "stat_text", "label": "Texto Stat", "default": "Mais de 3k clientes satisfeitos." },
+    { "type": "image_picker", "id": "avatar_1", "label": "Avatar 1" },
+    { "type": "image_picker", "id": "avatar_2", "label": "Avatar 2" },
+    { "type": "color", "id": "promo_card_bg", "label": "BG Promo", "default": "#8eb1c4" },
+    { "type": "text", "id": "promo_title", "label": "Título Promo", "default": "New Collection" },
+    { "type": "text", "id": "promo_tag", "label": "Tag Promo", "default": "2024" },
+    { "type": "image_picker", "id": "promo_image", "label": "Imagem Promo" },
+    { "type": "text", "id": "promo_footer", "label": "Footer Promo", "default": "Limited Edition" },
+    { "type": "header", "content": "Combo Builder" },
+    { "type": "text", "id": "combo_eyebrow", "label": "Eyebrow", "default": "Monte seu Kit" },
+    { "type": "text", "id": "combo_title", "label": "Título Combo", "default": "Crie seu Combo" },
+    { "type": "text", "id": "combo_subtitle", "label": "Subtítulo", "default": "Escolha 2 produtos abaixo" },
+    { "type": "text", "id": "choice_label", "label": "Label Escolha", "default": "Escolha o produto" },
+    { "type": "text", "id": "select_variant_placeholder", "label": "Placeholder Variante", "default": "Selecione a opção" },
+    { "type": "header", "content": "T-shirt Infantil Extra" },
+    { "type": "product", "id": "extra_kids_product", "label": "Produto Extra (R$69,90)" },
+    { "type": "text", "id": "extra_label", "label": "Label do add-on", "default": "Adicionar T-shirt Infantil Extra" },
+    { "type": "text", "id": "extra_sublabel", "label": "Sublabel", "default": "Mesma estampa, outro tamanho" },
+    { "type": "text", "id": "extra_size_placeholder", "label": "Placeholder tamanho", "default": "Selecione o tamanho" },
+    { "type": "header", "content": "Footer / Total" },
+    { "type": "text", "id": "total_label", "label": "Label Total", "default": "Total" },
+    { "type": "text", "id": "total_hint", "label": "Texto Apoio Total", "default": "Frete calculado no checkout" },
+    { "type": "text", "id": "atc_label", "label": "Texto Botão ATC", "default": "Adicionar Combo ao Carrinho" },
+    { "type": "header", "content": "Features / Footer" },
+    { "type": "color", "id": "feature_left_bg", "label": "BG Feature Left", "default": "#f5f5f5" },
+    { "type": "image_picker", "id": "feature_left_image", "label": "Img Feature Left" },
+    { "type": "text", "id": "feature_left_title", "label": "Titulo Feature Left" },
+    { "type": "text", "id": "feature_left_kicker", "label": "Kicker Feature Left" },
+    { "type": "textarea", "id": "quote_text", "label": "Quote", "default": "Depoimento principal aqui." },
+    { "type": "text", "id": "rating_text", "label": "Rating Text", "default": "4.9/5" },
+    { "type": "color", "id": "testimonial_bg", "label": "BG Testimonial", "default": "#dcc6b9" },
+    { "type": "textarea", "id": "testimonial_text", "label": "Texto Testimonial", "default": "Amei o produto!" },
+    { "type": "image_picker", "id": "testimonial_avatar", "label": "Avatar Testimonial" },
+    { "type": "text", "id": "testimonial_name", "label": "Nome Testimonial", "default": "Ana S." },
+    { "type": "text", "id": "testimonial_sub", "label": "Sub Testimonial", "default": "Cliente Verificada" }
+  ],
+  "blocks": [
+    {
+      "type": "combo_product",
+      "name": "Produto do Combo",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Produto" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Combo Pais e filhos2" }
+  ]
+}
+{% endschema %}

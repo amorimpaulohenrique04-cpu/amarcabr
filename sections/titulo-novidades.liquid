@@ -1,0 +1,210 @@
+<noscript></noscript>
+{%- style -%}
+  .editorial-header-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: transparent;
+    width: 100%;
+    display: block;
+    /* Removido overflow que causava comportamento estranho */
+  }
+
+  .editorial-container-{{ section.id }} {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin-inline: auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+    text-align: {{ section.settings.text_alignment }};
+  }
+
+  .editorial-title-{{ section.id }} {
+    /* 1. Tipografia */
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 400; 
+    color: {{ section.settings.color_text }};
+    
+    /* 2. Métricas */
+    line-height: 1; 
+    letter-spacing: 0.05em; 
+    
+    /* 3. Proximidade */
+    margin: 0 0 {{ section.settings.margin_bottom_title }}px 0;
+    
+    text-transform: none;
+    font-size: {{ section.settings.size_mobile }}px;
+    
+    /* 4. CORREÇÃO DA ROLAGEM (Magic Fix) */
+    display: inline-block; /* Garante que o transform funcione apenas no texto */
+    /* Usar transform evita que a largura da página aumente */
+    {% if section.settings.text_alignment == 'left' %}
+      transform: translateX({{ section.settings.optical_offset }}px);
+    {% endif %}
+    
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media screen and (min-width: 990px) {
+    .editorial-header-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_desktop }}px;
+      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+    }
+    
+    .editorial-title-{{ section.id }} {
+      font-size: {{ section.settings.size_desktop }}px;
+      max-width: 1000px;
+      
+      {% if section.settings.text_alignment == 'left' %}
+        margin-left: 0;
+        margin-right: auto;
+      {% else %}
+        margin-left: auto;
+        margin-right: auto;
+      {% endif %}
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .editorial-title-{{ section.id }} {
+       /* No mobile zeramos o offset para não quebrar a tela pequena */
+       transform: translateX(0px); 
+    }
+  }
+{%- endstyle -%}
+
+<div class="editorial-header-{{ section.id }}">
+  <div class="editorial-container-{{ section.id }}">
+    <h2 class="editorial-title-{{ section.id }}">
+      {{ section.settings.title }}
+    </h2>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Título Label (Editorial)",
+  "tag": "section",
+  "class": "section-editorial-label",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Texto",
+      "default": "Novidades"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Alinhamento",
+      "options": [
+        { "value": "left", "label": "Esquerda (Editorial)" },
+        { "value": "center", "label": "Centro" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Cor do Texto",
+      "default": "#4b4b4b"
+    },
+    {
+      "type": "header",
+      "content": "Ajuste Fino (Offset)"
+    },
+    {
+      "type": "range",
+      "id": "optical_offset",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Mover para direita (px)",
+      "default": 0,
+      "info": "Use para alinhar visualmente com a foto. Não cria rolagem."
+    },
+    {
+      "type": "header",
+      "content": "Tipografia"
+    },
+    {
+      "type": "range",
+      "id": "size_desktop",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho Desktop",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "size_mobile",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Tamanho Mobile",
+      "default": 18
+    },
+    {
+      "type": "header",
+      "content": "Espaçamento"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom_title",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Margem Inferior",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Topo (Desktop)",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Base (Desktop)",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Topo (Mobile)",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Base (Mobile)",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Título Label (Editorial)"
+    }
+  ]
+}
+{% endschema %}

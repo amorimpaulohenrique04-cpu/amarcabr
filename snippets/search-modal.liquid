@@ -1,0 +1,214 @@
+<script>
+  (function () {
+    if (window.__amSearchModalBooted) return;
+    window.__amSearchModalBooted = true;
+
+    var searchModulePromise = null;
+    var dialogModulePromise = null;
+    var lastOpenAt = 0;
+
+    function ensureDialogModule() {
+      if (!dialogModulePromise) {
+        dialogModulePromise = import("{{ 'dialog.js' | asset_url }}").catch(function (err) {
+          dialogModulePromise = null;
+          throw err;
+        });
+      }
+      return dialogModulePromise;
+    }
+
+    function ensureSearchModule() {
+      if (!searchModulePromise) {
+        searchModulePromise = import("{{ 'am-instant-search.js' | asset_url }}").catch(function (err) {
+          searchModulePromise = null;
+          throw err;
+        });
+      }
+      return searchModulePromise;
+    }
+
+    function ensureSearchReady() {
+      return Promise.allSettled([ensureDialogModule(), ensureSearchModule()]);
+    }
+
+    function getModal() {
+      return document.getElementById('search-modal');
+    }
+
+    function getDialog(modal) {
+      return modal ? modal.querySelector('dialog') : null;
+    }
+
+    function isOpen() {
+      var modal = getModal();
+      var dialog = getDialog(modal);
+      return !!(dialog && dialog.open);
+    }
+
+    function openSearch() {
+      var modal = getModal();
+      if (!modal) return;
+
+      var dialog = getDialog(modal);
+      if (dialog && dialog.open) return;
+
+      ensureSearchReady().then(function () {
+        modal = getModal();
+        if (!modal) return;
+
+        dialog = getDialog(modal);
+        if (dialog && dialog.open) return;
+
+        if (typeof modal.showDialog === 'function') {
+          modal.showDialog();
+          return;
+        }
+
+        if (dialog && !dialog.open) {
+          window.AMOverlay?.closeAll?.({ except: dialog });
+          try {
+            dialog.showModal();
+          } catch (_) {
+            dialog.setAttribute('open', '');
+          }
+        }
+      });
+    }
+
+    function closeSearch() {
+      var modal = getModal();
+      if (!modal) return;
+
+      if (typeof modal.closeDialog === 'function') {
+        modal.closeDialog();
+        return;
+      }
+
+      var dialog = getDialog(modal);
+      if (!dialog || !dialog.open) return;
+
+      dialog.classList.add('dialog-closing');
+      window.setTimeout(function () {
+        dialog.classList.remove('dialog-closing');
+        try {
+          dialog.close();
+        } catch (_) {
+          dialog.removeAttribute('open');
+        }
+      }, 180);
+    }
+
+    document.addEventListener('pointerdown', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (!t.closest('.search-modal__button')) return;
+      ensureSearchReady().catch(function () {});
+    }, { passive: true });
+
+    document.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+
+      if (t.closest('.search-modal__button')) {
+        if (isOpen()) return;
+
+        var now = Date.now();
+        if (now - lastOpenAt < 250) return;
+        lastOpenAt = now;
+
+        e.preventDefault();
+        e.stopPropagation();
+        openSearch();
+        return;
+      }
+
+      if (t.closest('.am-search__close, .predictive-search__close-modal-button')) {
+        if (!isOpen()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        closeSearch();
+      }
+    }, { capture: true, passive: false });
+  })();
+</script>
+
+<dialog-component
+  id="search-modal"
+  class="search-modal"
+  {{ block.shopify_attributes }}
+>
+  <dialog
+    ref="dialog"
+    class="search-modal__content dialog-modal"
+    scroll-lock
+    aria-labelledby="search-modal-heading"
+  >
+    <h2 id="search-modal-heading" class="visually-hidden">
+      {{ 'content.search' | t }}
+    </h2>
+
+    <form
+      action="{{ routes.search_url }}"
+      method="get"
+      role="search"
+      class="predictive-search-form"
+    >
+      <div class="predictive-search-form__header">
+        <div class="predictive-search-form__header-inner">
+          {% render 'am-instant-search',
+            input_id: 'am-search-input-modal',
+            results_id: 'am-search-results-modal',
+            limit: 8
+          %}
+        </div>
+
+      
+      </div>
+    </form>
+  </dialog>
+</dialog-component>
+
+{% stylesheet %}
+  .search-modal {
+    --search-border-radius: var(--style-border-radius-popover);
+  }
+
+  @keyframes animateMenuOpen {
+    0% { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes animateMenuClose {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0; }
+  }
+
+  /* Containers esticam para preencher o dialog inteiro */
+  .search-modal__content .predictive-search-form,
+  .search-modal__content .predictive-search-form__header,
+  .search-modal__content .predictive-search-form__header-inner {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  .predictive-search__close-modal-button {
+    --button-color: var(--color-foreground);
+    --button-background-color: transparent;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: var(--minimum-touch-target);
+    height: var(--minimum-touch-target);
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .predictive-search__close-modal-button:active {
+    transform: scale(0.9);
+    transition: transform 100ms var(--animation-timing-active);
+  }
+{% endstylesheet %}

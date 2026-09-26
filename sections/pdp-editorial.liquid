@@ -1,0 +1,652 @@
+{% comment %}
+  Section: Creative About Us (Editorial + Responsive)
+  ✅ Alinhada com o menu da header (mesma lógica do seu PDP alinhado):
+     - max-width: var(--am-header-max, var(--page-width, 1240px))
+     - padding-inline: var(--am-header-x, var(--page-margin, 16px))
+  ✅ Mantém o resto igual (inclui marquee full-bleed)
+{% endcomment %}
+
+{%- liquid
+  assign sid = section.id
+  assign bg = section.settings.bg_color
+  assign text = section.settings.text_color
+  assign muted = section.settings.muted_text_color
+  assign accent = section.settings.accent_color
+  assign badge_bg = section.settings.badge_bg
+  assign marquee_bg = section.settings.marquee_bg
+  assign marquee_text = section.settings.marquee_text_color
+-%}
+
+{%- if section.settings.load_google_fonts -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet"></noscript>
+{%- endif -%}
+
+<style>
+  #CreativeAboutUs-{{ sid }}{
+    --cau-bg: {{ bg }};
+    --cau-text: {{ text }};
+    --cau-muted: {{ muted }};
+    --cau-accent: {{ accent }};
+    --cau-badge-bg: {{ badge_bg }};
+    --cau-marquee-bg: {{ marquee_bg }};
+    --cau-marquee-text: {{ marquee_text }};
+
+    background-color: var(--cau-bg);
+    color: var(--cau-text);
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-font-heading{
+    font-family: {% if section.settings.load_google_fonts %}'Playfair Display'{% else %}serif{% endif %}, serif;
+  }
+  #CreativeAboutUs-{{ sid }} .cau-font-script{
+    font-family: {% if section.settings.load_google_fonts %}'Great Vibes'{% else %}cursive{% endif %}, cursive;
+  }
+
+  #CreativeAboutUs-{{ sid }} h2,
+  #CreativeAboutUs-{{ sid }} h3,
+  #CreativeAboutUs-{{ sid }} h4{
+    margin: 0;
+    line-height: 1.1;
+    color: var(--cau-text);
+  }
+
+  /* IMPORTANTÍSSIMO: padding vertical só aqui */
+  #CreativeAboutUs-{{ sid }} .cau-wrapper{
+    padding-top: clamp(40px, 5vw, 80px);
+    padding-bottom: clamp(40px, 5vw, 80px);
+  }
+
+  /* ✅ CONTAINER ALINHADO COM MENU/HEADER (igual ao PDP alinhado) */
+  #CreativeAboutUs-{{ sid }} .cau-container{
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin: 0 auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+  }
+
+  /* --- HERO --- */
+  #CreativeAboutUs-{{ sid }} .cau-hero{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(22px, 4.2vw, 70px);
+    align-items: center;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-hero__media{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 10px;
+    background: rgba(255,255,255,0.5);
+
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-hero__img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-hero__content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-badge{
+  display: inline-block;
+  background-color: var(--cau-badge-bg);
+  color: #fff; /* ✅ branco fixo */
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 22px;
+  transform: rotate(-3deg);
+}
+
+  #CreativeAboutUs-{{ sid }} .cau-hero__title{
+    font-size: clamp(30px, 5vw, 64px);
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-wrap: balance;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-script-highlight{
+    font-family: 'Great Vibes', cursive;
+    color: var(--cau-accent);
+    font-weight: 400;
+    font-size: 1.3em;
+    margin: 0 4px;
+    display: inline-block;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-hero__text{
+    font-size: clamp(14px, 1.15vw, 18px);
+    color: var(--cau-muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  background-color: var(--cau-badge-bg);
+  color: #fff; /* ✅ branco fixo */
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: transform .2s, opacity .2s;
+  will-change: transform;
+}
+
+  #CreativeAboutUs-{{ sid }} .cau-btn:hover{
+    transform: translateY(-2px);
+    opacity: .9;
+  }
+
+  /* Tablet */
+  @media (min-width: 750px) and (max-width: 989px){
+    #CreativeAboutUs-{{ sid }} .cau-hero{
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: clamp(22px, 3.6vw, 56px);
+    }
+    #CreativeAboutUs-{{ sid }} .cau-hero__content{
+      align-items: flex-start;
+      text-align: left;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-hero__media{
+      max-width: 420px;
+      margin: 0;
+    }
+  }
+
+  /* Desktop */
+  @media (min-width: 990px){
+    #CreativeAboutUs-{{ sid }} .cau-hero{
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: clamp(40px, 5vw, 80px);
+    }
+    #CreativeAboutUs-{{ sid }} .cau-hero__content{
+      align-items: flex-start;
+      text-align: left;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-hero__media{
+      margin: 0;
+      max-width: 520px;
+    }
+  }
+
+  /* --- MARQUEE (full bleed) --- */
+  #CreativeAboutUs-{{ sid }} .cau-marquee-wrap{
+    background-color: var(--cau-marquee-bg);
+    color: var(--cau-marquee-text);
+    padding: 16px 0;
+    margin: 56px 0;
+    transform: rotate(-1deg);
+
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-marquee-content{
+    display: flex;
+    width: max-content;
+    animation: cau-scroll 30s linear infinite;
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-marquee-item{
+    font-size: clamp(16px, 2vw, 20px);
+    font-style: italic;
+    padding: 0 30px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    font-family: 'Playfair Display', serif;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-marquee-dot{
+    color: rgba(255,255,255,0.5);
+    margin-left: 30px;
+    font-size: 10px;
+  }
+
+  @keyframes cau-scroll{
+    0%{ transform: translateX(0); }
+    100%{ transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #CreativeAboutUs-{{ sid }} .cau-marquee-content{ animation: none; }
+    #CreativeAboutUs-{{ sid }} .cau-btn{ transition: none; }
+  }
+
+  /* --- JOURNEY --- */
+  #CreativeAboutUs-{{ sid }} .cau-journey{
+    position: relative;
+    margin-bottom: 56px;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-glow{
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%; height: 60%;
+    background: radial-gradient(circle, var(--cau-badge-bg) 0%, rgba(255,255,255,0) 70%);
+    opacity: .15;
+    filter: blur(60px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-section-header{
+    text-align: center;
+    margin-bottom: clamp(36px, 4vw, 60px);
+    position: relative;
+    z-index: 1;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-section-title{
+    font-size: clamp(28px, 4vw, 52px);
+    margin-bottom: 10px;
+    text-wrap: balance;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-section-sub{
+    color: var(--cau-muted);
+    font-size: clamp(14px, 1.6vw, 16px);
+    margin: 0;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestones{
+    display: flex;
+    flex-direction: column;
+    gap: clamp(40px, 5vw, 80px);
+    position: relative;
+    z-index: 1;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(18px, 3vw, 30px);
+    align-items: center;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone__media{
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #fff;
+    padding: 8px;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    transform: rotate(-1deg);
+    transition: transform .3s ease;
+    will-change: transform;
+
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone:hover .cau-milestone__media{
+    transform: rotate(0deg) scale(1.01);
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone__img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone__text-content{
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone__year{
+    font-family: 'Great Vibes', cursive;
+    color: var(--cau-accent);
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone__title{
+    font-size: clamp(20px, 2.3vw, 28px);
+    margin-bottom: 14px;
+    text-wrap: balance;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-milestone__desc{
+    color: var(--cau-muted);
+    line-height: 1.6;
+    font-size: clamp(14px, 1.35vw, 16px);
+  }
+
+  /* Tablet */
+  @media (min-width: 750px) and (max-width: 989px){
+    #CreativeAboutUs-{{ sid }} .cau-milestone{
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: clamp(26px, 4vw, 56px);
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone__media{
+      max-width: 360px;
+      margin: 0;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone__text-content{
+      text-align: left;
+      padding: 0;
+    }
+  }
+
+  /* Desktop ZigZag */
+  @media (min-width: 990px){
+    #CreativeAboutUs-{{ sid }} .cau-milestones{ gap: 100px; }
+    #CreativeAboutUs-{{ sid }} .cau-milestone{
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 80px;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone__media{
+      max-width: 460px;
+      margin: 0;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone__text-content{
+      text-align: left;
+      padding: 0;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone:nth-child(even) .cau-milestone__media{
+      order: 2;
+      transform: rotate(1deg);
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone:nth-child(even) .cau-milestone__text-content{
+      order: 1;
+      text-align: right;
+    }
+    #CreativeAboutUs-{{ sid }} .cau-milestone:nth-child(odd) .cau-milestone__text-content{ padding-right: 40px; }
+    #CreativeAboutUs-{{ sid }} .cau-milestone:nth-child(even) .cau-milestone__text-content{ padding-left: 40px; }
+  }
+
+  /* --- PHILOSOPHY --- */
+  #CreativeAboutUs-{{ sid }} .cau-cards{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 34px;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-card{
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 30px 22px;
+    text-align: center;
+    border-radius: 4px;
+    transition: transform .3s ease, box-shadow .3s ease, background .3s ease;
+    will-change: transform;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-card:hover{
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transform: translateY(-5px);
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-icon-wrap{
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--cau-badge-bg) 20%, transparent);
+    color: var(--cau-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-icon-wrap svg{ width: 28px; height: 28px; }
+
+  #CreativeAboutUs-{{ sid }} .cau-card__title{
+    font-size: clamp(18px, 2vw, 22px);
+    margin-bottom: 10px;
+  }
+
+  #CreativeAboutUs-{{ sid }} .cau-card__text{
+    font-size: 14px;
+    color: var(--cau-muted);
+    line-height: 1.5;
+  }
+
+  @media (min-width: 750px){
+    #CreativeAboutUs-{{ sid }} .cau-cards{
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+  }
+</style>
+
+<div id="CreativeAboutUs-{{ sid }}">
+  <!-- ✅ Em vez de .page-width, usamos o mesmo container do header/menu -->
+  <div class="cau-container am-page-width">
+    <div class="cau-wrapper">
+
+      <div class="cau-hero">
+        <div class="cau-hero__media">
+          {% if section.settings.hero_image != blank %}
+            {{ section.settings.hero_image | image_url: width: 1200 | image_tag: class: 'cau-hero__img', loading: 'lazy' }}
+          {% else %}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'cau-hero__img' }}
+          {% endif %}
+        </div>
+
+        <div class="cau-hero__content">
+          {% if section.settings.badge_text != blank %}
+            <span class="cau-badge">{{ section.settings.badge_text }}</span>
+          {% endif %}
+
+          <h2 class="cau-hero__title cau-font-heading">
+            {{ section.settings.heading | replace: '[script]', '<span class="cau-script-highlight">' | replace: '[/script]', '</span>' }}
+          </h2>
+
+          <div class="cau-hero__text">
+            {{ section.settings.body }}
+          </div>
+
+          {% if section.settings.button_label != blank %}
+            <a href="{{ section.settings.button_link }}" class="cau-btn">
+              {{ section.settings.button_label }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% capture marquee_items %}
+        {% for block in section.blocks %}
+          {% if block.type == 'marquee_item' %}
+            <div class="cau-marquee-item">
+              {{ block.settings.text }}
+              <span class="cau-marquee-dot">&bull;</span>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endcapture %}
+
+      {% if marquee_items != blank %}
+        <div class="cau-marquee-wrap">
+          <div class="cau-marquee-content">
+            {{ marquee_items }}
+            {{ marquee_items }}
+            {{ marquee_items }}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="cau-journey">
+        <div class="cau-glow"></div>
+
+        <div class="cau-section-header">
+          <h3 class="cau-section-title cau-font-heading">{{ section.settings.journey_heading }}</h3>
+          <p class="cau-section-sub">{{ section.settings.journey_subheading }}</p>
+        </div>
+
+        <div class="cau-milestones">
+          {% for block in section.blocks %}
+            {% if block.type == 'milestone' %}
+              <div class="cau-milestone" {{ block.shopify_attributes }}>
+                <div class="cau-milestone__media">
+                  {% if block.settings.image != blank %}
+                    {{ block.settings.image | image_url: width: 1000 | image_tag: class: 'cau-milestone__img', loading: 'lazy' }}
+                  {% else %}
+                    {{ 'collection-1' | placeholder_svg_tag: 'cau-milestone__img' }}
+                  {% endif %}
+                </div>
+
+                <div class="cau-milestone__text-content">
+                  {% if block.settings.year != blank %}
+                    <span class="cau-milestone__year">{{ block.settings.year }}</span>
+                  {% endif %}
+                  <h4 class="cau-milestone__title cau-font-heading">{{ block.settings.title }}</h4>
+                  <div class="cau-milestone__desc">{{ block.settings.text }}</div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="cau-philosophy">
+        <div class="cau-section-header">
+          <h3 class="cau-section-title cau-font-heading">{{ section.settings.philo_heading }}</h3>
+          <p class="cau-section-sub">{{ section.settings.philo_subheading }}</p>
+        </div>
+
+        <div class="cau-cards">
+          {% for block in section.blocks %}
+            {% if block.type == 'value' %}
+              <div class="cau-card" {{ block.shopify_attributes }}>
+                <div class="cau-icon-wrap">
+                  {% case block.settings.icon %}
+                    {% when 'leaf' %}
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    {% when 'heart' %}
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                    {% when 'users' %}
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                    {% when 'star' %}
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
+                  {% endcase %}
+                </div>
+                <h4 class="cau-card__title cau-font-heading">{{ block.settings.title }}</h4>
+                <div class="cau-card__text">{{ block.settings.text }}</div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Creative About Us",
+  "settings": [
+    { "type": "checkbox", "id": "load_google_fonts", "label": "Carregar Fontes (Playfair + Great Vibes)", "default": true },
+
+    { "type": "header", "content": "Colors" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#FAF6F2" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#2c2c2c" },
+    { "type": "color", "id": "muted_text_color", "label": "Muted Text", "default": "#6b6b6b" },
+    { "type": "color", "id": "accent_color", "label": "Accent (Script)", "default": "#D94682" },
+    { "type": "color", "id": "badge_bg", "label": "Badge/Button BG", "default": "#F4B4C8" },
+
+    { "type": "header", "content": "Hero" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero Image (Portrait)" },
+    { "type": "text", "id": "badge_text", "label": "Badge Text", "default": "Our Story" },
+    { "type": "text", "id": "heading", "label": "Heading (use [script]word[/script])", "default": "A Passion For [script]Timeless[/script] Design" },
+    { "type": "richtext", "id": "body", "label": "Body Text", "default": "<p>Write your brand story here. Focus on emotion and connection.</p>" },
+    { "type": "text", "id": "button_label", "label": "Button Label", "default": "Discover More" },
+    { "type": "url", "id": "button_link", "label": "Button Link" },
+
+    { "type": "header", "content": "Marquee" },
+    { "type": "color", "id": "marquee_bg", "label": "Marquee BG", "default": "#D94682" },
+    { "type": "color", "id": "marquee_text_color", "label": "Marquee Text", "default": "#FAF6F2" },
+
+    { "type": "header", "content": "Journey" },
+    { "type": "text", "id": "journey_heading", "label": "Journey Heading", "default": "Our Journey" },
+    { "type": "text", "id": "journey_subheading", "label": "Journey Subheading", "default": "From humble beginnings to a beloved brand." },
+
+    { "type": "header", "content": "Philosophy" },
+    { "type": "text", "id": "philo_heading", "label": "Philosophy Heading", "default": "Our Values" },
+    { "type": "text", "id": "philo_subheading", "label": "Philosophy Subheading", "default": "What drives us forward every day." }
+  ],
+  "blocks": [
+    {
+      "type": "marquee_item",
+      "name": "Marquee Word",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Word", "default": "Style" }
+      ]
+    },
+    {
+      "type": "milestone",
+      "name": "Milestone (ZigZag)",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image (Portrait)" },
+        { "type": "text", "id": "year", "label": "Year/Script Text", "default": "2021" },
+        { "type": "text", "id": "title", "label": "Title", "default": "The Beginning" },
+        { "type": "richtext", "id": "text", "label": "Description", "default": "<p>Description of this milestone.</p>" }
+      ]
+    },
+    {
+      "type": "value",
+      "name": "Value Card",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon", "options": [
+          {"value": "leaf", "label": "Leaf"},
+          {"value": "heart", "label": "Heart"},
+          {"value": "users", "label": "Users"},
+          {"value": "star", "label": "Star"}
+        ], "default": "leaf" },
+        { "type": "text", "id": "title", "label": "Title", "default": "Quality" },
+        { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Short description of this value.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Creative About Us",
+      "blocks": [
+        { "type": "marquee_item", "settings": { "text": "Design" } },
+        { "type": "marquee_item", "settings": { "text": "Quality" } },
+        { "type": "marquee_item", "settings": { "text": "Passion" } },
+        { "type": "milestone", "settings": { "year": "2021", "title": "First Spark" } },
+        { "type": "milestone", "settings": { "year": "2023", "title": "Expansion" } },
+        { "type": "value", "settings": { "icon": "leaf", "title": "Sustainability" } },
+        { "type": "value", "settings": { "icon": "heart", "title": "Craftsmanship" } },
+        { "type": "value", "settings": { "icon": "users", "title": "Community" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

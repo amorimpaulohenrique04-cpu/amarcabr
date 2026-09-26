@@ -1,0 +1,582 @@
+{% comment %}
+  Fashionista "Digital Editorial" Section v2.2 (A MARCA Typography Align)
+  - Mantém layout/estrutura
+  - Ajusta APENAS tipografia para conversar com a identidade do site
+{% endcomment %}
+
+<style>
+  /* Removi imports do Google Fonts para não conflitar com a tipografia do tema (A MARCA) */
+  /* Se você quiser manter, pode — mas pro alinhamento premium é melhor usar as fontes do tema via CSS vars */
+
+  .digital-editorial-section {
+    width: 100%;
+    position: relative;
+    background-color: #ffffff;
+    overflow: hidden;
+    font-size: 16px;
+    z-index: 0;
+  }
+
+  /* Layout Wrapper */
+  .de-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* --- LEFT: MAIN IMAGE --- */
+  .de-image-col {
+    position: relative;
+    width: 100%;
+    height: {{ section.settings.height_mobile }}px;
+    overflow: hidden;
+    background-color: #f3f3f3;
+  }
+
+  .de-main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: {{ section.settings.image_focus }};
+    transition: transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .digital-editorial-section:hover .de-main-img {
+    transform: scale(1.02);
+  }
+
+  /* Tech Overlays */
+  .tech-overlay-top {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 3;
+  }
+
+  .tech-tag {
+    font-family: var(--font-body-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-size: 10px;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 2px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    mix-blend-mode: difference;
+  }
+
+  .tech-line-vertical {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    z-index: 2;
+  }
+
+  /* --- RIGHT: CONTENT --- */
+  .de-content-col {
+    position: relative;
+    width: 100%;
+    background-color: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    min-height: 400px;
+    z-index: 1;
+  }
+
+  /* Background Number */
+  .bg-number {
+    position: absolute;
+    top: -20px;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-body-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-size: 8rem;
+    font-weight: 700;
+    opacity: 0.035;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 0;
+    letter-spacing: -0.04em;
+  }
+
+  /* Typography */
+  .de-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .de-square {
+    width: 10px;
+    height: 10px;
+    background-color: {{ section.settings.accent_color }};
+  }
+
+  /* Subheading: editorial + quiet luxury */
+  .de-subheading {
+    font-family: var(--font-body-family, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(0,0,0,0.62);
+    font-weight: 600;
+  }
+
+  /* Heading: usa fonte de heading do tema (A MARCA) */
+  .de-heading {
+    font-family: var(--font-heading-family, serif);
+    font-size: 2.4rem;
+    line-height: 1.05;
+    margin: 0 0 1.25rem 0;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Description */
+  .de-description {
+    font-family: var(--font-body-family, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif);
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: rgba(0,0,0,0.68);
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+    border-left: 1px solid rgba(0,0,0,0.10);
+    max-width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Actions */
+  .de-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  .de-price {
+    font-family: var(--font-heading-family, serif);
+    font-size: 1.35rem;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .de-btn {
+    padding: 12px 30px;
+    font-family: var(--font-body-family, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    background: transparent;
+    color: #8f332e;
+    border: 1px solid #8f332e;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .de-btn:hover {
+    background: #8f332e;
+    color: #fff;
+    border-color: #8f332e;
+  }
+
+  /* --- DESKTOP & TABLET CONFIG --- */
+  @media (min-width: 768px) and (max-width: 989px) {
+    /* Tablet: evita corte (altura travada) e evita overlay cobrindo o botão */
+    .digital-editorial-section {
+      overflow: visible;
+    }
+
+    .de-wrapper {
+      flex-direction: row;
+      height: auto;
+      min-height: 0;
+    }
+
+    .de-image-col {
+      width: 55%;
+      height: {{ section.settings.height_desktop }}px;
+    }
+
+    .de-content-col {
+      width: 45%;
+      padding: 2.5rem 2rem;
+      min-height: 0;
+    }
+
+    .bg-number {
+      font-size: 9rem;
+      top: -28px;
+      right: -12px;
+    }
+
+    .de-heading {
+      font-size: 2.45rem;
+    }
+
+    .de-description {
+      margin-bottom: 1.5rem;
+    }
+
+    .de-actions {
+      gap: 0.75rem;
+    }
+
+    .de-btn {
+      padding: 12px 22px;
+    }
+  }
+
+  @media (min-width: 990px) {
+    /* Desktop */
+    .de-wrapper {
+      flex-direction: row;
+      height: {{ section.settings.height_desktop }}px;
+    }
+
+    .de-image-col {
+      width: 65%;
+      height: 100%;
+    }
+
+    .de-content-col {
+      width: 35%;
+      padding: 0 4rem;
+    }
+
+    .bg-number {
+      font-size: 12rem;
+      top: -40px;
+      right: -20px;
+    }
+
+    .de-heading {
+      font-size: 3.05rem;
+    }
+  }
+
+  /* --- TABBED WINDOW OVERLAY (POLAROID) --- */
+  .tab-window-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: 35%;
+    transform: translateY(-50%);
+    z-index: 3;
+  }
+
+  /* Só no desktop grande (evita cobrir CTA no tablet) */
+  @media (min-width: 990px) {
+    .tab-window-container {
+      display: block;
+    }
+  }
+
+  .tab-card {
+    width: 300px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.10);
+  }
+
+  .tab-list {
+    display: flex;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .tab-item {
+    flex: 1;
+    padding: 10px 12px;
+    text-align: center;
+    font-family: var(--font-body-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: rgba(0,0,0,0.70);
+    background: rgba(255,255,255,0.7);
+  }
+
+  .tab-text {
+    opacity: 0.9;
+  }
+
+  .tab-body {
+    padding: 12px;
+  }
+
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  .card-filename {
+    font-family: var(--font-body-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-size: 10px;
+    color: rgba(0,0,0,0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .card-dots { display: flex; gap: 4px; }
+  .card-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(0,0,0,0.08); }
+
+  .card-image-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    background: #f3f3f3;
+  }
+
+  .card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+
+  .tab-window-container:hover .card-img {
+    filter: grayscale(0%);
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 8px;
+    padding: 0 4px;
+  }
+
+  .stock-label {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-body-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .stock-title { font-size: 9px; color: rgba(0,0,0,0.40); }
+  .stock-val { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.78); }
+
+  .color-swatch {
+    width: 40px;
+    height: 16px;
+    background-color: {{ section.settings.accent_color }};
+  }
+</style>
+
+<section class="digital-editorial-section">
+  <div class="de-wrapper">
+
+    <div class="de-image-col">
+      {% if section.settings.custom_image != blank %}
+        <img
+          src="{{ section.settings.custom_image | image_url: width: 900 }}"
+          srcset="
+            {{ section.settings.custom_image | image_url: width: 400 }} 400w,
+            {{ section.settings.custom_image | image_url: width: 600 }} 600w,
+            {{ section.settings.custom_image | image_url: width: 900 }} 900w,
+            {{ section.settings.custom_image | image_url: width: 1200 }} 1200w"
+          sizes="(max-width: 767px) 100vw, (max-width: 989px) 55vw, 65vw"
+          width="{{ section.settings.custom_image.width }}"
+          height="{{ section.settings.custom_image.height }}"
+          class="de-main-img"
+          loading="lazy"
+          decoding="async"
+          alt="{{ section.settings.heading }}">
+      {% elsif section.settings.product != blank %}
+        <img
+          src="{{ section.settings.product.featured_image | image_url: width: 900 }}"
+          srcset="
+            {{ section.settings.product.featured_image | image_url: width: 400 }} 400w,
+            {{ section.settings.product.featured_image | image_url: width: 600 }} 600w,
+            {{ section.settings.product.featured_image | image_url: width: 900 }} 900w,
+            {{ section.settings.product.featured_image | image_url: width: 1200 }} 1200w"
+          sizes="(max-width: 767px) 100vw, (max-width: 989px) 55vw, 65vw"
+          width="{{ section.settings.product.featured_image.width }}"
+          height="{{ section.settings.product.featured_image.height }}"
+          class="de-main-img"
+          loading="lazy"
+          decoding="async"
+          alt="{{ section.settings.product.title }}">
+      {% else %}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'de-main-img' }}
+      {% endif %}
+
+      {% if section.settings.show_tape %}
+        <div class="tech-overlay-top">
+          <span class="tech-tag">{{ section.settings.tech_tag_1 }}</span>
+          <span class="tech-tag">{{ section.settings.tech_tag_2 }}</span>
+        </div>
+        <div class="tech-line-vertical"></div>
+      {% endif %}
+    </div>
+
+    <div class="de-content-col">
+      <div class="bg-number">{{ section.settings.bg_number }}</div>
+
+      <div class="de-eyebrow">
+        <div class="de-square"></div>
+        <span class="de-subheading">{{ section.settings.subheading }}</span>
+      </div>
+
+      <h2 class="de-heading">
+        {{ section.settings.heading | default: section.settings.product.title }}
+      </h2>
+
+      <div class="de-description">
+        {{ section.settings.description | default: section.settings.product.description | strip_html | truncatewords: 25 }}
+      </div>
+
+      <div class="de-actions">
+        <span class="de-price">
+          {% if section.settings.product != blank %}
+            {{ section.settings.product.price | money }}
+          {% else %}
+            {{ section.settings.product_price | default: '$ 149,90' }}
+          {% endif %}
+        </span>
+
+        {% if section.settings.product != blank %}
+          <a href="{{ section.settings.product.url }}" class="de-btn">{{ section.settings.btn_text }}</a>
+        {% else %}
+          <a href="{{ section.settings.btn_link }}" class="de-btn">{{ section.settings.btn_text }}</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if section.settings.show_secondary %}
+      <div class="tab-window-container">
+        <div class="tab-card">
+          <div class="tab-list">
+            <div class="tab-item tab-1"><span class="tab-text">{{ section.settings.polaroid_tab_1 }}</span></div>
+            <div class="tab-item tab-2"><span class="tab-text">{{ section.settings.polaroid_tab_2 }}</span></div>
+            <div class="tab-item tab-3"><span class="tab-text">{{ section.settings.polaroid_tab_3 }}</span></div>
+          </div>
+
+          <div class="tab-body">
+            <div class="card-meta">
+              <div class="card-filename">{{ section.settings.polaroid_filename }}</div>
+              <div class="card-dots">
+                <span class="card-dot"></span>
+                <span class="card-dot"></span>
+                <span class="card-dot"></span>
+              </div>
+            </div>
+
+            <div class="card-image-wrap">
+              {% if section.settings.secondary_image != blank %}
+                <img
+                  src="{{ section.settings.secondary_image | image_url: width: 400 }}"
+                  srcset="
+                    {{ section.settings.secondary_image | image_url: width: 300 }} 300w,
+                    {{ section.settings.secondary_image | image_url: width: 400 }} 400w,
+                    {{ section.settings.secondary_image | image_url: width: 600 }} 600w"
+                  sizes="300px"
+                  width="{{ section.settings.secondary_image.width }}"
+                  height="{{ section.settings.secondary_image.height }}"
+                  class="card-img"
+                  loading="lazy"
+                  decoding="async"
+                  alt="{{ section.settings.polaroid_filename }}">
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'card-img' }}
+              {% endif %}
+            </div>
+
+            <div class="card-footer">
+              <div class="stock-label">
+                <span class="stock-title">{{ section.settings.stock_label }}</span>
+                <span class="stock-val">{{ section.settings.stock_status }}</span>
+              </div>
+              <span class="color-swatch" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Item of the week",
+  "settings": [
+    { "type": "header", "content": "Product & Image" },
+    { "type": "product", "id": "product", "label": "Product" },
+    { "type": "image_picker", "id": "custom_image", "label": "Custom Main Image (optional)" },
+    { "type": "select", "id": "image_focus", "label": "Image Focus", "default": "center", "options": [
+      { "value": "center", "label": "Center" },
+      { "value": "top", "label": "Top" },
+      { "value": "bottom", "label": "Bottom" },
+      { "value": "left", "label": "Left" },
+      { "value": "right", "label": "Right" }
+    ]},
+
+    { "type": "header", "content": "Text" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "ITEM OF THE WEEK" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "New Drop — Quiet Luxury" },
+    { "type": "richtext", "id": "description", "label": "Description", "default": "<p>Uma peça com presença editorial, feita pra compor looks com identidade — e propósito.</p>" },
+
+    { "type": "header", "content": "CTA" },
+    { "type": "text", "id": "btn_text", "label": "Button Text", "default": "Comprar agora" },
+    { "type": "url", "id": "btn_link", "label": "Button Link (fallback)" },
+    { "type": "text", "id": "product_price", "label": "Fallback Price (if no product)", "default": "R$ 149,90" },
+
+    { "type": "header", "content": "Layout" },
+    { "type": "range", "id": "height_mobile", "label": "Mobile Image Height (px)", "min": 320, "max": 720, "step": 10, "default": 520 },
+    { "type": "range", "id": "height_desktop", "label": "Desktop Height (px)", "min": 420, "max": 860, "step": 10, "default": 620 },
+    { "type": "text", "id": "bg_number", "label": "Background Number", "default": "01" },
+
+    { "type": "header", "content": "Overlays" },
+    { "type": "checkbox", "id": "show_tape", "label": "Show Tech Overlay", "default": true },
+    { "type": "text", "id": "tech_tag_1", "label": "Tech Tag 1", "default": "A MARCA" },
+    { "type": "text", "id": "tech_tag_2", "label": "Tech Tag 2", "default": "LIMITED" },
+
+    { "type": "header", "content": "Secondary Card (Tabbed Window)" },
+    { "type": "checkbox", "id": "show_secondary", "label": "Show Polaroid Window", "default": true },
+    { "type": "image_picker", "id": "secondary_image", "label": "Polaroid Image" },
+    { "type": "text", "id": "polaroid_filename", "label": "Filename Text", "default": "ITEM_PREVIEW.JPG" },
+    { "type": "text", "id": "polaroid_tab_1", "label": "Tab 1 Text", "default": "01 VIEW" },
+    { "type": "text", "id": "polaroid_tab_2", "label": "Tab 2 Text", "default": "02 BUY" },
+    { "type": "text", "id": "polaroid_tab_3", "label": "Tab 3 Text", "default": "03 INFO" },
+    { "type": "text", "id": "stock_label", "label": "Stock Label", "default": "Stock" },
+    { "type": "text", "id": "stock_status", "label": "Stock Status", "default": "AVAILABLE" },
+
+    { "type": "header", "content": "Style Colors" },
+    { "type": "color", "id": "bg_color", "label": "Content Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text Color", "default": "#000000" },
+    { "type": "color", "id": "accent_color", "label": "Accent Color", "default": "#0033cc" }
+  ],
+  "presets": [
+    { "name": "Digital Editorial v2.2" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,157 @@
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="view-transition" content="same-origin">
+
+{%- if request.page_type == 'page' -%}
+  {%- if page.handle == 'collection-bundle' or page.handle == 'mix-match-bundle' -%}
+    <meta name="robots" content="noindex,follow">
+  {%- endif -%}
+{%- endif -%}
+
+{%- liquid
+  assign og_title = page_title | default: shop.name
+  assign og_url = canonical_url | default: request.origin
+  assign og_type = 'website'
+  assign og_description = page_description | default: shop.description | default: shop.name
+
+  if template.name == 'index'
+    assign og_title = 'Camisetas Cristãs Premium e Moda Cristã | A MARCA'
+    assign og_description = 'Vista sua fé com propósito. Descubra camisetas cristãs premium, autorais e infantis em algodão de alta qualidade. A MARCA envia para todo o Brasil.'
+  elsif request.page_type == 'product'
+    assign og_type = 'product'
+  elsif request.page_type == 'article'
+    assign og_type = 'article'
+  elsif request.page_type == 'password'
+    assign og_url = request.origin
+  endif
+-%}
+
+<meta property="og:site_name" content="{{ shop.name | escape }}">
+<meta property="og:url" content="{{ og_url }}">
+<meta property="og:title" content="{{ og_title | escape }}">
+<meta property="og:type" content="{{ og_type }}">
+<meta property="og:description" content="{{ og_description | escape }}">
+
+{%- if request.page_type == 'article' and article != blank -%}
+  <meta name="author" content="{{ article.author | escape }}">
+  <meta property="article:published_time" content="{{ article.published_at | date: '%Y-%m-%dT%H:%M:%S%z' }}">
+  <meta property="article:modified_time" content="{{ article.updated_at | date: '%Y-%m-%dT%H:%M:%S%z' }}">
+  <meta property="article:author" content="{{ article.author | escape }}">
+{%- endif -%}
+
+{%- if page_image -%}
+  <meta property="og:image" content="http:{{ page_image | image_url }}">
+  <meta property="og:image:secure_url" content="https:{{ page_image | image_url }}">
+  <meta property="og:image:width" content="{{ page_image.width }}">
+  <meta property="og:image:height" content="{{ page_image.height }}">
+{%- endif -%}
+
+{%- if request.page_type == 'product' -%}
+  <meta property="og:price:amount" content="{{ product.price | money_without_currency | strip_html }}">
+  <meta property="og:price:currency" content="{{ cart.currency.iso_code }}">
+{%- endif -%}
+
+{%- if settings.social_twitter_link != blank -%}
+  <meta name="twitter:site" content="{{ settings.social_twitter_link | split: 'twitter.com/' | last | prepend: '@' }}">
+{%- endif -%}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ og_title | escape }}">
+<meta name="twitter:description" content="{{ og_description | escape }}">
+
+{%- comment -%}
+  A MARCA — ALT integrity guard.
+  Native Shopify alt text remains authoritative. This only covers images created
+  dynamically by JavaScript or third-party widgets that arrive without useful alt.
+  Intentionally decorative/aria-hidden images remain empty.
+{%- endcomment -%}
+<script>
+(function () {
+  'use strict';
+
+  function clean(value) {
+    return String(value || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function isDecorative(img) {
+    return img.getAttribute('role') === 'presentation' ||
+      img.getAttribute('aria-hidden') === 'true' ||
+      !!img.closest('[aria-hidden="true"]');
+  }
+
+  function nearestLabel(img) {
+    var direct = clean(img.getAttribute('data-alt') || img.getAttribute('title'));
+    if (direct) return direct;
+
+    var link = img.closest('a[aria-label]');
+    if (link) {
+      var linkLabel = clean(link.getAttribute('aria-label'));
+      if (linkLabel) return linkLabel;
+    }
+
+    var scope = img.closest(
+      'article, li, [data-product-card], .product-card, .lx-csel-opt, .lx-thumb, .lx-extra-thumb, .family-combo__model-card, .testimonial-card, .category-card, [class*="product-card"], [class*="testimonial"]'
+    );
+
+    if (scope) {
+      var label = scope.querySelector(
+        'h1, h2, h3, h4, [data-product-title], .product-card__title, .lx-csel-optName, .family-combo__model-title, .lx-name, .lx-title, [class*="title"]'
+      );
+      var scoped = label ? clean(label.textContent) : '';
+      if (scoped) return scoped;
+    }
+
+    var pageHeading = document.querySelector('main h1');
+    var headingText = pageHeading ? clean(pageHeading.textContent) : '';
+    if (headingText) return headingText + ' — A MARCA';
+
+    var pageTitle = clean(document.title.split('|')[0].split('–')[0]);
+    return pageTitle ? pageTitle + ' — A MARCA' : 'Imagem A MARCA';
+  }
+
+  function ensureAlt(img) {
+    if (!img || img.nodeName !== 'IMG') return;
+
+    if (isDecorative(img)) {
+      if (!img.hasAttribute('alt')) img.setAttribute('alt', '');
+      return;
+    }
+
+    var current = clean(img.getAttribute('alt'));
+    if (current) return;
+
+    img.setAttribute('alt', nearestLabel(img));
+  }
+
+  function scan(root) {
+    if (!root) return;
+    if (root.nodeName === 'IMG') ensureAlt(root);
+    if (root.querySelectorAll) root.querySelectorAll('img').forEach(ensureAlt);
+  }
+
+  function start() {
+    scan(document);
+
+    if (!window.MutationObserver) return;
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(scan);
+        if (mutation.type === 'attributes' && mutation.target.nodeName === 'IMG') {
+          ensureAlt(mutation.target);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src']
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
+})();
+</script>

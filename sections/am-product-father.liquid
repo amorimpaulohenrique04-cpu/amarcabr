@@ -1,0 +1,1220 @@
+{% comment %}
+  PRESTIGE HORIZON V24 — KIT DIA DOS PAIS
+  ■ PDP padrão + T-shirt infantil extra integrada à buybox
+  ■ ZOOM INLINE CLICK-TO-ACTIVATE — Estilo Boca Rosa
+
+  COMPORTAMENTO:
+  - Desktop: clique na imagem = ativa zoom, mouse move = navega, clique novamente = sai
+  - Mobile: toque na imagem = ativa zoom, arraste = navega, toque novamente = sai
+  - Clique fora ou scroll = desativa zoom
+  - Sem overlay, sem modal, sem fullscreen
+  - Responsivo para todos os dispositivos
+{% endcomment %}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign product_form_id = 'product-form-' | append: section.id -%}
+{%- assign section_id = section.id -%}
+
+{%- comment -%}
+  PIX PRICE — sempre do metafield do PRODUTO
+{%- endcomment -%}
+{%- assign product_pix_raw = product.metafields.custom.pix_price.value | default: product.metafields.custom.pix_price -%}
+
+{%- comment -%}
+  INFANTIL EXTRA — conexão por produto
+  Prioridade: metafield custom.extra_child_product > produto escolhido na seção.
+  O valor configurado abaixo é apenas uma validação de consistência: o Shopify
+  sempre cobra o preço real da variante do produto extra.
+{%- endcomment -%}
+{%- assign extra_child_product = product.metafields.custom.extra_child_product.value -%}
+{%- if extra_child_product == blank -%}
+  {%- assign extra_child_product = section.settings.extra_child_product -%}
+{%- endif -%}
+{%- assign extra_child_enabled = false -%}
+{%- if section.settings.enable_extra_child and extra_child_product != blank -%}
+  {%- assign extra_child_enabled = true -%}
+{%- endif -%}
+{%- assign extra_child_expected_price = section.settings.extra_child_unit_price | default: 6990 | times: 1 -%}
+
+{%- comment -%}
+  LÓGICA DE DETECÇÃO DA TAG
+{%- endcomment -%}
+{%- assign show_toggle = true -%}
+{%- assign active_panel = 'regular' -%}
+
+{%- if product.tags contains 'fit:infantil' -%}
+  {%- assign show_toggle = false -%}
+  {%- assign active_panel = 'infantil' -%}
+{%- elsif product.tags contains 'fit:oversized' -%}
+  {%- assign show_toggle = false -%}
+  {%- assign active_panel = 'oversized' -%}
+{%- elsif product.tags contains 'fit:regular' -%}
+  {%- assign show_toggle = false -%}
+  {%- assign active_panel = 'regular' -%}
+{%- endif -%}
+
+<style>
+  #shopify-section-{{ section_id }} {
+    --pp-bg: {{ section.settings.bg_color | default: '#ffffff' }};
+    --pp-text: {{ section.settings.text_color | default: '#000000' }};
+    --pp-border: #e0e0e0;
+    --btn-pri-bg: {{ section.settings.btn_primary_bg }};
+    --btn-pri-txt: {{ section.settings.btn_primary_text }};
+    --btn-pri-bd: {{ section.settings.btn_primary_border }};
+    --btn-pri-bg-h: {{ section.settings.btn_primary_bg_hover }};
+    --btn-pri-txt-h: {{ section.settings.btn_primary_text_hover }};
+    --btn-pri-bd-h: {{ section.settings.btn_primary_border_hover }};
+    --btn-sec-bg: {{ section.settings.btn_secondary_bg }};
+    --btn-sec-txt: {{ section.settings.btn_secondary_text }};
+    --btn-sec-bd: {{ section.settings.btn_secondary_border }};
+    --btn-sec-bg-h: {{ section.settings.btn_secondary_bg_hover }};
+    --btn-sec-txt-h: {{ section.settings.btn_secondary_text_hover }};
+    --btn-sec-bd-h: {{ section.settings.btn_secondary_border_hover }};
+  }
+
+  /* --- LAYOUT GERAL --- */
+  .pp-section { background-color: var(--pp-bg); color: var(--pp-text); padding: 40px 0 16px; font-family: var(--font-body--family, sans-serif); }
+  .pp-container { max-width: var(--am-header-max, var(--page-width, 1240px)); margin: 0 auto; padding-inline: 20px; display: grid; grid-template-columns: 1fr 420px; gap: 50px; }
+  .pp-info-col { position: -webkit-sticky; position: sticky; top: 110px; z-index: 1; height: fit-content; }
+
+  /* Galeria */
+  .pp-gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: start; }
+
+  .pp-media-item {
+    position: relative;
+    width: 100%;
+    background: #f4f4f4;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+  }
+  .pp-media-item img,
+  .pp-media-item video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .pp-media-item--has-zoom {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .pp-media-item__zoom-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-size: 250%;
+    background-position: center center;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+    transition: opacity 0.2s ease;
+    will-change: opacity, background-position;
+  }
+
+  .pp-media-item--has-zoom.is-zoom-active .pp-media-item__zoom-layer {
+    opacity: 1;
+  }
+  .pp-media-item--has-zoom.is-zoom-active {
+    cursor: crosshair;
+  }
+
+  .pp-media-item__zoom-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .pp-media-item--has-zoom.is-zoom-active .pp-media-item__zoom-icon {
+    opacity: 0;
+  }
+  .pp-media-item__zoom-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #333;
+  }
+
+  @media (hover: none) {
+    .pp-media-item__zoom-icon {
+      opacity: 0.8;
+    }
+  }
+
+  /* Tipografia & Preço */
+  .pp-title { font-family: var(--font-heading--family); font-size: 2.0rem; margin: 10px 0; line-height: 1.1; }
+  .pp-price { font-size: 1.4rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; }
+  .pp-price__context { flex-basis: 100%; font-size: 0.68rem; font-weight: 500; line-height: 1.4; letter-spacing: 0.06em; text-transform: uppercase; color: #666; }
+  .pp-price--sale { color: #d32f2f; }
+  .pp-price--compare { text-decoration: line-through; opacity: 0.6; font-size: 0.95rem; font-weight: 400; }
+  .pp-rte { font-size: 0.9rem; margin-bottom: 30px; color: #444; }
+  .pp-breadcrumb { font-size: 0.75rem; color: var(--pp-text); opacity: 0.7; margin-bottom: 10px; letter-spacing: 0.04em; }
+  .pp-breadcrumb a { color: inherit; text-decoration: none; transition: opacity 0.2s ease; }
+  .pp-breadcrumb a:hover { opacity: 1; }
+  .pp-breadcrumb__sep { margin: 0 6px; opacity: 0.5; }
+  .pp-installments-wrap { margin-bottom: 14px; font-size: 0.8rem; color: #666; line-height: 1.4; }
+  .pp-installments-wrap .installment-3x { display: block; font-weight: 500; color: var(--pp-text); opacity: 0.8; }
+
+  /* Swatches */
+  .pp-variant-group { margin-bottom: 25px; border: 0; padding: 0; }
+  .pp-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; display: block; }
+  .pp-swatch-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .pp-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  .pp-swatch-label { min-width: 40px; height: 40px; padding: 0 12px; border: 1px solid var(--pp-border); background: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; transition: all 0.15s ease; text-transform: uppercase; }
+  input:checked + .pp-swatch-label:not(.pp-swatch-label--visual) { background: #000 !important; color: #fff; border-color: #000 !important; }
+  .pp-swatch-label--visual { width: 40px !important; height: 40px !important; padding: 0 !important; border-radius: 50%; background-size: cover; background-position: center; }
+  input:checked + .pp-swatch-label--visual { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000; border-color: transparent !important; }
+
+  /* Infantil extra integrado à buybox */
+  .pp-extra-child { margin: 4px 0 0; border-top: 1px solid var(--pp-border); border-bottom: 1px solid var(--pp-border); }
+  .pp-extra-child__summary { min-height: 72px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; padding: 13px 0; }
+  .pp-extra-child__eyebrow { display: block; margin-bottom: 4px; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #777; }
+  .pp-extra-child__title-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px 10px; }
+  .pp-extra-child__title { margin: 0; font-size: 0.82rem; font-weight: 600; line-height: 1.35; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pp-extra-child__unit-price { font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+  .pp-extra-child__description { margin: 4px 0 0; color: #666; font-size: 0.72rem; line-height: 1.45; }
+  .pp-extra-child__stepper { height: 38px; display: inline-grid; grid-template-columns: 36px 34px 36px; border: 1px solid var(--pp-border); background: #fff; }
+  .pp-extra-child__stepper-btn { border: 0; background: transparent; color: #000; font: inherit; font-size: 1rem; cursor: pointer; }
+  .pp-extra-child__stepper-btn:disabled { color: #bbb; cursor: not-allowed; }
+  .pp-extra-child__count { display: flex; align-items: center; justify-content: center; border-inline: 1px solid var(--pp-border); font-size: 0.78rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .pp-extra-child__rows { padding: 0 0 14px; display: grid; gap: 8px; }
+  .pp-extra-child__row { display: grid; grid-template-columns: minmax(110px, .75fr) minmax(0, 1.25fr); gap: 12px; align-items: center; }
+  .pp-extra-child__row-label { font-size: 0.69rem; font-weight: 600; line-height: 1.3; letter-spacing: 0.05em; text-transform: uppercase; }
+  .pp-extra-child__select-wrap { position: relative; }
+  .pp-extra-child__select { width: 100%; height: 40px; appearance: none; border: 1px solid var(--pp-border); border-radius: 0; background: #fff; color: #000; padding: 0 34px 0 12px; font: inherit; font-size: 0.75rem; cursor: pointer; }
+  .pp-extra-child__select:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
+  .pp-extra-child__chevron { position: absolute; top: 50%; right: 12px; width: 10px; height: 6px; transform: translateY(-50%); pointer-events: none; }
+  .pp-extra-child__status { min-height: 18px; margin: 0; padding: 0 0 10px; font-size: 0.68rem; line-height: 1.35; color: #666; }
+  .pp-extra-child__status.is-error { color: #9b1c1c; }
+  .pp-extra-child__empty { margin: 10px 0 0; padding: 12px; border: 1px dashed #b7b7b7; font-size: 0.72rem; line-height: 1.45; }
+  @media (max-width: 480px) {
+    .pp-extra-child__summary { gap: 10px; }
+    .pp-extra-child__stepper { grid-template-columns: 34px 30px 34px; }
+    .pp-extra-child__row { grid-template-columns: 1fr; gap: 5px; }
+  }
+
+  /* Botões */
+  .pp-actions-bar { margin-top: 30px; z-index: 2; position: relative; }
+  .pp-buy-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pp-btn { width: 100%; height: 52px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s ease; font-family: inherit; position: relative; z-index: 2; }
+  .pp-btn:active { transform: none; }
+  .pp-btn[disabled] { opacity: .5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+  #BtnAddToCart { background: var(--btn-pri-bg); color: var(--btn-pri-txt); border-color: var(--btn-pri-bd); }
+  #BtnBuyNow { background: var(--btn-sec-bg); color: var(--btn-sec-txt); border-color: var(--btn-sec-bd); }
+  #BtnAddToCart.is-added { background: #2e7d32; border-color: #2e7d32; color: #fff; }
+  @media (hover:hover){
+    .pp-btn:hover { transform: none; box-shadow: none; }
+    #BtnAddToCart:hover { background: var(--btn-pri-bg-h); color: var(--btn-pri-txt-h); border-color: var(--btn-pri-bd-h); }
+    #BtnBuyNow:hover { background: var(--btn-sec-bg-h); color: var(--btn-sec-txt-h); border-color: var(--btn-sec-bd-h); }
+  }
+
+  /* Accordions */
+  .pp-accordions { margin-top: 35px; border-top: 1px solid #eee; }
+  .pp-details { border-bottom: 1px solid #eee; padding: 18px 0; }
+  .pp-summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .pp-summary::-webkit-details-marker { display: none; }
+  .pp-icon-plus { position: relative; width: 12px; height: 12px; }
+  .pp-icon-plus::before, .pp-icon-plus::after { content: ""; position: absolute; background: #000; transition: transform 0.3s ease; }
+  .pp-icon-plus::before { top: 5px; left: 0; width: 100%; height: 2px; }
+  .pp-icon-plus::after { top: 0; left: 5px; width: 2px; height: 100%; }
+  .pp-details[open] .pp-icon-plus::after { transform: rotate(90deg); }
+  .pp-details[open] .pp-icon-plus { transform: rotate(180deg); }
+  .pp-accordion-content { margin-top: 15px; font-size: 0.85rem; color: #555; line-height: 1.6; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Guia de Medidas */
+  .pp-size-guide-toggle { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+  .pp-sg-radio { display: none; }
+  .pp-sg-label { padding: 8px 16px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid #ddd; cursor: pointer; transition: all 0.2s ease; background: #fff; }
+  .pp-sg-radio:checked + .pp-sg-label { background: #000; color: #fff; border-color: #000; }
+  .pp-sg-panel { display: none; animation: fadeIn 0.3s ease; }
+  .pp-sg-panel.is-active { display: block; }
+  .pp-sg-grid { display: grid; grid-template-columns: 140px 1fr; gap: 20px; align-items: center; }
+  .pp-sg-img { width: 100%; height: auto; display: block; mix-blend-mode: multiply; }
+  .pp-sg-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center; }
+  .pp-sg-table th { background: #f9f9f9; font-weight: 700; text-transform: uppercase; padding: 8px 4px; border: 1px solid #eee; }
+  .pp-sg-table td { padding: 8px 4px; border: 1px solid #eee; color: #333; }
+  .pp-sg-table tr:nth-child(even) { background: #fdfdfd; }
+  @media (max-width: 480px) {
+    .pp-sg-grid { grid-template-columns: 1fr; text-align: center; }
+    .pp-sg-img { max-width: 180px; margin: 0 auto 15px; }
+  }
+
+  /* Cross Sell */
+  .pp-cross-item { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .pp-cross-img { width: 40px; height: 50px; object-fit: cover; border-radius: 2px; }
+
+  /* Mobile */
+  @media (max-width: 749px) {
+    .pp-container { grid-template-columns: 1fr; gap: 30px; }
+    .pp-section { padding-bottom: 12px; }
+    .pp-info-col { position: relative; top: auto; z-index: 1; }
+    .pp-actions-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); z-index: 9999; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); transition: transform 0.3s ease; }
+    body.pp-has-pp-actions-bar #MainContent { contain: none !important; }
+    body.pp-has-pp-actions-bar #MainContent { padding-bottom: calc(var(--pp-actions-bar-h, 84px) + env(safe-area-inset-bottom)); }
+    .pp-actions-bar.is-hidden { transform: translate3d(0,100%,0); }
+    .pp-gallery-grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px; gap: 10px; }
+    .pp-media-item { min-width: 85vw; scroll-snap-align: center; }
+    .pp-btn { height: 48px; font-size: 12px; }
+    .pp-media-item__zoom-layer {
+      background-size: 200%;
+    }
+  }
+
+  /* Tablet */
+  @media (min-width: 750px) and (max-width: 989px) {
+    .pp-container { grid-template-columns: 1fr; gap: 40px; }
+    .pp-info-col { position: relative; top: auto; }
+    .pp-gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 0; padding: 0; }
+    .pp-media-item { aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; background: #f4f4f4; min-width: auto; }
+    .pp-actions-bar { position: relative; bottom: auto; left: auto; right: auto; padding: 0; margin-top: 28px; box-shadow: none; }
+  }
+</style>
+
+<div class="section-background" style="background: {{ section.settings.bg_color }};"></div>
+
+<section id="shopify-section-{{ section_id }}" class="pp-section pp-section-zoom section" style="color: {{ section.settings.text_color }};">
+  <div class="section-content-wrapper spacing-style size-style border-style">
+    <div class="pp-container am-page-width">
+
+      <div class="pp-gallery-grid">
+        {% for media in product.media %}
+          <div class="pp-media-item{% if media.media_type != 'video' %} pp-media-item--has-zoom{% endif %}"
+            {% if media.media_type != 'video' %}
+              data-pp-zoom-src="{{ media | image_url: width: 2000 }}"
+            {% endif %}>
+            {% if media.media_type == 'video' %}
+              {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false, loading: 'lazy' }}
+            {% else %}
+              <img
+                src="{{ media | image_url: width: 600 }}"
+                srcset="{{ media | image_url: width: 400 }} 400w,
+                        {{ media | image_url: width: 600 }} 600w,
+                        {{ media | image_url: width: 800 }} 800w"
+                sizes="(max-width: 749px) 85vw, 50vw"
+                loading="{% if forloop.index <= 2 %}eager{% else %}lazy{% endif %}"
+                {% if forloop.index <= 2 %}fetchpriority="high"{% endif %}
+                width="{{ media.width }}"
+                height="{{ media.height }}"
+                alt="{{ media.alt | escape }}"
+                draggable="false">
+              <div class="pp-media-item__zoom-layer"
+                style="background-image: url('{{ media | image_url: width: 2000 }}');"
+                aria-hidden="true"></div>
+              <div class="pp-media-item__zoom-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.3-4.3"/>
+                  <path d="M11 8v6M8 11h6"/>
+                </svg>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="pp-info-col">
+        <nav class="pp-breadcrumb">
+          <a href="{{ routes.root_url }}">Início</a>
+          {%- assign breadcrumb_collection = collection | default: product.collections.first -%}
+          {%- if breadcrumb_collection -%}
+            <span class="pp-breadcrumb__sep">›</span><a href="{{ breadcrumb_collection.url }}">{{ breadcrumb_collection.title }}</a>
+          {%- endif -%}
+          <span class="pp-breadcrumb__sep">›</span><span class="pp-breadcrumb__current">{{ product.title }}</span>
+        </nav>
+        <h1 class="pp-title">{{ product.title }}</h1>
+
+        {% form 'product', product, id: product_form_id, class: 'pp-product-form' %}
+          <div class="pp-price">
+            <span class="pp-price__regular {% if current_variant.compare_at_price > current_variant.price %}pp-price--sale{% endif %}">{{ current_variant.price | money }}</span>
+            {% if current_variant.compare_at_price > current_variant.price %}<span class="pp-price--compare">{{ current_variant.compare_at_price | money }}</span>{% endif %}
+          </div>
+
+          {%- if section.settings.show_payment_terms -%}
+            <div class="pp-installments-wrap" data-pp-installments>{%- render 'installment-3x', product: product, variant: current_variant -%}</div>
+          {%- endif -%}
+
+          <div class="pp-rte">{{ product.description }}</div>
+
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+
+          {% unless product.has_only_default_variant %}
+            {% for option in product.options_with_values %}
+              {% assign option_name = option.name | downcase %}
+              {% assign is_visual = false %}
+              {% if option_name contains 'cor' or option_name contains 'color' or option_name contains 'estampa' %}{% assign is_visual = true %}{% endif %}
+              <fieldset class="pp-variant-group js-variant-group">
+                <label class="pp-label">{{ option.name }}: <span class="js-val" style="font-weight:400; opacity:.7">{{ option.selected_value }}</span></label>
+                <div class="pp-swatch-list">
+                  {% for value in option.values %}
+                    {%- liquid
+                      assign swatch_style = ''
+                      assign use_visual_style = is_visual
+                      if value.swatch.image
+                        assign img = value.swatch.image | image_url: width: 80
+                        assign swatch_style = 'background-image: url(' | append: img | append: ')'
+                        assign use_visual_style = true
+                      elsif value.swatch.color
+                        assign swatch_style = 'background-color: ' | append: value.swatch.color
+                        assign use_visual_style = true
+                      elsif is_visual
+                        assign color_clean = value | downcase | replace: ' ', ''
+                        assign swatch_style = 'background-color: ' | append: color_clean
+                      endif
+                    -%}
+                    <div class="pp-swatch-item">
+                      <input type="radio" id="{{ section_id }}-{{ option.position }}-{{ forloop.index0 }}" name="option-{{ option.position }}" value="{{ value | escape }}" {% if option.selected_value == value %}checked{% endif %} class="pp-visually-hidden">
+                      <label for="{{ section_id }}-{{ option.position }}-{{ forloop.index0 }}" class="pp-swatch-label{% if use_visual_style %} pp-swatch-label--visual{% endif %}" {% if swatch_style != '' %}style="{{ swatch_style }}"{% endif %}>{% unless use_visual_style %}{{ value }}{% endunless %}</label>
+                    </div>
+                  {% endfor %}
+                </div>
+              </fieldset>
+            {% endfor %}
+          {% endunless %}
+
+          {%- if extra_child_enabled -%}
+            <div
+              class="pp-extra-child"
+              data-extra-child
+              data-extra-product-id="{{ extra_child_product.id }}"
+              data-extra-product-title="{{ extra_child_product.title | escape }}"
+              data-extra-expected-price="{{ extra_child_expected_price }}"
+              data-extra-max="{{ section.settings.extra_child_max | default: 3 }}"
+            >
+              <div class="pp-extra-child__summary">
+                <div>
+                  <span class="pp-extra-child__eyebrow">{{ section.settings.extra_child_eyebrow }}</span>
+                  <div class="pp-extra-child__title-row">
+                    <p class="pp-extra-child__title">{{ section.settings.extra_child_title }}</p>
+                    <span class="pp-extra-child__unit-price">+ {{ extra_child_expected_price | money }} cada</span>
+                  </div>
+                  <p class="pp-extra-child__description">{{ section.settings.extra_child_description }}</p>
+                </div>
+
+                <div class="pp-extra-child__stepper" aria-label="Quantidade de camisetas infantis extras">
+                  <button type="button" class="pp-extra-child__stepper-btn" data-extra-minus aria-label="Remover camiseta infantil extra" disabled>−</button>
+                  <span class="pp-extra-child__count" data-extra-count aria-live="polite">0</span>
+                  <button type="button" class="pp-extra-child__stepper-btn" data-extra-plus aria-label="Adicionar camiseta infantil extra">+</button>
+                </div>
+              </div>
+
+              <div class="pp-extra-child__rows" data-extra-rows hidden></div>
+
+              <template data-extra-row-template>
+                <div class="pp-extra-child__row" data-extra-row>
+                  <label class="pp-extra-child__row-label">
+                    Infantil extra <span data-extra-index></span>
+                  </label>
+                  <div class="pp-extra-child__select-wrap">
+                    <select class="pp-extra-child__select" data-extra-select aria-label="Tamanho da camiseta infantil extra">
+                      <option value="">Escolha o tamanho</option>
+                      {%- for variant in extra_child_product.variants -%}
+                        <option
+                          value="{{ variant.id }}"
+                          data-price="{{ variant.price }}"
+                          {% unless variant.available %}disabled{% endunless %}
+                        >
+                          {{ variant.title }}{% unless variant.available %} — Esgotado{% endunless %}
+                        </option>
+                      {%- endfor -%}
+                    </select>
+                    <svg class="pp-extra-child__chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.25 6 6.25 11 1.25" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+              </template>
+
+              <p class="pp-extra-child__status" data-extra-status role="status" aria-live="polite"></p>
+            </div>
+          {%- elsif request.design_mode and section.settings.enable_extra_child -%}
+            <div class="pp-extra-child__empty">
+              Conecte o produto infantil extra pelo metafield <code>custom.extra_child_product</code> ou pelas configurações desta seção.
+            </div>
+          {%- endif -%}
+
+          <div class="pp-actions-bar">
+            <div class="pp-buy-row">
+              <button type="submit" id="BtnAddToCart" class="pp-btn" {% unless current_variant.available %}disabled{% endunless %}>
+                {%- if current_variant.available -%}Adicionar à Sacola{%- else -%}Esgotado{%- endif -%}
+              </button>
+              <button type="button" id="BtnBuyNow" class="pp-btn" {% unless current_variant.available %}disabled{% endunless %}>
+                {%- if current_variant.available -%}Comprar Agora{%- else -%}Esgotado{%- endif -%}
+              </button>
+            </div>
+          </div>
+        {% endform %}
+
+        <div class="pp-accordions">
+          <details class="pp-details">
+            <summary class="pp-summary"><span>{{ section.settings.acc_size_title }}</span><div class="pp-icon-plus"></div></summary>
+            <div class="pp-accordion-content">
+              {% if show_toggle %}
+              <div class="pp-size-guide-toggle">
+                <input type="radio" id="sg-regular" name="sg_fit" class="pp-sg-radio" value="regular" {% if active_panel == 'regular' %}checked{% endif %}>
+                <label for="sg-regular" class="pp-sg-label">Regular</label>
+                <input type="radio" id="sg-oversized" name="sg_fit" class="pp-sg-radio" value="oversized" {% if active_panel == 'oversized' %}checked{% endif %}>
+                <label for="sg-oversized" class="pp-sg-label">Oversized</label>
+                <input type="radio" id="sg-infantil" name="sg_fit" class="pp-sg-radio" value="infantil" {% if active_panel == 'infantil' %}checked{% endif %}>
+                <label for="sg-infantil" class="pp-sg-label">Infantil</label>
+              </div>
+              {% endif %}
+
+              {% if show_toggle or active_panel == 'regular' %}
+              <div class="pp-sg-panel {% if active_panel == 'regular' %}is-active{% endif %}" data-panel="regular">
+                <div class="pp-sg-grid">
+                  <div>{% if section.settings.size_img_reg != blank %}<img src="{{ section.settings.size_img_reg | image_url: width: 300 }}" class="pp-sg-img" loading="lazy" alt="Guia Regular">{% endif %}</div>
+                  <div>{{ section.settings.size_tbl_reg }}</div>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if show_toggle or active_panel == 'oversized' %}
+              <div class="pp-sg-panel {% if active_panel == 'oversized' %}is-active{% endif %}" data-panel="oversized">
+                <div class="pp-sg-grid">
+                  <div>{% if section.settings.size_img_over != blank %}<img src="{{ section.settings.size_img_over | image_url: width: 300 }}" class="pp-sg-img" loading="lazy" alt="Guia Oversized">{% endif %}</div>
+                  <div>{{ section.settings.size_tbl_over }}</div>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if show_toggle or active_panel == 'infantil' %}
+              <div class="pp-sg-panel {% if active_panel == 'infantil' %}is-active{% endif %}" data-panel="infantil">
+                <div class="pp-sg-grid">
+                  <div>{% if section.settings.size_img_kids != blank %}<img src="{{ section.settings.size_img_kids | image_url: width: 300 }}" class="pp-sg-img" loading="lazy" alt="Guia Infantil">{% endif %}</div>
+                  <div>{{ section.settings.size_tbl_kids }}</div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </details>
+          <details class="pp-details">
+            <summary class="pp-summary"><span>{{ section.settings.acc_care_title }}</span><div class="pp-icon-plus"></div></summary>
+            <div class="pp-accordion-content">{{ section.settings.acc_care_content }}</div>
+          </details>
+          <details class="pp-details">
+            <summary class="pp-summary"><span>{{ section.settings.acc_ship_title }}</span><div class="pp-icon-plus"></div></summary>
+            <div class="pp-accordion-content">{{ section.settings.acc_ship_content }}</div>
+          </details>
+        </div>
+
+        {% if section.settings.show_cross %}
+        <div class="pp-cross" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+          <p style="font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px;">Combine com:</p>
+          {%- liquid
+            assign cross_products = product.metafields.custom.combine.value | default: product.collections.first.products
+            assign count = 0
+          -%}
+          {% for rel in cross_products %}
+            {% if rel.id != product.id and rel.available and count < 2 %}
+              {% assign count = count | plus: 1 %}
+              <div class="pp-cross-item">
+                <a href="{{ rel.url }}" style="display:contents">
+                  <img src="{{ rel.featured_image | image_url: width: 100 }}" class="pp-cross-img" loading="lazy" alt="{{ rel.title | escape }}">
+                  <div style="flex: 1;">
+                    <div style="font-size: 0.75rem; font-weight: 600;">{{ rel.title }}</div>
+                    <div style="font-size: 0.7rem; color: #666;">{{ rel.price | money }}</div>
+                  </div>
+                  <span style="font-size: 1.1rem; color: #000;">+</span>
+                </a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  var formId = '{{ product_form_id }}';
+  var productJson = {{ product.variants | json }};
+  var extraProductJson = {% if extra_child_enabled %}{{ extra_child_product.variants | json }}{% else %}[]{% endif %};
+  var extraExpectedPrice = {{ extra_child_expected_price | default: 6990 }};
+
+  var productPixPrice = (function() {
+    var raw = {{ product_pix_raw | default: 0 | times: 1 }};
+    if (raw != null && !isNaN(Number(raw)) && Number(raw) > 0) return Number(raw);
+    return 0;
+  })();
+
+  function getPixAmount(fallbackPrice) {
+    if (productPixPrice > 0) return productPixPrice;
+    var fb = Number(fallbackPrice);
+    return (!isNaN(fb) && fb > 0) ? fb : 0;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+
+    var mq = window.matchMedia('(max-width: 749px)');
+    var actionsBar = document.querySelector('#shopify-section-{{ section_id }} .pp-actions-bar');
+    var resizeTimer;
+
+    function syncActionsBarState() {
+      if (!actionsBar) return;
+      if (mq.matches) {
+        document.body.classList.add('pp-has-pp-actions-bar');
+        var h = Math.ceil(actionsBar.getBoundingClientRect().height || actionsBar.offsetHeight || 0);
+        if (h) document.documentElement.style.setProperty('--pp-actions-bar-h', h + 'px');
+      } else {
+        document.body.classList.remove('pp-has-pp-actions-bar');
+        document.documentElement.style.removeProperty('--pp-actions-bar-h');
+      }
+    }
+    syncActionsBarState();
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(syncActionsBarState, 150);
+    }, { passive: true });
+    window.addEventListener('orientationchange', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(syncActionsBarState, 150);
+    }, { passive: true });
+
+    /* --- LÓGICA GUIA DE MEDIDAS --- */
+    var sgRadios = document.querySelectorAll('input[name="sg_fit"]');
+    var sgPanels = document.querySelectorAll('.pp-sg-panel');
+    sgRadios.forEach(function(radio) {
+      radio.addEventListener('change', function(e) {
+        var target = e.target.value;
+        sgPanels.forEach(function(p) {
+          if (p.dataset.panel === target) p.classList.add('is-active');
+          else p.classList.remove('is-active');
+        });
+      });
+    });
+
+    /* --- LÓGICA FORMULÁRIO --- */
+    var formEl = document.getElementById(formId);
+    if (!formEl) return;
+
+    var dom = {
+      addBtn: document.getElementById('BtnAddToCart'),
+      buyBtn: document.getElementById('BtnBuyNow'),
+      hiddenId: formEl.querySelector('input[name="id"]'),
+      priceEl: formEl.querySelector('.pp-price'),
+      installment3xEl: formEl.querySelector('.installment-3x'),
+      valEls: formEl.querySelectorAll('.js-val'),
+      extraRoot: formEl.querySelector('[data-extra-child]'),
+      extraRows: formEl.querySelector('[data-extra-rows]'),
+      extraTemplate: formEl.querySelector('[data-extra-row-template]'),
+      extraPlus: formEl.querySelector('[data-extra-plus]'),
+      extraMinus: formEl.querySelector('[data-extra-minus]'),
+      extraCount: formEl.querySelector('[data-extra-count]'),
+      extraStatus: formEl.querySelector('[data-extra-status]')
+    };
+
+    var currentVariant = productJson.find(function(v) {
+      return dom.hiddenId && String(v.id) === String(dom.hiddenId.value);
+    }) || productJson[0] || null;
+    var purchaseBusy = false;
+
+    function getExtraRows() {
+      return dom.extraRows ? Array.from(dom.extraRows.querySelectorAll('[data-extra-row]')) : [];
+    }
+
+    function getExtraSelections() {
+      return getExtraRows().map(function(row, index) {
+        var select = row.querySelector('[data-extra-select]');
+        var variant = extraProductJson.find(function(v) { return select && String(v.id) === String(select.value); });
+        return { index: index + 1, select: select, variant: variant || null };
+      });
+    }
+
+    function getExtraCount() { return getExtraRows().length; }
+    function getExtraTotal() { return getExtraCount() * extraExpectedPrice; }
+
+    function extrasAreValid(showMessage) {
+      var selections = getExtraSelections();
+      if (!selections.length) {
+        if (dom.extraStatus) dom.extraStatus.textContent = '';
+        return true;
+      }
+
+      var missing = selections.find(function(item) { return !item.variant; });
+      if (missing) {
+        if (showMessage && missing.select) missing.select.focus();
+        if (dom.extraStatus) {
+          dom.extraStatus.textContent = 'Escolha o tamanho de cada camiseta infantil extra.';
+          dom.extraStatus.classList.add('is-error');
+        }
+        return false;
+      }
+
+      var invalidPrice = selections.find(function(item) {
+        return Number(item.variant.price) !== Number(extraExpectedPrice);
+      });
+      if (invalidPrice) {
+        if (dom.extraStatus) {
+          dom.extraStatus.textContent = 'O preço da variante infantil extra precisa ser ' + formatMoney(extraExpectedPrice) + ' no cadastro do produto.';
+          dom.extraStatus.classList.add('is-error');
+        }
+        return false;
+      }
+
+      var unavailable = selections.find(function(item) { return !item.variant.available; });
+      if (unavailable) {
+        if (dom.extraStatus) {
+          dom.extraStatus.textContent = 'Um dos tamanhos adicionais está esgotado.';
+          dom.extraStatus.classList.add('is-error');
+        }
+        return false;
+      }
+
+      if (dom.extraStatus) {
+        dom.extraStatus.textContent = selections.length === 1
+          ? '1 camiseta infantil extra selecionada.'
+          : selections.length + ' camisetas infantis extras selecionadas.';
+        dom.extraStatus.classList.remove('is-error');
+      }
+      return true;
+    }
+
+    function renderCommercialTotals() {
+      if (!currentVariant) return;
+      var extraTotal = getExtraTotal();
+      var total = Number(currentVariant.price || 0) + extraTotal;
+      var compareTotal = Number(currentVariant.compare_at_price || 0) > Number(currentVariant.price || 0)
+        ? Number(currentVariant.compare_at_price) + extraTotal
+        : 0;
+      var count = getExtraCount();
+      var priceHtml = compareTotal > total
+        ? '<span class="pp-price--sale">' + formatMoney(total) + '</span><span class="pp-price--compare">' + formatMoney(compareTotal) + '</span>'
+        : '<span class="pp-price__regular">' + formatMoney(total) + '</span>';
+
+      if (count > 0) {
+        priceHtml += '<span class="pp-price__context">Kit + ' + count + (count === 1 ? ' infantil extra' : ' infantis extras') + '</span>';
+      }
+      if (dom.priceEl) dom.priceEl.innerHTML = priceHtml;
+
+      var pixAmount = getPixAmount(currentVariant.price) + extraTotal;
+      if (dom.installment3xEl) dom.installment3xEl.textContent = '3x de ' + formatMoney(Math.round(pixAmount / 3));
+    }
+
+    function syncExtraUI() {
+      var count = getExtraCount();
+      var max = dom.extraRoot ? Math.max(1, parseInt(dom.extraRoot.dataset.extraMax || '3', 10) || 3) : 0;
+      if (dom.extraCount) dom.extraCount.textContent = String(count);
+      if (dom.extraMinus) dom.extraMinus.disabled = count === 0;
+      if (dom.extraPlus) dom.extraPlus.disabled = count >= max;
+      if (dom.extraRows) dom.extraRows.hidden = count === 0;
+      getExtraRows().forEach(function(row, index) {
+        var indexEl = row.querySelector('[data-extra-index]');
+        if (indexEl) indexEl.textContent = String(index + 1);
+      });
+      renderCommercialTotals();
+      extrasAreValid(false);
+      syncPurchaseButtons();
+    }
+
+    function syncPurchaseButtons() {
+      if (purchaseBusy) return;
+      var mainAvailable = !!(currentVariant && currentVariant.available);
+      var extrasValid = extrasAreValid(false);
+      updateBtn(dom.addBtn, mainAvailable ? 'Adicionar à Sacola' : 'Esgotado', !mainAvailable || !extrasValid);
+      updateBtn(dom.buyBtn, mainAvailable ? 'Comprar Agora' : 'Esgotado', !mainAvailable || !extrasValid);
+    }
+
+    function addExtraRow() {
+      if (!dom.extraTemplate || !dom.extraRows) return;
+      var fragment = dom.extraTemplate.content.cloneNode(true);
+      dom.extraRows.appendChild(fragment);
+      var newRow = getExtraRows().slice(-1)[0];
+      var select = newRow && newRow.querySelector('[data-extra-select]');
+      if (select) {
+        select.addEventListener('change', function() {
+          renderCommercialTotals();
+          extrasAreValid(false);
+          syncPurchaseButtons();
+        });
+      }
+      syncExtraUI();
+      if (select) select.focus();
+    }
+
+    function removeExtraRow() {
+      var rows = getExtraRows();
+      if (!rows.length) return;
+      rows[rows.length - 1].remove();
+      syncExtraUI();
+    }
+
+    if (dom.extraPlus) dom.extraPlus.addEventListener('click', addExtraRow);
+    if (dom.extraMinus) dom.extraMinus.addEventListener('click', removeExtraRow);
+
+    /* ================================================
+       RESTAURAR BOTÕES AO VOLTAR (bfcache)
+       Quando o usuário volta do checkout, o navegador
+       restaura o DOM como estava — botões travados.
+       O evento "pageshow" com persisted=true detecta isso.
+       ================================================ */
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        /* Remover o input return_to injetado pelo Buy Now */
+        var leftoverReturn = formEl.querySelector('input[name="return_to"]');
+        if (leftoverReturn) leftoverReturn.remove();
+
+        /* Descobrir variante atual para checar disponibilidade */
+        var currentId = dom.hiddenId ? dom.hiddenId.value : null;
+        var restoredVariant = currentId
+          ? productJson.find(function(v) { return String(v.id) === String(currentId); })
+          : null;
+
+        /* Resetar estado comercial */
+        currentVariant = restoredVariant || productJson[0] || null;
+        purchaseBusy = false;
+        renderCommercialTotals();
+        syncPurchaseButtons();
+
+        if (dom.addBtn) {
+          dom.addBtn.classList.remove('is-added');
+          dom.addBtn.setAttribute('aria-busy', 'false');
+        }
+        if (dom.buyBtn) {
+          dom.buyBtn.setAttribute('aria-busy', 'false');
+        }
+      }
+    });
+
+    /* --- VARIANT CHANGE HANDLER --- */
+    formEl.addEventListener('change', function(e) {
+      if (!e.target.matches('.pp-variant-group input[type="radio"]')) return;
+      var group = e.target.closest('.pp-variant-group');
+      group.querySelector('.js-val').textContent = e.target.value;
+
+      var formData = new FormData(formEl);
+      var selectedOpts = Array.from(formData.entries()).filter(function(entry) { return entry[0].startsWith('option'); }).map(function(entry) { return entry[1]; });
+      var matched = productJson.find(function(v) { return v.options.length === selectedOpts.length && v.options.every(function(o, i) { return o === selectedOpts[i]; }); });
+
+      if (matched) {
+        if (dom.hiddenId) dom.hiddenId.value = matched.id;
+
+        currentVariant = matched;
+        renderCommercialTotals();
+        syncPurchaseButtons();
+        window.history.replaceState({}, '', '?variant=' + matched.id);
+      } else {
+        currentVariant = null;
+        updateBtn(dom.addBtn, "Indisponível", true);
+        updateBtn(dom.buyBtn, "Indisponível", true);
+      }
+    });
+
+    /* ================================================
+       CARRINHO — produto principal + infantis extras
+       ================================================ */
+    function readMainProperties() {
+      var properties = {};
+      formEl.querySelectorAll('[name^="properties["]').forEach(function(input) {
+        if (input.disabled || !input.name || !input.value) return;
+        var match = input.name.match(/^properties\[(.*)\]$/);
+        if (match) properties[match[1]] = input.value;
+      });
+      return properties;
+    }
+
+    function collectCartSections() {
+      var ids = ['cart-drawer', 'cart-icon-bubble'];
+      document.querySelectorAll('[data-section-id], [data-cart-section-id]').forEach(function(el) {
+        var id = el.dataset.sectionId || el.dataset.cartSectionId;
+        if (id) ids.push(id);
+      });
+      return Array.from(new Set(ids.filter(Boolean))).slice(0, 5);
+    }
+
+    function renderReturnedSections(sections) {
+      if (!sections || typeof sections !== 'object') return;
+      Object.keys(sections).forEach(function(sectionId) {
+        var html = sections[sectionId];
+        if (!html) return;
+        var parsed = new DOMParser().parseFromString(html, 'text/html');
+        var current = document.getElementById('shopify-section-' + sectionId);
+        var next = parsed.getElementById('shopify-section-' + sectionId);
+        if (current && next) {
+          current.replaceWith(next);
+          return;
+        }
+        current = document.getElementById(sectionId);
+        next = parsed.getElementById(sectionId);
+        if (current && next) current.replaceWith(next);
+      });
+    }
+
+    function dispatchCartEvents(data) {
+      var detail = {
+        data: data,
+        sections: data && data.sections || null,
+        source: 'product-form-kit',
+        sourceId: formId,
+        itemCount: data && Array.isArray(data.items) ? data.items.length : 1 + getExtraCount()
+      };
+      document.dispatchEvent(new CustomEvent('cart:update', { bubbles: true, detail: detail }));
+      document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true, detail: detail }));
+      document.dispatchEvent(new CustomEvent('product:added', { bubbles: true, detail: { product: data } }));
+
+      if (typeof window.publish === 'function' && window.PUB_SUB_EVENTS && window.PUB_SUB_EVENTS.cartUpdate) {
+        try {
+          window.publish(window.PUB_SUB_EVENTS.cartUpdate, {
+            source: formId,
+            productVariantId: data && data.items && data.items[0] && data.items[0].variant_id,
+            cartData: data
+          });
+        } catch (eventError) {
+          console.warn('[Kit Dia dos Pais] Falha ao publicar evento do carrinho.', eventError);
+        }
+      }
+    }
+
+    function openCartDrawer() {
+      var drawer = document.querySelector('cart-drawer, [data-cart-drawer], .cart-drawer');
+      if (drawer) {
+        if (typeof drawer.open === 'function') { drawer.open(); return true; }
+        if (typeof drawer.show === 'function') { drawer.show(); return true; }
+        drawer.classList.add('is-open', 'active', 'animate');
+        drawer.removeAttribute('hidden');
+        drawer.setAttribute('open', '');
+        return true;
+      }
+      var opener = document.querySelector('[data-cart-drawer-open], [aria-controls="CartDrawer"], [aria-controls="cart-drawer"]');
+      if (opener) { opener.click(); return true; }
+      return false;
+    }
+
+    function buildCartItems() {
+      if (!currentVariant || !currentVariant.available) throw new Error('Selecione uma combinação disponível do kit.');
+      if (!extrasAreValid(true)) throw new Error('Escolha os tamanhos das camisetas infantis extras.');
+
+      var groupId = 'kit-pais-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+      var mainProperties = readMainProperties();
+      mainProperties._kit_group = groupId;
+      mainProperties._kit_role = 'principal';
+      if (getExtraCount() > 0) mainProperties['Infantis extras'] = String(getExtraCount());
+
+      var quantityInput = formEl.querySelector('[name="quantity"]');
+      var mainQuantity = Math.max(1, parseInt(quantityInput && quantityInput.value || '1', 10) || 1);
+      var mainItem = {
+        id: Number(currentVariant.id),
+        quantity: mainQuantity,
+        properties: mainProperties
+      };
+      var sellingPlan = formEl.querySelector('[name="selling_plan"]');
+      if (sellingPlan && sellingPlan.value) mainItem.selling_plan = Number(sellingPlan.value);
+
+      var items = [mainItem];
+      getExtraSelections().forEach(function(item) {
+        items.push({
+          id: Number(item.variant.id),
+          quantity: 1,
+          properties: {
+            _kit_group: groupId,
+            _kit_role: 'infantil_extra',
+            _kit_child_index: String(item.index),
+            'Adicional do kit': '{{ extra_child_product.title | default: "T-shirt infantil extra" | escape }}',
+            'Tamanho infantil extra': item.variant.title
+          }
+        });
+      });
+      return items;
+    }
+
+    async function submitCartBundle(button, redirectToCheckout) {
+      if (purchaseBusy) return;
+      purchaseBusy = true;
+      var originalText = button ? button.textContent : '';
+      if (button) {
+        button.textContent = redirectToCheckout ? 'Redirecionando…' : 'Adicionando…';
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+      }
+
+      try {
+        var sectionIds = collectCartSections();
+        var payload = {
+          items: buildCartItems(),
+          sections: sectionIds.join(','),
+          sections_url: window.location.pathname
+        };
+        var cartAddUrl = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root || '/') + 'cart/add.js';
+        var res = await fetch(cartAddUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        var data = await res.json().catch(function() { return {}; });
+        if (!res.ok) throw new Error(data.description || data.message || 'Falha ao adicionar o kit.');
+
+        renderReturnedSections(data.sections);
+        dispatchCartEvents(data);
+
+        if (redirectToCheckout) {
+          window.location.assign('/checkout');
+          return;
+        }
+
+        document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true, detail: { sourceId: formId } }));
+        window.setTimeout(function() {
+          if (!openCartDrawer()) console.info('[Kit Dia dos Pais] Carrinho adicionado; drawer controlado pelo tema.');
+        }, 60);
+        if (button) {
+          button.textContent = 'Adicionado!';
+          button.classList.add('is-added');
+          button.setAttribute('aria-busy', 'false');
+        }
+        window.setTimeout(function() {
+          purchaseBusy = false;
+          if (button) button.classList.remove('is-added');
+          syncPurchaseButtons();
+        }, 1800);
+      } catch (err) {
+        console.error('[Kit Dia dos Pais]', err);
+        purchaseBusy = false;
+        if (button) {
+          button.textContent = originalText;
+          button.removeAttribute('aria-busy');
+        }
+        syncPurchaseButtons();
+        showToast(err.message || 'Erro ao adicionar o kit.');
+      }
+    }
+
+    if (dom.addBtn) {
+      formEl.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        submitCartBundle(dom.addBtn, false);
+      });
+    }
+
+    if (dom.buyBtn) {
+      dom.buyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        submitCartBundle(dom.buyBtn, true);
+      });
+    }
+
+    renderCommercialTotals();
+    syncExtraUI();
+
+    /* --- ACCORDION SCROLL --- */
+    document.querySelectorAll('.pp-details').forEach(function(d) {
+      d.addEventListener('toggle', function() {
+        if (d.open && window.innerWidth < 990) {
+          setTimeout(function() { d.scrollIntoView({behavior: "smooth", block: "nearest"}); }, 100);
+        }
+      });
+    });
+
+    /* ================================================
+       ZOOM INLINE — CLICK TO ACTIVATE
+       ================================================ */
+    var isTouchDevice = window.matchMedia('(hover: none)').matches;
+    var zoomItems = document.querySelectorAll('.pp-media-item--has-zoom');
+
+    function deactivateAllZooms() {
+      var activeItem = document.querySelector('.pp-media-item--has-zoom.is-zoom-active');
+      if (activeItem) {
+        activeItem.classList.remove('is-zoom-active');
+        var layer = activeItem.querySelector('.pp-media-item__zoom-layer');
+        if (layer) layer.style.backgroundPosition = 'center center';
+        activeItem._ppZoomActive = false;
+      }
+    }
+
+    zoomItems.forEach(function(item) {
+      var zoomLayer = item.querySelector('.pp-media-item__zoom-layer');
+      if (!zoomLayer) return;
+
+      item._ppZoomActive = false;
+      item._ppBgPosX = 50;
+      item._ppBgPosY = 50;
+      item._ppLastTouchX = 0;
+      item._ppLastTouchY = 0;
+      item._ppHdPreloaded = false;
+
+      function preloadHD() {
+        if (item._ppHdPreloaded) return;
+        var hdSrc = item.getAttribute('data-pp-zoom-src');
+        if (hdSrc) {
+          var preload = new Image();
+          preload.src = hdSrc;
+          item._ppHdPreloaded = true;
+        }
+      }
+
+      function activateZoom(clientX, clientY) {
+        deactivateAllZooms();
+        preloadHD();
+        item._ppZoomActive = true;
+        item.classList.add('is-zoom-active');
+
+        var rect = item.getBoundingClientRect();
+        item._ppBgPosX = ((clientX - rect.left) / rect.width) * 100;
+        item._ppBgPosY = ((clientY - rect.top) / rect.height) * 100;
+        item._ppBgPosX = Math.max(0, Math.min(100, item._ppBgPosX));
+        item._ppBgPosY = Math.max(0, Math.min(100, item._ppBgPosY));
+        zoomLayer.style.backgroundPosition = item._ppBgPosX + '% ' + item._ppBgPosY + '%';
+      }
+
+      function deactivateZoom() {
+        item._ppZoomActive = false;
+        item.classList.remove('is-zoom-active');
+        zoomLayer.style.backgroundPosition = 'center center';
+        item._ppBgPosX = 50;
+        item._ppBgPosY = 50;
+      }
+
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!item._ppZoomActive) {
+          activateZoom(e.clientX, e.clientY);
+        } else {
+          deactivateZoom();
+        }
+      });
+
+      if (!isTouchDevice) {
+        item.addEventListener('mousemove', function(e) {
+          if (!item._ppZoomActive) return;
+          var rect = item.getBoundingClientRect();
+          var x = ((e.clientX - rect.left) / rect.width) * 100;
+          var y = ((e.clientY - rect.top) / rect.height) * 100;
+          x = Math.max(0, Math.min(100, x));
+          y = Math.max(0, Math.min(100, y));
+          zoomLayer.style.backgroundPosition = x + '% ' + y + '%';
+        });
+
+        item.addEventListener('mouseleave', function() {
+          if (item._ppZoomActive) {
+            deactivateZoom();
+          }
+        });
+      }
+
+      if (isTouchDevice) {
+        item.addEventListener('touchstart', function(e) {
+          if (!item._ppZoomActive) return;
+          if (e.touches.length === 1) {
+            item._ppLastTouchX = e.touches[0].clientX;
+            item._ppLastTouchY = e.touches[0].clientY;
+          }
+        }, { passive: true });
+
+        item.addEventListener('touchmove', function(e) {
+          if (!item._ppZoomActive) return;
+          if (e.touches.length === 1) {
+            e.preventDefault();
+            var rect = item.getBoundingClientRect();
+            var deltaX = (item._ppLastTouchX - e.touches[0].clientX) / rect.width * 100;
+            var deltaY = (item._ppLastTouchY - e.touches[0].clientY) / rect.height * 100;
+
+            item._ppBgPosX = Math.max(0, Math.min(100, item._ppBgPosX + deltaX * 0.8));
+            item._ppBgPosY = Math.max(0, Math.min(100, item._ppBgPosY + deltaY * 0.8));
+            zoomLayer.style.backgroundPosition = item._ppBgPosX + '% ' + item._ppBgPosY + '%';
+
+            item._ppLastTouchX = e.touches[0].clientX;
+            item._ppLastTouchY = e.touches[0].clientY;
+          }
+        }, { passive: false });
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      var clickedZoomItem = e.target.closest('.pp-media-item--has-zoom');
+      if (!clickedZoomItem) {
+        deactivateAllZooms();
+      }
+    });
+
+    var scrollTimer;
+    window.addEventListener('scroll', function() {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(function() {
+        deactivateAllZooms();
+      }, 100);
+    }, { passive: true });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        deactivateAllZooms();
+      }
+    });
+
+  });
+
+  function updateBtn(btn, text, disabled) { if(btn){ btn.textContent = text; btn.disabled = disabled; } }
+  function formatMoney(cents) { return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+  function showToast(msg) { var toast = document.getElementById('pp-toast'); if (!toast) { toast = document.createElement('div'); toast.id = 'pp-toast'; toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:99999;opacity:0;transition:opacity .3s'; document.body.appendChild(toast); } toast.textContent = msg; toast.style.opacity = '1'; setTimeout(function(){ toast.style.opacity = '0'; }, 3500); }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Horizon V24 Kit Pais",
+  "settings": [
+    { "type": "header", "content": "Layout & Base" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Texto Principal", "default": "#000000" },
+    { "type": "header", "content": "T-shirt infantil extra" },
+    { "type": "checkbox", "id": "enable_extra_child", "label": "Ativar infantil extra", "default": true },
+    { "type": "product", "id": "extra_child_product", "label": "Produto infantil não listado", "info": "Fallback quando o produto atual não possui o metafield custom.extra_child_product." },
+    { "type": "number", "id": "extra_child_unit_price", "label": "Preço esperado por unidade (centavos)", "default": 6990, "info": "Todas as variantes do produto infantil extra devem ter exatamente este preço. 6990 = R$ 69,90." },
+    { "type": "range", "id": "extra_child_max", "label": "Máximo de infantis extras", "min": 1, "max": 5, "step": 1, "default": 3 },
+    { "type": "text", "id": "extra_child_eyebrow", "label": "Sobretítulo", "default": "Exclusivo no kit" },
+    { "type": "text", "id": "extra_child_title", "label": "Título", "default": "Adicionar T-shirt infantil extra" },
+    { "type": "textarea", "id": "extra_child_description", "label": "Descrição", "default": "Mesma estampa do kit. Escolha uma unidade para cada criança adicional." },
+    { "type": "header", "content": "Botão: Adicionar (Primário)" },
+    { "type": "color", "id": "btn_primary_bg", "label": "Fundo", "default": "#8f332e" },
+    { "type": "color", "id": "btn_primary_text", "label": "Texto", "default": "#ffffff" },
+    { "type": "color", "id": "btn_primary_border", "label": "Borda", "default": "#8f332e" },
+    { "type": "color", "id": "btn_primary_bg_hover", "label": "Fundo (Hover)", "default": "#752a26" },
+    { "type": "color", "id": "btn_primary_text_hover", "label": "Texto (Hover)", "default": "#ffffff" },
+    { "type": "color", "id": "btn_primary_border_hover", "label": "Borda (Hover)", "default": "#752a26" },
+    { "type": "header", "content": "Botão: Comprar (Secundário)" },
+    { "type": "color", "id": "btn_secondary_bg", "label": "Fundo", "default": "#ffffff" },
+    { "type": "color", "id": "btn_secondary_text", "label": "Texto", "default": "#8f332e" },
+    { "type": "color", "id": "btn_secondary_border", "label": "Borda", "default": "#8f332e" },
+    { "type": "color", "id": "btn_secondary_bg_hover", "label": "Fundo (Hover)", "default": "#f4f4f4" },
+    { "type": "color", "id": "btn_secondary_text_hover", "label": "Texto (Hover)", "default": "#8f332e" },
+    { "type": "color", "id": "btn_secondary_border_hover", "label": "Borda (Hover)", "default": "#8f332e" },
+    { "type": "header", "content": "Guia de Medidas (Normal)" },
+    { "type": "text", "id": "acc_size_title", "label": "Título do Accordion", "default": "Guia de Medidas" },
+    { "type": "image_picker", "id": "size_img_reg", "label": "Desenho Técnico (Regular)" },
+    { "type": "liquid", "id": "size_tbl_reg", "label": "HTML Tabela (Regular)", "default": "<table class='pp-sg-table'><thead><tr><th>Tam</th><th>Busto</th><th>Cintura</th></tr></thead><tbody><tr><td>P</td><td>88</td><td>68</td></tr><tr><td>M</td><td>94</td><td>74</td></tr></tbody></table>" },
+    { "type": "header", "content": "Guia de Medidas (Oversized)" },
+    { "type": "image_picker", "id": "size_img_over", "label": "Desenho Técnico (Oversized)" },
+    { "type": "liquid", "id": "size_tbl_over", "label": "HTML Tabela (Oversized)", "default": "<table class='pp-sg-table'><thead><tr><th>Tam</th><th>Busto</th><th>Cintura</th></tr></thead><tbody><tr><td>P</td><td>96</td><td>76</td></tr><tr><td>M</td><td>102</td><td>82</td></tr></tbody></table>" },
+    { "type": "header", "content": "Guia de Medidas (Infantil)" },
+    { "type": "image_picker", "id": "size_img_kids", "label": "Desenho Técnico (Infantil)" },
+    { "type": "liquid", "id": "size_tbl_kids", "label": "HTML Tabela (Infantil)", "default": "<table class='pp-sg-table'><thead><tr><th>Idade</th><th>Altura</th></tr></thead><tbody><tr><td>2-3</td><td>98</td></tr><tr><td>4-5</td><td>110</td></tr></tbody></table>" },
+    { "type": "header", "content": "Conteúdo Extra" },
+    { "type": "text", "id": "acc_care_title", "label": "Título: Cuidados", "default": "Detalhes e Cuidados" },
+    { "type": "liquid", "id": "acc_care_content", "label": "HTML: Cuidados" },
+    { "type": "text", "id": "acc_ship_title", "label": "Título: Envios", "default": "Envio e Trocas" },
+    { "type": "liquid", "id": "acc_ship_content", "label": "HTML: Envios" },
+    { "type": "checkbox", "id": "show_cross", "label": "Exibir Cross Sell", "default": true },
+    { "type": "checkbox", "id": "show_payment_terms", "label": "Exibir Parcelamento", "default": true }
+  ],
+  "presets": [{ "name": "Horizon V24 Kit Pais" }]
+}
+{% endschema %}

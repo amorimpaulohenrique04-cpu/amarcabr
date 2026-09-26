@@ -1,0 +1,44 @@
+import{Component}from '@theme/component';export const MORPH_OPTIONS={childrenOnly:!0,reject(oldNode,newNode){if(newNode.nodeType===Node.TEXT_NODE&&newNode.nodeValue?.trim()===''){return!0}
+if(newNode instanceof HTMLTemplateElement&&newNode.shadowRootMode==='open'&&oldNode.parentElement&&newNode.parentElement&&oldNode.parentElement.tagName===newNode.parentElement.tagName&&oldNode.parentElement?.shadowRoot!=null){return!0}
+if(newNode.nodeType===Node.COMMENT_NODE&&newNode.nodeValue==='shopify:rendered_by_section_api'){return!0}
+return!1},onBeforeUpdate(oldNode,newNode){if(oldNode instanceof Element&&newNode instanceof Element){const attributes=['product-grid-view','data-current-checked','data-previous-checked','cart-summary-sticky'];for(const attribute of attributes){const oldValue=oldNode.getAttribute(attribute);const newValue=newNode.getAttribute(attribute);if(oldValue&&oldValue!==newValue){newNode.setAttribute(attribute,oldValue)}}
+const elements=['floating-panel-component','fieldset.variant-option'];const ids=['account-popover'];for(const element of elements){if(oldNode.matches(element)&&newNode.matches(element)){const oldStyle=oldNode.getAttribute('style');if(oldStyle)newNode.setAttribute('style',oldStyle);}}
+for(const id of ids){if(oldNode.id===id&&newNode.id===id){const oldStyle=oldNode.getAttribute('style');if(oldStyle)newNode.setAttribute('style',oldStyle);}}
+if(oldNode instanceof HTMLElement&&newNode instanceof HTMLElement&&oldNode.style.viewTransitionName){newNode.style.viewTransitionName=oldNode.style.viewTransitionName}}},onAfterUpdate(node){if(node instanceof Component){queueMicrotask(()=>node.updatedCallback())}},};export function morph(oldTree,newTree,options=MORPH_OPTIONS){if(!oldTree||!newTree){throw new Error('Both oldTree and newTree must be provided')}
+if(typeof newTree==='string'){const doc=new DOMParser().parseFromString(newTree,'text/html');const body=doc.body;const parsedNewTree=body.firstElementChild||Array.from(body.childNodes).find((n)=>n.nodeType===Node.ELEMENT_NODE);if(!parsedNewTree){throw new Error('newTree string is not valid HTML')}
+newTree=parsedNewTree;if(!parsedNewTree){throw new Error('newTree string is not valid HTML')}
+newTree=parsedNewTree}
+if(options.childrenOnly){updateChildren(newTree,oldTree,options);return oldTree}
+if(newTree.nodeType===11){throw new Error('newTree should have one root node (not a DocumentFragment)')}
+return walk(newTree,oldTree,options)}
+function walk(newNode,oldNode,options){if(!oldNode)return newNode;if(!newNode)return oldNode;if(newNode.isSameNode?.(oldNode))return oldNode;if(newNode.nodeType!==oldNode.nodeType)return newNode;if(newNode instanceof Element&&oldNode instanceof Element){if(oldNode.tagName==='SHOPIFY-ACCELERATED-CHECKOUT-CART')return oldNode;if(newNode.tagName!==oldNode.tagName)return newNode;const newKey=getNodeKey(newNode,options);const oldKey=getNodeKey(oldNode,options);if(newKey&&oldKey&&newKey!==oldKey)return newNode}
+if(oldNode instanceof Element&&oldNode.hasAttribute('data-skip-node-update')&&newNode instanceof Element&&newNode.hasAttribute('data-skip-node-update')){updateChildren(newNode,oldNode,options)}else{updateNode(newNode,oldNode,options);updateChildren(newNode,oldNode,options)}
+options.onAfterUpdate?.(newNode);return oldNode}
+function updateNode(newNode,oldNode,options){options.onBeforeUpdate?.(oldNode,newNode);if((newNode instanceof HTMLDetailsElement&&oldNode instanceof HTMLDetailsElement)||(newNode instanceof HTMLDialogElement&&oldNode instanceof HTMLDialogElement)){if(!newNode.hasAttribute('declarative-open')){newNode.open=oldNode.open}}
+if(oldNode instanceof HTMLElement&&newNode instanceof HTMLElement){for(const attr of['slot','sizes']){const oldValue=oldNode.getAttribute(attr);const newValue=newNode.getAttribute(attr);if(oldValue!==newValue){oldValue==null?newNode.removeAttribute(attr):newNode.setAttribute(attr,oldValue)}}}
+if(newNode instanceof Element&&oldNode instanceof Element){if(!oldNode.isEqualNode(newNode)){copyAttributes(newNode,oldNode)}}else if(newNode instanceof Text||newNode instanceof Comment){if(oldNode.nodeValue!==newNode.nodeValue){oldNode.nodeValue=newNode.nodeValue}}
+if(newNode instanceof HTMLInputElement&&oldNode instanceof HTMLInputElement){updateInput(newNode,oldNode)}else if(newNode instanceof HTMLOptionElement&&oldNode instanceof HTMLOptionElement){updateAttribute(newNode,oldNode,'selected')}else if(newNode instanceof HTMLTextAreaElement&&oldNode instanceof HTMLTextAreaElement){updateTextarea(newNode,oldNode)}}
+function getNodeKey(node,options){return options?.getNodeKey?.(node)??(node instanceof Element?node.id:undefined)}
+function updateAttribute(newNode,oldNode,name){if(newNode[name]!==oldNode[name]){oldNode[name]=newNode[name];if(newNode[name]!=null){oldNode.setAttribute(name,'')}else{oldNode.removeAttribute(name)}}}
+function copyAttributes(newNode,oldNode){const oldAttrs=oldNode.attributes;const newAttrs=newNode.attributes;for(const attr of Array.from(newAttrs)){const{name:attrName,namespaceURI:attrNamespaceURI,value:attrValue}=attr;const localName=attr.localName||attrName;if(attrName==='src'||attrName==='href'||attrName==='srcset'||attrName==='poster'){if(oldNode.getAttribute(attrName)===attrValue)continue}
+if(attrNamespaceURI){const fromValue=oldNode.getAttributeNS(attrNamespaceURI,localName);if(fromValue!==attrValue){oldNode.setAttributeNS(attrNamespaceURI,localName,attrValue)}}else{if(!oldNode.hasAttribute(attrName)){oldNode.setAttribute(attrName,attrValue)}else{const fromValue=oldNode.getAttribute(attrName);if(fromValue!==attrValue){if(attrValue==='null'||attrValue==='undefined'){oldNode.removeAttribute(attrName)}else{oldNode.setAttribute(attrName,attrValue)}}}}}
+for(const attr of Array.from(oldAttrs)){if(attr.specified===!1)continue;const{name:attrName,namespaceURI:attrNamespaceURI}=attr;const localName=attr.localName||attrName;if(attrNamespaceURI){if(!newNode.hasAttributeNS(attrNamespaceURI,localName)){oldNode.removeAttributeNS(attrNamespaceURI,localName)}}else if(!newNode.hasAttribute(attrName)){oldNode.removeAttribute(attrName)}}}
+function updateInput(newNode,oldNode){const newValue=newNode.value;updateAttribute(newNode,oldNode,'checked');updateAttribute(newNode,oldNode,'disabled');if(newNode.indeterminate!==oldNode.indeterminate){oldNode.indeterminate=newNode.indeterminate}
+if(oldNode.type==='file')return;if(newValue!==oldNode.value){oldNode.setAttribute('value',newValue);oldNode.value=newValue}
+if(newValue==='null'){oldNode.value='';oldNode.removeAttribute('value')}
+if(!newNode.hasAttributeNS(null,'value')){oldNode.removeAttribute('value')}else if(oldNode.type==='range'){oldNode.value=newValue}}
+function updateTextarea(newNode,oldNode){const newValue=newNode.value;if(newValue!==oldNode.value){oldNode.value=newValue}
+const firstChild=oldNode.firstChild;if(firstChild?.nodeType===Node.TEXT_NODE){if(newValue===''&&firstChild.nodeValue===oldNode.placeholder){return}
+firstChild.nodeValue=newValue}}
+function updateChildren(newNode,oldNode,options){if(oldNode instanceof Element&&oldNode.hasAttribute('data-skip-subtree-update')&&newNode instanceof Element&&newNode.hasAttribute('data-skip-subtree-update')){return}
+let oldChild,newChild,morphed,oldMatch;let offset=0;for(let i=0;;i++){oldChild=oldNode.childNodes[i];newChild=newNode.childNodes[i-offset];if(!oldChild&&!newChild){break}
+if(!newChild){oldChild&&oldNode.removeChild(oldChild);i--;continue}
+if(!oldChild){oldNode.appendChild(newChild);offset++;continue}
+if(same(newChild,oldChild,options)){morphed=walk(newChild,oldChild,options);if(morphed!==oldChild){oldNode.replaceChild(morphed,oldChild);offset++}
+continue}
+if(options.reject?.(oldChild,newChild)){newNode.removeChild(newChild);i--;continue}
+oldMatch=null;for(let j=i;j<oldNode.childNodes.length;j++){const potentialOldNode=oldNode.childNodes[j];if(potentialOldNode&&same(potentialOldNode,newChild,options)){oldMatch=potentialOldNode;break}}
+if(oldMatch){morphed=walk(newChild,oldMatch,options);if(morphed!==oldMatch)offset++;oldNode.insertBefore(morphed,oldChild)}else if(!getNodeKey(newChild,options)&&!getNodeKey(oldChild,options)){morphed=walk(newChild,oldChild,options);if(morphed!==oldChild){oldNode.replaceChild(morphed,oldChild);offset++}}else{oldNode.insertBefore(newChild,oldChild);offset++}}}
+function same(a,b,options){if(a.nodeType!==b.nodeType)return!1;if(a.nodeType===Node.ELEMENT_NODE){if(a instanceof Element&&b instanceof Element&&a.tagName!==b.tagName)return!1;const aKey=getNodeKey(a,options);const bKey=getNodeKey(b,options);if(aKey&&bKey&&aKey!==bKey)return!1}
+if(a.nodeType===Node.TEXT_NODE&&b.nodeType===Node.TEXT_NODE)
+return a.nodeValue?.trim()===b.nodeValue?.trim();if(a.nodeType===Node.COMMENT_NODE&&b.nodeType===Node.COMMENT_NODE)return a.nodeValue===b.nodeValue;return!0}

@@ -1,0 +1,130 @@
+{% comment %}
+  AM - PDP Hero Content
+  Based on Horizon native structure but stripped for editorial look.
+  Maintains all native form IDs and event hooks.
+{% endcomment %}
+
+<div class="am-pdp-container page-width">
+  <div class="am-pdp-grid">
+    
+    {%- comment -%} --- MEDIA COLUMN --- {%- endcomment -%}
+    <div class="am-pdp-media" data-media-group>
+      {%- if product.media.size > 0 -%}
+        {%- for media in product.media -%}
+          <div class="am-media-item" data-media-id="{{ media.id }}">
+            {% render 'product-media', media: media, loop: false, variant_image: false %}
+          </div>
+        {%- endfor -%}
+      {%- else -%}
+        <div class="am-media-placeholder">
+          {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} --- INFO COLUMN (Sticky Buybox) --- {%- endcomment -%}
+    <div class="am-pdp-info">
+      <div class="am-pdp-info-sticky">
+        {%- assign product_form_id = 'product-form-' | append: section.id -%}
+
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when '@app' -%}
+              <div class="am-block-app">{% render block %}</div>
+
+            {%- when 'title' -%}
+              <h1 class="am-pdp-title" {{ block.shopify_attributes }}>
+                {{ product.title | escape }}
+              </h1>
+
+            {%- when 'price' -%}
+              <div class="am-pdp-price" {{ block.shopify_attributes }}>
+                <span class="price-item regular">
+                  {{ product.price | money }}
+                </span>
+                {%- if product.compare_at_price > product.price -%}
+                  <span class="price-item compare">
+                    {{ product.compare_at_price | money }}
+                  </span>
+                {%- endif -%}
+                {%- if product.selected_or_first_available_variant.unit_price_measurement -%}
+                  <div class="unit-price caption">
+                    {{ product.selected_or_first_available_variant.unit_price | money }}
+                  </div>
+                {%- endif -%}
+              </div>
+
+            {%- when 'variant_picker' -%}
+              <div class="am-pdp-variants" {{ block.shopify_attributes }}>
+                {%- unless product.has_only_default_variant -%}
+                  {%- for option in product.options_with_values -%}
+                    <fieldset class="js product-form__input am-variant-fieldset">
+                      <legend class="form__label">{{ option.name }}</legend>
+                      <div class="am-variant-options">
+                        {%- for value in option.values -%}
+                          <input type="radio" id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                                name="{{ option.name }}"
+                                value="{{ value | escape }}"
+                                form="{{ product_form_id }}"
+                                {% if option.selected_value == value %}checked{% endif %}
+                          >
+                          <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
+                            {{ value }}
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    </fieldset>
+                  {%- endfor -%}
+                {%- endunless -%}
+              </div>
+
+            {%- when 'buy_buttons' -%}
+              <div class="am-pdp-actions" {{ block.shopify_attributes }}>
+                {%- comment -%} Quantity selector hidden via CSS as requested {%- endcomment -%}
+                <product-form class="product-form">
+                  <div class="product-form__error-message-wrapper" role="alert" hidden>
+                    <span class="product-form__error-message"></span>
+                  </div>
+
+                  {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" disabled>
+                    
+                    <div class="product-form__buttons">
+                      <button
+                        type="submit"
+                        name="add"
+                        class="product-form__submit button button--full-width button--primary am-submit-btn"
+                        {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}
+                      >
+                        <span>
+                          {%- if product.selected_or_first_available_variant.available -%}
+                            {{ 'products.product.add_to_cart' | t }}
+                          {%- else -%}
+                            {{ 'products.product.sold_out' | t }}
+                          {%- endif -%}
+                        </span>
+                        <div class="loading-overlay__spinner" hidden>
+                          <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                            <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+                          </svg>
+                        </div>
+                      </button>
+                      {%- comment -%} No Dynamic Checkout Buttons rendered here for purity {%- endcomment -%}
+                    </div>
+                  {%- endform -%}
+                </product-form>
+              </div>
+
+            {%- when 'description' -%}
+              {%- comment -%} Rendered in editorial section, skipped here or hidden via CSS if user adds block {%- endcomment -%}
+              <div class="am-hidden-description" style="display:none;">{{ product.description }}</div>
+
+            {%- when 'custom_liquid' -%}
+              {{ block.settings.custom_liquid }}
+
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,257 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@theme/overflow-list": "{{ 'overflow-list.js' | asset_url }}",
+      "@theme/product-title": "{{ 'product-title-truncation.js' | asset_url }}",
+      "@theme/component": "{{ 'component.js' | asset_url }}",
+      "@theme/dialog": "{{ 'dialog.js' | asset_url }}",
+      "@theme/events": "{{ 'events.js' | asset_url }}",
+      "@theme/focus": "{{ 'focus.js' | asset_url }}",
+      "@theme/morph": "{{ 'morph.js' | asset_url }}",
+      "@theme/paginated-list": "{{ 'paginated-list.js' | asset_url }}",
+      "@theme/performance": "{{ 'performance.js' | asset_url }}",
+      "@theme/product-form": "{{ 'product-form.js' | asset_url }}",
+      "@theme/recently-viewed-products": "{{ 'recently-viewed-products.js' | asset_url }}",
+      "@theme/scrolling": "{{ 'scrolling.js' | asset_url }}",
+      "@theme/section-renderer": "{{ 'section-renderer.js' | asset_url }}",
+      "@theme/section-hydration": "{{ 'section-hydration.js' | asset_url }}",
+      "@theme/utilities": "{{ 'utilities.js' | asset_url }}",
+      "@theme/variant-picker": "{{ 'variant-picker.js' | asset_url }}",
+      "@theme/media-gallery": "{{ 'media-gallery.js' | asset_url }}",
+      "@theme/quick-add": "{{ 'quick-add.js' | asset_url }}",
+      "@theme/paginated-list-aspect-ratio": "{{ 'paginated-list-aspect-ratio.js' | asset_url }}",
+      "@theme/popover-polyfill": "{{ 'popover-polyfill.js' | asset_url }}",
+      "@theme/component-quantity-selector": "{{ 'component-quantity-selector.js' | asset_url }}",
+      "@theme/comparison-slider": "{{ 'comparison-slider.js' | asset_url }}",
+      "@theme/sticky-add-to-cart": "{{ 'sticky-add-to-cart.js' | asset_url }}",
+      "@theme/fly-to-cart": "{{ 'fly-to-cart.js' | asset_url }}"
+    }
+  }
+</script>
+
+{%- if settings.page_transition_enabled or settings.transition_to_main_product -%}
+  <script
+    src="{{ 'view-transitions.js' | asset_url }}"
+    async
+    blocking="render"
+  ></script>
+{%- endif -%}
+
+{%- comment -%} PERFORMANCE: Popover polyfill apenas se navegador não suporta {%- endcomment -%}
+<script>
+(function(){if('showPopover'in HTMLElement.prototype)return;var s=document.createElement('script');s.src="{{ 'popover-polyfill.js' | asset_url }}";s.type="module";s.fetchPriority="low";document.head.appendChild(s);})();
+</script>
+
+{%- comment -%} PERFORMANCE: Quick-add lazy load - por interação/viewport (evita custo no startup) {%- endcomment -%}
+<script type="module">
+(() => {
+  const once = (() => { const s = new Set(); return (k, fn) => { if (s.has(k)) return; s.add(k); try { fn(); } catch {} }; })();
+  const loadQuickAdd = () => once('quick-add', () => import('@theme/quick-add').catch(()=>{}));
+
+  if ('IntersectionObserver' in window) {
+    const el = document.querySelector('product-card, .product-card, [data-quick-add], [data-add-to-cart]');
+    if (el) {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some(e => e.isIntersecting)) { io.disconnect(); loadQuickAdd(); }
+      }, { rootMargin: '600px 0px', threshold: 0.01 });
+      io.observe(el);
+    }
+  }
+
+  document.addEventListener('pointerdown', (e) => {
+    if (e.target && e.target.closest && e.target.closest('[data-quick-add],[data-add-to-cart],button[name="add"]')) loadQuickAdd();
+  }, { passive: true });
+})();
+</script>
+
+{%- comment -%} PERFORMANCE: Smart lazy loader (sem scan global no startup / evita imports por DOM escondido) {%- endcomment -%}
+<script type="module">
+(() => {
+  const once = (() => {
+    const done = new Set();
+    return (key, fn) => {
+      if (done.has(key)) return;
+      done.add(key);
+      try { fn(); } catch {}
+    };
+  })();
+
+  const ioLoad = (selector, importFn, rootMargin = '600px 0px') => {
+    const el = document.querySelector(selector);
+    if (!el) return;
+    if (!('IntersectionObserver' in window)) { importFn(); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some(e => e.isIntersecting)) {
+        io.disconnect();
+        importFn();
+      }
+    }, { rootMargin, threshold: 0.01 });
+    io.observe(el);
+  };
+
+  const onFirstMatch = (eventName, selector, fn) => {
+    document.addEventListener(eventName, (e) => {
+      const t = e.target && e.target.closest ? e.target.closest(selector) : null;
+      if (!t) return;
+      fn(t);
+    }, { passive: true });
+  };
+
+  if (document.querySelector('overflow-list')) {
+    once('overflow-list', () => import('@theme/overflow-list').catch(()=>{}));
+  }
+
+  const loadDialog = () => once('dialog', () => import('@theme/dialog').catch(()=>{}));
+  const loadFocus  = () => once('focus',  () => import('@theme/focus').catch(()=>{}));
+
+  onFirstMatch('pointerdown',
+    '[data-dialog-open],[data-modal-open],[aria-haspopup="dialog"],[popovertarget],[data-open-search]',
+    () => { loadFocus(); loadDialog(); }
+  );
+
+  const loadQty = () => once('qty', () => import('@theme/component-quantity-selector').catch(()=>{}));
+  onFirstMatch('pointerdown',
+    '[data-quantity-selector],quantity-selector,component-quantity-selector,[data-qty-increment],[data-qty-decrement]',
+    () => { loadQty(); }
+  );
+
+  const loadCartInternals = () => once('cart-internals', () => Promise.allSettled([
+    import('{{ "component-cart-items.js" | asset_url }}'),
+    import('{{ "component-cart-quantity-selector.js" | asset_url }}'),
+    import('@theme/dialog').catch(()=>{})
+  ]));
+
+  onFirstMatch('pointerdown',
+    '[data-cart-drawer-open],[data-cart-toggle],a[href="/cart"],a[href^="/cart?"]',
+    () => { loadCartInternals(); }
+  );
+
+  document.addEventListener('cart:open', () => { loadCartInternals(); }, { passive: true });
+  document.addEventListener('cart:refresh', () => { loadCartInternals(); }, { passive: true });
+
+  {% if settings.show_add_discount_code %}
+    onFirstMatch('pointerdown',
+      '[data-cart-drawer-open],[data-cart-toggle],a[href="/cart"],a[href^="/cart?"]',
+      () => once('cart-discount', () => import('{{ "cart-discount.js" | asset_url }}').catch(()=>{}))
+    );
+  {% endif %}
+
+  ioLoad('accordion-custom, [data-accordion], details.accordion', () =>
+    once('accordion', () => import('{{ "accordion-custom.js" | asset_url }}').catch(()=>{}))
+  );
+  ioLoad('disclosure-custom, [data-disclosure]', () =>
+    once('disclosure', () => import('{{ "disclosure-custom.js" | asset_url }}').catch(()=>{}))
+  );
+
+  if (document.body.classList.contains('template-product') || document.querySelector('main [data-product-id], product-form, product-form-component')) {
+    once('variant-picker', () => import('@theme/variant-picker').catch(()=>{}));
+    once('media', () => import('{{ "media.js" | asset_url }}').catch(()=>{}));
+    once('product-price', () => import('{{ "product-price.js" | asset_url }}').catch(()=>{}));
+    once('product-sku', () => import('{{ "product-sku.js" | asset_url }}').catch(()=>{}));
+    once('product-inventory', () => import('{{ "product-inventory.js" | asset_url }}').catch(()=>{}));
+    once('product-title', () => import('@theme/product-title').catch(()=>{}));
+    once('sticky-atc', () => import('@theme/sticky-add-to-cart').catch(()=>{}));
+  }
+
+  ioLoad('recently-viewed-products, [data-recently-viewed]', () =>
+    once('recently-viewed', () => import('@theme/recently-viewed-products').catch(()=>{}))
+  );
+  ioLoad('show-more, [data-show-more]', () =>
+    once('show-more', () => import('{{ "show-more.js" | asset_url }}').catch(()=>{}))
+  );
+})();
+</script>
+
+{%- comment -%}
+  PERFORMANCE: Product-only complement.
+  Os módulos já carregados acima não são solicitados novamente; aqui entram apenas
+  product-form e media-gallery, que não fazem parte do loader global.
+{%- endcomment -%}
+{% if request.page_type == 'product' %}
+<script type="module">
+(() => {
+  const hasProductDom = () =>
+    !!document.querySelector('product-form, product-form-component, media-gallery, [data-product-id]');
+
+  if (!hasProductDom()) return;
+
+  const loadCoreProduct = () => {
+    Promise.allSettled([
+      import('@theme/product-form'),
+      import('@theme/media-gallery')
+    ]);
+  };
+
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadCoreProduct, { timeout: 1200 });
+  } else {
+    setTimeout(loadCoreProduct, 300);
+  }
+})();
+</script>
+{% endif %}
+
+{%- comment -%} PERFORMANCE: Slideshow lazy load - só quando elementos existem {%- endcomment -%}
+{% if template.name != 'cart' and template.name != '404' and request.page_type != 'password' %}
+<script type="module">
+function initSlideshow(){
+  const loadOnView=(sel,url)=>{const el=document.querySelector(sel);if(!el)return;const obs=new IntersectionObserver((e)=>{if(e[0].isIntersecting){import(url).catch(()=>{});obs.disconnect()}},{rootMargin:'100px',threshold:0.01});obs.observe(el)};
+  if(document.querySelector('slideshow-component'))loadOnView('slideshow-component','{{ "slideshow.js" | asset_url }}');
+  if(document.querySelector('layered-slideshow-component'))loadOnView('layered-slideshow-component','{{ "layered-slideshow.js" | asset_url }}');
+}
+document.readyState==='loading'?document.addEventListener('DOMContentLoaded',initSlideshow):initSlideshow();
+</script>
+{% endif %}
+
+{%- comment -%} PERFORMANCE: Non-critical UI scripts - lazy load on interaction/visibility {%- endcomment -%}
+<script type="module">
+(function(){
+  var loaded=false;
+  function loadDeferred(){
+    if(loaded)return;loaded=true;
+    var scripts=['{{ "anchored-popover.js" | asset_url }}','{{ "floating-panel.js" | asset_url }}','{{ "rte-formatter.js" | asset_url }}'];
+    if(document.querySelector('video-background'))scripts.push('{{ "video-background.js" | asset_url }}');
+    scripts.forEach(function(u){var s=document.createElement('script');s.src=u;s.type='module';document.head.appendChild(s)});
+  }
+  if('requestIdleCallback'in window){requestIdleCallback(loadDeferred,{timeout:3000})}
+  else{window.addEventListener('load',loadDeferred)}
+  ['scroll','click','touchstart','keydown'].forEach(function(e){window.addEventListener(e,loadDeferred,{once:true,passive:true})});
+})();
+</script>
+
+{% if template == 'product' or template.name == 'product' or request.page_type == 'product' %}
+  <script type="module">
+    import { RecentlyViewed } from '@theme/recently-viewed-products';
+    RecentlyViewed.addProduct('{{ product.id }}');
+  </script>
+{% endif %}
+
+<script
+  src="{{ 'auto-close-details.js' | asset_url }}"
+  defer="defer"
+></script>
+
+<script>
+  const Theme = {
+    translations: {
+      placeholder_image: `{{ 'content.placeholder_image' | t }}`,
+      added: `{{ 'actions.added' | t }}`,
+      recipient_form_fields_visible: `{{ 'content.recipient_form_fields_visible' | t }}`,
+      recipient_form_fields_hidden: `{{ 'content.recipient_form_fields_hidden' | t }}`,
+      recipient_form_error: `{{ 'content.recipient_form_error' | t }}`,
+      items_added_to_cart_one: `{{ 'content.items_added_to_cart.one' | t }}`,
+      items_added_to_cart_other: `{{ 'content.items_added_to_cart.other' | t }}`,
+    },
+    routes: {
+      cart_add_url: '{{ routes.cart_add_url | append: '.js' }}',
+      cart_change_url: '{{ routes.cart_change_url }}',
+      cart_update_url: '{{ routes.cart_update_url }}',
+      cart_url: '{{ routes.cart_url }}',
+      predictive_search_url: '{{ routes.predictive_search_url }}',
+      search_url: '{{ routes.search_url }}',
+    },
+    template: {
+      name: '{{ template }}',
+    },
+  };
+</script>

@@ -1,0 +1,181 @@
+{% comment %}
+  Announcement Bar — Marquee Full Width
+  Horizon Safe
+{% endcomment %}
+
+{%- capture announcement_blocks -%}
+  {% content_for 'blocks' %}
+{%- endcapture -%}
+
+<style>
+  .announcement-bar .announcement-bar__slide,
+  .announcement-bar .announcement-bar__text {
+    font-size: var(--font-size, 0.75rem) !important;
+    line-height: 1.2;
+  }
+
+  .announcement-bar .announcement-bar__slide {
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+</style>
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+
+<aside
+  class="announcement-bar spacing-style section color-{{ section.settings.color_scheme }}"
+  style="
+    {% render 'spacing-padding', settings: section.settings %};
+    --border-bottom-width: {{ section.settings.divider_width }}px;
+    --marquee-duration: {{ section.settings.speed | times: 4 }}s;
+  "
+  aria-label="Announcement Bar"
+>
+
+  <div class="announcement-bar__slider">
+
+    <div class="announcement-bar__marquee">
+
+      <div class="announcement-bar__track">
+        {{ announcement_blocks }}
+      </div>
+
+      <div class="announcement-bar__track">
+        {{ announcement_blocks }}
+      </div>
+
+    </div>
+
+  </div>
+
+</aside>
+
+{% stylesheet %}
+
+.announcement-bar {
+  width: 100%;
+  border-block-end: var(--border-bottom-width) solid var(--color-border);
+  position: relative;
+  z-index: 5;
+}
+
+/* Remove limitação de largura do Horizon */
+.section-announcement-bar .section {
+  max-width: 100% !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.announcement-bar__slider {
+  width: 100%;
+  overflow: hidden;
+}
+
+.announcement-bar__marquee {
+  display: flex;
+  width: max-content;
+  animation: announcement-marquee var(--marquee-duration, 20s) linear infinite;
+}
+
+/* 🔥 ESPAÇO ENTRE FRASES */
+.announcement-bar__track {
+  display: flex;
+  align-items: center;
+  gap: 5rem; /* controla espaço entre frases */
+  padding-right: 5rem;
+  flex: 0 0 auto;
+}
+
+.announcement-bar__slide {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* animação */
+@keyframes announcement-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  .announcement-bar__marquee {
+    animation: none;
+  }
+}
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "tag": "section",
+  "class": "section-announcement-bar",
+
+  "settings": [
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Velocidade",
+      "min": 3,
+      "max": 15,
+      "step": 1,
+      "default": 8,
+      "unit": "s"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Esquema de cores",
+      "default": "scheme-4"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "label": "Espessura do divisor",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    }
+  ],
+
+  "blocks": [
+    {
+      "type": "_announcement"
+    }
+  ],
+
+  "presets": [
+    {
+      "name": "Announcement Bar",
+      "blocks": [
+        { "type": "_announcement" }
+      ]
+    }
+  ]
+}
+{% endschema %}

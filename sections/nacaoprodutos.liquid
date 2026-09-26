@@ -1,0 +1,885 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  #shopify-section-{{ section.id }} {
+    --bg: {{ section.settings.bg_color }};
+    --panel: {{ section.settings.panel_color }};
+    --text: {{ section.settings.text_color }};
+    --blue: {{ section.settings.blue_color }};
+    --green: {{ section.settings.green_color }};
+    --coral: {{ section.settings.coral_color }};
+    --yellow: {{ section.settings.yellow_color }};
+    --cream: {{ section.settings.cream_color }};
+    --line: {{ section.settings.line_color }};
+    --shadow: rgba(0, 0, 0, 0.10);
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #shopify-section-{{ section.id }}::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+
+  .ns-prod {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .ns-prod__header {
+    position: relative;
+    display: grid;
+    gap: 0.85rem;
+    justify-items: start;
+    margin-bottom: 1.4rem;
+  }
+
+  .ns-prod__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.62rem 0.82rem 0.58rem;
+    background: var(--green);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 var(--shadow);
+    transform: rotate(-2deg);
+  }
+
+  .ns-prod__kicker-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    background: var(--pink, #fb7da8);
+    border-radius: 2px;
+    flex: 0 0 auto;
+  }
+
+  .ns-prod__title {
+    margin: 0;
+    display: grid;
+    gap: 0.12rem;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+
+  .ns-prod__title-line {
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    font-size: clamp(2.2rem, 7vw, 4.8rem);
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    color: var(--blue);
+    text-shadow: 4px 4px 0 #18318f, 8px 8px 0 rgba(255,255,255,0.18);
+  }
+
+  .ns-prod__title-line--alt {
+    color: #fff;
+    text-shadow: 4px 4px 0 var(--green), 8px 8px 0 #18318f;
+  }
+
+  .ns-prod__subtitle {
+    margin: 0;
+    max-width: 42rem;
+    font-size: 1rem;
+    line-height: 1.35;
+    color: rgba(17,17,17,0.82);
+  }
+
+  .ns-prod__header-deco {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .ns-prod__star {
+    top: -0.1rem;
+    right: 2rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: #fff;
+    clip-path: polygon(50% 0%, 62% 36%, 100% 50%, 62% 64%, 50% 100%, 38% 64%, 0% 50%, 38% 36%);
+  }
+
+  .ns-prod__flag {
+    right: 0;
+    bottom: 0.2rem;
+    width: 5.2rem;
+    height: 3.2rem;
+    background: var(--green);
+    border-radius: 12px;
+    transform: rotate(8deg);
+    box-shadow: 8px 8px 0 rgba(255,255,255,0.2);
+  }
+
+  .ns-prod__flag::before {
+    content: '';
+    position: absolute;
+    inset: 0.7rem 1rem;
+    background: var(--yellow);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  }
+
+  .ns-prod__flag::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.95rem;
+    height: 0.95rem;
+    background: var(--blue);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .ns-prod__grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .ns-prod-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.9rem;
+    padding: 0.95rem;
+    background: var(--panel);
+    box-shadow: 0 14px 0 var(--shadow);
+    overflow: hidden;
+  }
+
+  .ns-prod-card--tilt-a { transform: rotate(-1deg); }
+  .ns-prod-card--tilt-b { transform: rotate(1deg); }
+  .ns-prod-card--tilt-c { transform: rotate(-0.7deg); }
+  .ns-prod-card--tilt-d { transform: rotate(0.8deg); }
+
+  .ns-prod-card__bg-star,
+  .ns-prod-card__bg-ball,
+  .ns-prod-card__bg-cross {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.95;
+  }
+
+  .ns-prod-card__bg-star {
+    right: -0.2rem;
+    top: -0.2rem;
+    width: 3rem;
+    height: 3rem;
+    background: var(--blue);
+    clip-path: polygon(50% 0%, 61% 19%, 84% 8%, 80% 30%, 100% 31%, 84% 50%, 100% 69%, 80% 70%, 84% 92%, 61% 81%, 50% 100%, 39% 81%, 16% 92%, 20% 70%, 0% 69%, 16% 50%, 0% 31%, 20% 30%, 16% 8%, 39% 19%);
+    transform: rotate(10deg);
+  }
+
+  .ns-prod-card__bg-ball {
+    left: -0.35rem;
+    bottom: -0.3rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, #fff 0 28%, transparent 29%),
+      radial-gradient(circle at 24% 30%, #fff 0 10%, transparent 11%),
+      radial-gradient(circle at 78% 30%, #fff 0 10%, transparent 11%),
+      radial-gradient(circle at 24% 72%, #fff 0 10%, transparent 11%),
+      radial-gradient(circle at 78% 72%, #fff 0 10%, transparent 11%),
+      #111;
+  }
+
+  .ns-prod-card__bg-cross {
+    left: 0.8rem;
+    top: 0.8rem;
+    width: 2rem;
+    height: 2rem;
+    transform: rotate(-12deg);
+  }
+
+  .ns-prod-card__bg-cross::before,
+  .ns-prod-card__bg-cross::after {
+    content: '';
+    position: absolute;
+    background: var(--green);
+    border-radius: 10px;
+  }
+
+  .ns-prod-card__bg-cross::before {
+    top: 0;
+    left: 0.68rem;
+    width: 0.62rem;
+    height: 2rem;
+  }
+
+  .ns-prod-card__bg-cross::after {
+    top: 0.68rem;
+    left: 0;
+    width: 2rem;
+    height: 0.62rem;
+  }
+
+  .ns-prod-card__media {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    background: var(--cream);
+    min-height: 250px;
+  }
+
+  .ns-prod-card__media-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .ns-prod-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 4 / 4.8;
+  }
+
+  .ns-prod-card__sticker {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.45rem 0.65rem 0.4rem;
+    background: var(--coral);
+    color: #fff;
+    font-size: 0.64rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 rgba(255,255,255,0.22);
+    transform: rotate(-5deg);
+  }
+
+  .ns-prod-card__pin {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.7rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.9rem;
+    padding: 0.38rem 0.58rem 0.34rem;
+    background: #fff;
+    color: var(--text);
+    font-size: 0.58rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transform: rotate(8deg);
+  }
+
+  .ns-prod-card__content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .ns-prod-card__topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .ns-prod-card__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.46rem 0.64rem 0.42rem;
+    background: var(--green);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    box-shadow: 5px 5px 0 rgba(255,255,255,0.2);
+    transform: rotate(-2deg);
+  }
+
+  .ns-prod-card__price-wrap {
+    display: inline-flex;
+    align-items: end;
+    gap: 0.18rem;
+    color: var(--blue);
+    line-height: 1;
+    font-weight: 900;
+  }
+
+  .ns-prod-card__currency {
+    font-size: 0.95rem;
+    transform: translateY(-0.2rem);
+  }
+
+  .ns-prod-card__price {
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: -0.06em;
+  }
+
+  .ns-prod-card__compare {
+    font-size: 0.9rem;
+    color: rgba(17,17,17,0.55);
+    text-decoration: line-through;
+    font-weight: 700;
+  }
+
+  .ns-prod-card__title {
+    margin: 0;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    line-height: 0.98;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    color: var(--blue);
+  }
+
+  .ns-prod-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .ns-prod-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .ns-prod-card__meta-item {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.95rem;
+    padding: 0.44rem 0.58rem 0.4rem;
+    font-size: 0.6rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: #fff;
+  }
+
+  .ns-prod-card__meta-item--highlight {
+    background: var(--yellow);
+    color: var(--text);
+  }
+
+  .ns-prod-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .ns-prod-card__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.9rem;
+    padding: 0.82rem 1rem 0.78rem;
+    text-decoration: none;
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 rgba(255,255,255,0.2);
+    transition: transform 180ms ease;
+  }
+
+  .ns-prod-card__button:hover {
+    transform: translateY(-2px);
+  }
+
+  .ns-prod-card__button--primary {
+    background: var(--coral);
+    color: #fff;
+  }
+
+  .ns-prod__footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.35rem;
+  }
+
+  .ns-prod__footer-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.9rem 1.2rem 0.84rem;
+    background: #fff;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.74rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 7px 7px 0 rgba(255,255,255,0.2);
+    transform: rotate(-1deg);
+  }
+
+  @media screen and (min-width: 750px) {
+    .ns-prod {
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+
+    .ns-prod__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.2rem;
+    }
+  }
+
+  @media screen and (min-width: 1100px) {
+    .ns-prod__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.2rem;
+    }
+
+    .ns-prod-card {
+      padding: 1rem;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ns-prod {
+      padding-left: 0.85rem;
+      padding-right: 0.85rem;
+    }
+
+    .ns-prod__header {
+      margin-bottom: 1rem;
+    }
+
+    .ns-prod__flag {
+      width: 4.3rem;
+      height: 2.7rem;
+    }
+
+    .ns-prod-card {
+      padding: 0.85rem;
+      transform: none !important;
+    }
+
+    .ns-prod-card__media {
+      min-height: 220px;
+    }
+
+    .ns-prod-card__button,
+    .ns-prod__footer-button {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ns-prod-card,
+    .ns-prod-card__button,
+    .ns-prod__footer-button {
+      transition: none;
+    }
+  }
+{%- endstyle -%}
+
+<section class="section-{{ section.id }}-padding">
+  <div class="ns-prod">
+    <div class="ns-prod__header">
+      {%- if section.settings.kicker != blank -%}
+        <div class="ns-prod__kicker">
+          <span class="ns-prod__kicker-dot" aria-hidden="true"></span>
+          <span>{{ section.settings.kicker }}</span>
+        </div>
+      {%- endif -%}
+
+      <h2 class="ns-prod__title">
+        <span class="ns-prod__title-line">{{ section.settings.title_line_1 }}</span>
+        {%- if section.settings.title_line_2 != blank -%}
+          <span class="ns-prod__title-line ns-prod__title-line--alt">{{ section.settings.title_line_2 }}</span>
+        {%- endif -%}
+      </h2>
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="ns-prod__subtitle">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      <span class="ns-prod__header-deco ns-prod__star" aria-hidden="true"></span>
+      <span class="ns-prod__header-deco ns-prod__flag" aria-hidden="true"></span>
+    </div>
+
+    <div class="ns-prod__grid">
+      {%- assign product_limit = section.settings.products_to_show -%}
+      {%- if section.settings.collection != blank -%}
+        {%- for product in section.settings.collection.products limit: product_limit -%}
+          {%- assign tilt_class = 'ns-prod-card--tilt-a' -%}
+          {%- case forloop.index0 -%}
+            {%- when 0 -%}{%- assign tilt_class = 'ns-prod-card--tilt-a' -%}
+            {%- when 1 -%}{%- assign tilt_class = 'ns-prod-card--tilt-b' -%}
+            {%- when 2 -%}{%- assign tilt_class = 'ns-prod-card--tilt-c' -%}
+            {%- when 3 -%}{%- assign tilt_class = 'ns-prod-card--tilt-d' -%}
+          {%- endcase -%}
+          <article class="ns-prod-card {{ tilt_class }}">
+            <span class="ns-prod-card__bg-star" aria-hidden="true"></span>
+            <span class="ns-prod-card__bg-ball" aria-hidden="true"></span>
+            <span class="ns-prod-card__bg-cross" aria-hidden="true"></span>
+
+            <div class="ns-prod-card__media">
+              <a class="ns-prod-card__media-link" href="{{ product.url }}">
+                {%- if product.featured_image != blank -%}
+                  {{ product.featured_image | image_url: width: 1200 | image_tag:
+                    class: 'ns-prod-card__image',
+                    widths: '375, 550, 750, 900, 1200',
+                    sizes: '(min-width: 1100px) calc((100vw - 4.8rem) / 4), (min-width: 750px) calc((100vw - 3.6rem) / 2), calc(100vw - 1.7rem)',
+                    loading: 'lazy',
+                    fetchpriority: 'auto',
+                    decoding: 'async',
+                    alt: product.featured_image.alt | default: product.title
+                  }}
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag: 'ns-prod-card__image placeholder-svg' }}
+                {%- endif -%}
+                {%- if section.settings.show_sticker -%}
+                  <span class="ns-prod-card__sticker">{{ section.settings.sticker_text }}</span>
+                {%- endif -%}
+                {%- if product.available -%}
+                  <span class="ns-prod-card__pin">{{ section.settings.pin_in_stock }}</span>
+                {%- else -%}
+                  <span class="ns-prod-card__pin">{{ section.settings.pin_sold_out }}</span>
+                {%- endif -%}
+              </a>
+            </div>
+
+            <div class="ns-prod-card__content">
+              <div class="ns-prod-card__topline">
+                <span class="ns-prod-card__eyebrow">{{ section.settings.eyebrow_text }}</span>
+                <div>
+                  {%- if product.compare_at_price > product.price -%}
+                    <div class="ns-prod-card__compare">{{ product.compare_at_price | money }}</div>
+                  {%- endif -%}
+                  <div class="ns-prod-card__price-wrap">
+                    <span class="ns-prod-card__currency">{{ cart.currency.symbol | default: 'R$' }}</span>
+                    <span class="ns-prod-card__price">{{ product.price | money_without_currency }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <h3 class="ns-prod-card__title">
+                <a href="{{ product.url }}">{{ product.title }}</a>
+              </h3>
+
+              <div class="ns-prod-card__meta">
+                {%- if product.available -%}
+                  <span class="ns-prod-card__meta-item ns-prod-card__meta-item--highlight">{{ section.settings.meta_available }}</span>
+                {%- else -%}
+                  <span class="ns-prod-card__meta-item">{{ section.settings.meta_unavailable }}</span>
+                {%- endif -%}
+                {%- if product.type != blank -%}
+                  <span class="ns-prod-card__meta-item">{{ product.type }}</span>
+                {%- endif -%}
+                {%- if product.tags.size > 0 and section.settings.show_first_tag -%}
+                  <span class="ns-prod-card__meta-item">{{ product.tags.first }}</span>
+                {%- endif -%}
+              </div>
+
+              <div class="ns-prod-card__actions">
+                <a class="ns-prod-card__button ns-prod-card__button--primary" href="{{ product.url }}">{{ section.settings.primary_button_label }}</a>
+              </div>
+            </div>
+          </article>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <article class="ns-prod-card ns-prod-card--tilt-a">
+            <span class="ns-prod-card__bg-star" aria-hidden="true"></span>
+            <span class="ns-prod-card__bg-ball" aria-hidden="true"></span>
+            <span class="ns-prod-card__bg-cross" aria-hidden="true"></span>
+            <div class="ns-prod-card__media">{{ 'product-1' | placeholder_svg_tag: 'ns-prod-card__image placeholder-svg' }}</div>
+            <div class="ns-prod-card__content">
+              <div class="ns-prod-card__topline">
+                <span class="ns-prod-card__eyebrow">{{ section.settings.eyebrow_text }}</span>
+                <div class="ns-prod-card__price-wrap"><span class="ns-prod-card__currency">R$</span><span class="ns-prod-card__price">129</span></div>
+              </div>
+              <h3 class="ns-prod-card__title">Adicione uma coleção</h3>
+              <div class="ns-prod-card__meta"><span class="ns-prod-card__meta-item ns-prod-card__meta-item--highlight">produto</span></div>
+              <div class="ns-prod-card__actions"><span class="ns-prod-card__button ns-prod-card__button--primary">Ver produto</span></div>
+            </div>
+          </article>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.show_footer_button and section.settings.footer_button_label != blank and section.settings.footer_button_link != blank -%}
+      <div class="ns-prod__footer">
+        <a class="ns-prod__footer-button" href="{{ section.settings.footer_button_link }}">{{ section.settings.footer_button_label }}</a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Produtos Brasil Pop",
+  "tag": "section",
+  "class": "section section-ns-prod",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Coleção"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Produtos para mostrar",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Cabeçalho"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Drop Nação Santa 26"
+    },
+    {
+      "type": "text",
+      "id": "title_line_1",
+      "label": "Título linha 1",
+      "default": "Brasil"
+    },
+    {
+      "type": "text",
+      "id": "title_line_2",
+      "label": "Título linha 2",
+      "default": "em campo"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Peças com energia brasileira, fé e clima de edição especial para destacar a coleção da Copa."
+    },
+    {
+      "type": "header",
+      "content": "Rótulos"
+    },
+    {
+      "type": "text",
+      "id": "sticker_text",
+      "label": "Sticker na foto",
+      "default": "edição limitada"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sticker",
+      "label": "Mostrar sticker na foto",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "pin_in_stock",
+      "label": "Texto pin disponível",
+      "default": "pronta entrega"
+    },
+    {
+      "type": "text",
+      "id": "pin_sold_out",
+      "label": "Texto pin indisponível",
+      "default": "esgotado"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_text",
+      "label": "Eyebrow do card",
+      "default": "nação santa"
+    },
+    {
+      "type": "text",
+      "id": "meta_available",
+      "label": "Texto meta disponível",
+      "default": "disponível"
+    },
+    {
+      "type": "text",
+      "id": "meta_unavailable",
+      "label": "Texto meta indisponível",
+      "default": "indisponível"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_first_tag",
+      "label": "Mostrar primeira tag do produto",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Botões"
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "Botão principal do card",
+      "default": "Ver produto"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "Botão secundário do card",
+      "default": "Comprar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_footer_button",
+      "label": "Mostrar botão final",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "footer_button_label",
+      "label": "Texto botão final",
+      "default": "Ver coleção completa"
+    },
+    {
+      "type": "url",
+      "id": "footer_button_link",
+      "label": "Link botão final"
+    },
+    {
+      "type": "header",
+      "content": "Cores"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fundo da seção",
+      "default": "#F7F1E3"
+    },
+    {
+      "type": "color",
+      "id": "panel_color",
+      "label": "Fundo dos cards",
+      "default": "#FFD447"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Texto",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "blue_color",
+      "label": "Azul",
+      "default": "#058CD7"
+    },
+    {
+      "type": "color",
+      "id": "green_color",
+      "label": "Verde",
+      "default": "#00995E"
+    },
+    {
+      "type": "color",
+      "id": "coral_color",
+      "label": "Coral",
+      "default": "#FD5A46"
+    },
+    {
+      "type": "color",
+      "id": "yellow_color",
+      "label": "Amarelo",
+      "default": "#FFD447"
+    },
+    {
+      "type": "color",
+      "id": "cream_color",
+      "label": "Creme",
+      "default": "#FBF6EA"
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Cor base de contraste",
+      "default": "#17306F"
+    },
+    {
+      "type": "header",
+      "content": "Espaçamento"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Produtos Brasil Pop"
+    }
+  ]
+}
+{% endschema %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{%- case forloop.index0 | modulo: 4 -%}"
+  to: "{%- case forloop.index0 -%}"
+  position: 13286..13313
+{% endcomment %}

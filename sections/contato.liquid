@@ -1,0 +1,580 @@
+{% comment %}
+  Section: Fashion Contact Section (Optimized + Fully Editable + Better Spacing)
+  - Todos os textos editáveis via Theme Editor
+  - Espaçamentos otimizados para melhor leitura
+  - WhatsApp fixo na cor #90332F com ícone sempre visível
+  - CSS totalmente escopado por section.id (evita conflitos)
+{% endcomment %}
+
+{%- liquid
+  assign sid = section.id
+-%}
+
+{%- if section.settings.load_google_fonts -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"></noscript>
+{%- endif -%}
+
+<section id="FashionContact-{{ sid }}" class="fashion-contact">
+  <div class="fashion-contact__container">
+
+    <!-- Left Column: Editorial Image -->
+    <div class="fashion-contact__media">
+      {% if section.settings.hero_image != blank %}
+        {{ section.settings.hero_image | image_url: width: 1400 | image_tag: class: 'fashion-contact__image', loading: 'lazy' }}
+      {% else %}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'fashion-contact__image fashion-contact__placeholder' }}
+      {% endif %}
+
+      <div class="fashion-contact__overlay" aria-hidden="true"></div>
+
+      {% if section.settings.quote_text != blank %}
+        <div class="fashion-contact__quote">
+          <p class="fashion-contact__quote-text">“{{ section.settings.quote_text }}”</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Content & Form -->
+    <div class="fashion-contact__content">
+      <header class="fashion-contact__header">
+        {% if section.settings.subheading != blank %}
+          <p class="fashion-contact__subheading">{{ section.settings.subheading }}</p>
+        {% endif %}
+
+        {% if section.settings.heading != blank %}
+          <h2 class="fashion-contact__heading">
+            {{ section.settings.heading }}
+          </h2>
+        {% endif %}
+
+        {% if section.settings.description != blank %}
+          <div class="fashion-contact__description rte">
+            {{ section.settings.description }}
+          </div>
+        {% endif %}
+      </header>
+
+      <div class="fashion-contact__details">
+        <div class="fashion-contact__detail">
+          {% if section.settings.customer_care_title != blank %}
+            <h3 class="fashion-contact__detail-title">{{ section.settings.customer_care_title }}</h3>
+          {% endif %}
+
+          {% if section.settings.email != blank %}
+            <p class="fashion-contact__detail-line">
+              <a href="mailto:{{ section.settings.email | escape }}">{{ section.settings.email }}</a>
+            </p>
+          {% endif %}
+
+          {% if section.settings.phone != blank %}
+            <p class="fashion-contact__detail-line">
+              <a href="tel:{{ section.settings.phone | strip | escape }}">{{ section.settings.phone }}</a>
+            </p>
+          {% endif %}
+        </div>
+
+        <div class="fashion-contact__detail">
+          {% if section.settings.visit_us_title != blank %}
+            <h3 class="fashion-contact__detail-title">{{ section.settings.visit_us_title }}</h3>
+          {% endif %}
+
+          {% if section.settings.address != blank %}
+            <div class="fashion-contact__address rte">
+              {{ section.settings.address }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="fashion-contact__form">
+        {% form 'contact' %}
+          {% if form.posted_successfully? %}
+            <div class="fashion-contact__success" role="status">
+              {{ section.settings.success_message }}
+            </div>
+          {% endif %}
+
+          {{ form.errors | default_errors }}
+
+          <div class="fashion-contact__field">
+            <input
+              type="text"
+              name="contact[name]"
+              id="ContactFormName-{{ sid }}"
+              class="fashion-contact__input"
+              placeholder="{{ section.settings.name_placeholder }}"
+              value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}">
+            <label for="ContactFormName-{{ sid }}" class="fashion-contact__label">{{ section.settings.name_label }}</label>
+          </div>
+
+          <div class="fashion-contact__field">
+            <input
+              type="email"
+              name="contact[email]"
+              id="ContactFormEmail-{{ sid }}"
+              class="fashion-contact__input"
+              placeholder="{{ section.settings.email_placeholder }}"
+              value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+              spellcheck="false"
+              autocomplete="email"
+              autocapitalize="off">
+            <label for="ContactFormEmail-{{ sid }}" class="fashion-contact__label">{{ section.settings.email_label }}</label>
+          </div>
+
+          <div class="fashion-contact__field">
+            <textarea
+              rows="4"
+              name="contact[body]"
+              id="ContactFormMessage-{{ sid }}"
+              class="fashion-contact__input fashion-contact__textarea"
+              placeholder="{{ section.settings.message_placeholder }}">{% if form.body %}{{ form.body }}{% endif %}</textarea>
+            <label for="ContactFormMessage-{{ sid }}" class="fashion-contact__label">{{ section.settings.message_label }}</label>
+          </div>
+
+          <div class="fashion-contact__actions">
+            <button type="submit" class="fashion-contact__submit">
+              {{ section.settings.submit_label }}
+            </button>
+
+            {% if section.settings.side_note != blank %}
+              <div class="fashion-contact__side-note">
+                {{ section.settings.side_note }}
+              </div>
+            {% endif %}
+          </div>
+        {% endform %}
+      </div>
+    </div>
+  </div>
+
+  {% if section.settings.show_whatsapp and section.settings.whatsapp_number != blank %}
+    <a
+      class="fashion-contact__whatsapp"
+      href="https://wa.me/{{ section.settings.whatsapp_number | remove: ' ' | remove: '+' }}"
+      target="_blank"
+      rel="noopener"
+      aria-label="{{ section.settings.whatsapp_aria_label }}">
+      <span class="fashion-contact__whatsapp-icon" aria-hidden="true">
+        <!-- WhatsApp icon (filled) -->
+        <svg viewBox="0 0 32 32" focusable="false" aria-hidden="true">
+          <path d="M19.11 17.45c-.27-.14-1.6-.79-1.85-.88-.25-.09-.43-.14-.61.14-.18.27-.7.88-.86 1.06-.16.18-.32.2-.59.07-.27-.14-1.15-.42-2.19-1.34-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.41.12-.55.13-.13.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.48-.84-2.02-.22-.53-.45-.46-.61-.47h-.52c-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.3 0 1.36.99 2.68 1.13 2.86.14.18 1.95 2.98 4.73 4.18.66.28 1.18.45 1.58.58.66.21 1.27.18 1.75.11.53-.08 1.6-.65 1.83-1.28.23-.63.23-1.17.16-1.28-.07-.11-.25-.18-.52-.32z"/>
+          <path d="M16.02 2.67c-7.23 0-13.1 5.79-13.1 12.92 0 2.27.6 4.47 1.74 6.41L3 29l6.27-1.97c1.86 1.02 3.96 1.55 6.12 1.55 7.23 0 13.1-5.79 13.1-12.92S23.25 2.67 16.02 2.67zm0 23.59c-1.98 0-3.89-.54-5.53-1.56l-.4-.24-3.72 1.17 1.21-3.49-.26-.4c-1.14-1.77-1.74-3.82-1.74-5.95 0-6.05 5-10.97 11.17-10.97S27.2 9.74 27.2 15.79c0 6.05-5 10.97-11.18 10.97z"/>
+        </svg>
+      </span>
+      <span class="fashion-contact__whatsapp-text">{{ section.settings.whatsapp_label }}</span>
+    </a>
+  {% endif %}
+</section>
+
+<style>
+  /* ========== SCOPE ========== */
+  #FashionContact-{{ sid }}{
+    --fc-text: #111;
+    --fc-muted: #6b7280;
+    --fc-border: rgba(17,17,17,.18);
+    --fc-bg: #fff;
+
+    --fc-accent: #90332F; /* WhatsApp + detalhes */
+    --fc-overlay: rgba(0,0,0,0.14);
+
+    --fc-pad: clamp(22px, 4vw, 64px);
+    --fc-gap: clamp(22px, 4vw, 70px);
+    --fc-radius: 999px;
+
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: var(--fc-text);
+    background: var(--fc-bg);
+  }
+
+  #FashionContact-{{ sid }} .rte p{ margin: 0 0 1em; }
+  #FashionContact-{{ sid }} .rte p:last-child{ margin-bottom: 0; }
+
+  /* Container */
+  #FashionContact-{{ sid }} .fashion-contact__container{
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 600px;
+    background: var(--fc-bg);
+  }
+
+  @media (min-width: 1024px){
+    #FashionContact-{{ sid }} .fashion-contact__container{
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* Media */
+  #FashionContact-{{ sid }} .fashion-contact__media{
+    position: relative;
+    width: 100%;
+    height: 420px;
+    background: #f3f3f3;
+    overflow: hidden;
+  }
+  @media (min-width: 1024px){
+    #FashionContact-{{ sid }} .fashion-contact__media{
+      height: auto;
+      min-height: 720px;
+    }
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__image{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: translateZ(0);
+    transition: transform 1.3s ease;
+  }
+  #FashionContact-{{ sid }} .fashion-contact__media:hover .fashion-contact__image{
+    transform: scale(1.03);
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__overlay{
+    position: absolute;
+    inset: 0;
+    background: var(--fc-overlay);
+    pointer-events: none;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__quote{
+    position: absolute;
+    left: clamp(18px, 3vw, 34px);
+    bottom: clamp(18px, 3vw, 40px);
+    z-index: 2;
+    max-width: min(520px, 86%);
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__quote-text{
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(18px, 2.2vw, 28px);
+    line-height: 1.2;
+    letter-spacing: .02em;
+    margin: 0;
+    color: #fff;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+
+  /* Content */
+  #FashionContact-{{ sid }} .fashion-contact__content{
+    padding: var(--fc-pad);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  @media (min-width: 1024px){
+    #FashionContact-{{ sid }} .fashion-contact__content{
+      padding: clamp(38px, 5vw, 80px) clamp(28px, 5vw, 92px);
+    }
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__header{
+    margin-bottom: 3.5rem; /* ✅ mais respiro */
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__subheading{
+    margin: 0 0 1rem;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .22em;
+    color: #9ca3af;
+    text-transform: uppercase;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__heading{
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(34px, 4.2vw, 56px);
+    font-weight: 400;
+    margin: 0 0 1.25rem;
+    line-height: 1.05;
+    color: #000;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__description{
+    color: var(--fc-muted);
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 560px;
+  }
+
+  /* Details */
+  #FashionContact-{{ sid }} .fashion-contact__details{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem; /* ✅ mais respiro */
+    margin-bottom: 4rem; /* ✅ mais respiro */
+  }
+  @media (min-width: 768px){
+    #FashionContact-{{ sid }} .fashion-contact__details{
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__detail-title{
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    margin: 0 0 .75rem;
+    color: #000;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__detail-line,
+  #FashionContact-{{ sid }} .fashion-contact__address{
+    margin: 0 0 .55rem;
+    font-size: .95rem;
+    color: var(--fc-muted);
+    line-height: 1.6;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__detail a{
+    color: inherit;
+    text-decoration: none;
+    transition: color .25s ease;
+  }
+  #FashionContact-{{ sid }} .fashion-contact__detail a:hover{
+    color: #000;
+  }
+
+  /* Form */
+  #FashionContact-{{ sid }} .fashion-contact__field{
+    position: relative;
+    margin-bottom: 2.75rem; /* ✅ mais respiro */
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__input{
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--fc-border);
+    padding: .9rem 0 .7rem;
+    font-size: 1rem;
+    color: #000;
+    outline: none;
+    border-radius: 0;
+    transition: border-color .25s ease;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__input:focus{
+    border-bottom-color: #000;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__input::placeholder{
+    color: transparent; /* mantém a UX do floating label */
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__label{
+    position: absolute;
+    left: 0;
+    top: .95rem;
+    font-size: 1rem;
+    color: #9ca3af;
+    transition: transform .2s ease, top .2s ease, font-size .2s ease, color .2s ease;
+    pointer-events: none;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__input:focus ~ .fashion-contact__label,
+  #FashionContact-{{ sid }} .fashion-contact__input:not(:placeholder-shown) ~ .fashion-contact__label{
+    top: -0.65rem;
+    font-size: .78rem;
+    color: #000;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__textarea{
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__actions{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.2rem;
+    margin-top: 2.5rem; /* ✅ mais respiro */
+    flex-wrap: wrap;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__submit{
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 1rem 2.5rem;
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-size: .75rem;
+    cursor: pointer;
+    transition: transform .2s ease, background .25s ease, opacity .25s ease;
+  }
+  #FashionContact-{{ sid }} .fashion-contact__submit:hover{
+    background: #222;
+    transform: translateY(-2px);
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__side-note{
+    font-size: .85rem;
+    color: #9ca3af;
+    line-height: 1.5;
+    max-width: 360px;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__success{
+    background: #f0fdf4;
+    color: #166534;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: .95rem;
+  }
+
+  /* Floating WhatsApp */
+  #FashionContact-{{ sid }} .fashion-contact__whatsapp{
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 99;
+
+    background: var(--fc-accent);
+    color: #fff;
+
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+
+    padding: .95rem 1.15rem;
+    border-radius: var(--fc-radius);
+
+    text-decoration: none;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transition: transform .25s ease, box-shadow .25s ease, opacity .25s ease;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__whatsapp:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.22);
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__whatsapp-icon{
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #FashionContact-{{ sid }} .fashion-contact__whatsapp-icon svg{
+    width: 22px;
+    height: 22px;
+    fill: currentColor; /* ✅ ícone sempre visível */
+    display: block;
+  }
+
+  #FashionContact-{{ sid }} .fashion-contact__whatsapp-text{
+    font-weight: 700;
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px){
+    #FashionContact-{{ sid }} .fashion-contact__whatsapp{
+      right: 1rem;
+      bottom: 1rem;
+      padding: .9rem 1rem;
+    }
+    #FashionContact-{{ sid }} .fashion-contact__whatsapp-text{
+      display: none; /* mobile: só ícone, mantém elegante */
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #FashionContact-{{ sid }} .fashion-contact__image,
+    #FashionContact-{{ sid }} .fashion-contact__whatsapp,
+    #FashionContact-{{ sid }} .fashion-contact__submit{
+      transition: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Fashion Contact",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "load_google_fonts",
+      "label": "Carregar fontes (Playfair + Inter)",
+      "default": true
+    },
+
+    { "type": "header", "content": "Editorial Image" },
+    { "type": "image_picker", "id": "hero_image", "label": "Editorial Image" },
+    { "type": "text", "id": "quote_text", "label": "Image Quote", "default": "Elegance is refusal." },
+
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "CONTACT US" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Get in Touch" },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>For inquiries regarding our collections, collaborations, or appointments, please leave us a message.</p>"
+    },
+
+    { "type": "header", "content": "Contact Info" },
+    { "type": "text", "id": "customer_care_title", "label": "Customer Care Title", "default": "Customer Care" },
+    { "type": "text", "id": "email", "label": "Email Address", "default": "contato@amarca.com.br" },
+    { "type": "text", "id": "phone", "label": "Phone Number", "default": "+55 11 99999-9999" },
+
+    { "type": "text", "id": "visit_us_title", "label": "Visit Us Title", "default": "Visit Us" },
+    {
+      "type": "richtext",
+      "id": "address",
+      "label": "Address",
+      "default": "<p>Rua Exemplo, 123<br>São Paulo - SP</p>"
+    },
+
+    { "type": "header", "content": "Form Texts" },
+    { "type": "text", "id": "name_label", "label": "Name Label", "default": "Name" },
+    { "type": "text", "id": "email_label", "label": "Email Label", "default": "Email Address" },
+    { "type": "text", "id": "message_label", "label": "Message Label", "default": "Message" },
+
+    { "type": "text", "id": "name_placeholder", "label": "Name Placeholder", "default": "Name" },
+    { "type": "text", "id": "email_placeholder", "label": "Email Placeholder", "default": "Email Address" },
+    { "type": "text", "id": "message_placeholder", "label": "Message Placeholder", "default": "Message" },
+
+    { "type": "text", "id": "submit_label", "label": "Submit Button Text", "default": "Send Message" },
+    {
+      "type": "textarea",
+      "id": "success_message",
+      "label": "Success Message",
+      "default": "Thank you for contacting us. We will get back to you shortly."
+    },
+    {
+      "type": "text",
+      "id": "side_note",
+      "label": "Side Note (optional)",
+      "default": "We usually reply within 48 business hours."
+    },
+
+    { "type": "header", "content": "WhatsApp" },
+    { "type": "checkbox", "id": "show_whatsapp", "label": "Show Floating WhatsApp Button", "default": true },
+    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp Number (with country code)", "default": "5599999999999" },
+    { "type": "text", "id": "whatsapp_label", "label": "WhatsApp Button Text", "default": "WhatsApp" },
+    { "type": "text", "id": "whatsapp_aria_label", "label": "WhatsApp ARIA Label", "default": "Falar no WhatsApp" }
+  ],
+  "presets": [
+    {
+      "name": "Fashion Contact",
+      "category": "Contact"
+    }
+  ]
+}
+{% endschema %}

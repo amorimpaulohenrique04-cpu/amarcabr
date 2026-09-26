@@ -1,0 +1,1657 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap"></noscript>
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign preview_image = section.settings.fallback_image | default: product.featured_image
+-%}
+
+{%- capture allowed_models_json -%}
+  [
+    {%- liquid
+      if product.metafields.custom.combo_products != blank
+        assign source_list = product.metafields.custom.combo_products.value
+      else
+        assign source_list = section.blocks | map: 'settings' | map: 'product'
+      endif
+
+      assign emitted_models = 0
+    -%}
+
+    {%- for p_adult in source_list -%}
+      {%- if p_adult != blank -%}
+        {%- assign p_kids = p_adult.metafields.custom.kids_product.value -%}
+
+        {%- comment -%}
+          A estampa é escolhida uma única vez pelo produto adulto.
+          O produto infantil correspondente deve estar vinculado em:
+          custom.kids_product
+        {%- endcomment -%}
+
+        {%- if p_kids != blank -%}
+          {%- if emitted_models > 0 -%},{%- endif -%}
+
+          {
+            "id": {{ p_adult.id | json }},
+            "title": {{ p_adult.title | json }},
+            "adult_product_id": {{ p_adult.id | json }},
+            "kids_product_id": {{ p_kids.id | json }},
+            "featured_image": {%- if p_adult.featured_image != blank -%}{{ p_adult.featured_image | image_url: width: 1200 | json }}{%- else -%}null{%- endif -%},
+            "variants": [
+              {%- assign emitted_variants = 0 -%}
+
+              {%- for v in p_adult.variants -%}
+                {%- if emitted_variants > 0 -%},{%- endif -%}
+                {
+                  "id": {{ v.id | json }},
+                  "available": {{ v.available | json }},
+                  "options": {{ v.options | json }},
+                  "type": "adult"
+                }
+                {%- assign emitted_variants = emitted_variants | plus: 1 -%}
+              {%- endfor -%}
+
+              {%- for v in p_kids.variants -%}
+                {%- if emitted_variants > 0 -%},{%- endif -%}
+                {
+                  "id": {{ v.id | json }},
+                  "available": {{ v.available | json }},
+                  "options": {{ v.options | json }},
+                  "type": "kids"
+                }
+                {%- assign emitted_variants = emitted_variants | plus: 1 -%}
+              {%- endfor -%}
+            ]
+          }
+
+          {%- assign emitted_models = emitted_models | plus: 1 -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  ]
+{%- endcapture -%}
+
+{%- capture combo_variants_json -%}
+  [
+    {%- for v in product.variants -%}
+      {%- unless forloop.first -%},{%- endunless -%}
+      {
+        "id": {{ v.id | json }},
+        "title": {{ v.title | json }},
+        "available": {{ v.available | json }},
+        "price": {{ v.price | json }},
+        "price_formatted": {{ v.price | money | json }},
+        "compare_at_price": {{ v.compare_at_price | default: 0 | json }},
+        "compare_at_formatted": {%- if v.compare_at_price != blank and v.compare_at_price > v.price -%}{{ v.compare_at_price | money | json }}{%- else -%}null{%- endif -%}
+      }
+    {%- endfor -%}
+  ]
+{%- endcapture -%}
+
+<section
+  id="family-combo-{{ section.id }}"
+  class="family-combo"
+  style="
+    --fc-bg: {{ section.settings.page_bg }};
+    --fc-card-bg: {{ section.settings.card_bg }};
+    --fc-text: {{ section.settings.text_color }};
+    --fc-muted: {{ section.settings.muted_color }};
+    --fc-accent: {{ section.settings.accent_color }};
+    --fc-container: var(--am-header-max, 1200px);
+    --fc-gutter: var(--am-header-x, 16px);
+  "
+>
+  <div class="family-combo__container">
+    <header class="family-combo__header">
+      {%- if section.settings.subtitle != blank -%}
+        <p class="family-combo__eyebrow">{{ section.settings.subtitle }}</p>
+      {%- endif -%}
+
+      <h2 class="family-combo__title">{{ section.settings.title }}</h2>
+
+      {%- if section.settings.intro != blank -%}
+        <div class="family-combo__intro rte">{{ section.settings.intro }}</div>
+      {%- endif -%}
+    </header>
+
+    <div
+      class="family-combo__builder"
+      data-models="{{ allowed_models_json | strip_newlines | escape }}"
+      data-combo-variants="{{ combo_variants_json | strip_newlines | escape }}"
+      data-size-order="{{ section.settings.size_options | escape }}"
+      data-variant-3="{{ section.settings.combo_variant_3_id | strip | escape }}"
+      data-variant-4="{{ section.settings.combo_variant_4_id | strip | escape }}"
+      data-variant-5="{{ section.settings.combo_variant_5_id | strip | escape }}"
+    >
+      <article class="family-combo__visual-card">
+        <div class="family-combo__media">
+          {%- if preview_image != blank -%}
+            <img
+              src="{{ preview_image | image_url: width: 1400 }}"
+              srcset="
+                {{ preview_image | image_url: width: 700 }} 700w,
+                {{ preview_image | image_url: width: 1000 }} 1000w,
+                {{ preview_image | image_url: width: 1400 }} 1400w
+              "
+              sizes="(min-width: 990px) 55vw, 100vw"
+              width="700"
+              height="933"
+              alt="{{ section.settings.combo_title | escape }}"
+              class="family-combo__preview-image"
+              data-main-preview
+              loading="eager"
+              fetchpriority="high"
+            >
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'family-combo__placeholder' }}
+          {%- endif -%}
+
+          <div class="family-combo__overlay" aria-hidden="true"></div>
+        </div>
+
+        <div class="family-combo__visual-content">
+          <div class="family-combo__visual-top">
+            <div class="family-combo__tags">
+              <span>{{ section.settings.visual_tag_1 }}</span>
+              <span aria-hidden="true">/</span>
+              <span>{{ section.settings.visual_tag_2 }}</span>
+            </div>
+          </div>
+
+          <div class="family-combo__visual-bottom">
+            <p class="family-combo__selected-model" data-preview-model>
+              {{ section.settings.combo_title }}
+            </p>
+            <h3 class="family-combo__visual-title" data-preview-composition>
+              2 Adultos + 1 Infantil
+            </h3>
+            <p class="family-combo__visual-note">
+              Uma única estampa para todas as camisetas. Os tamanhos são escolhidos individualmente.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <div class="family-combo__configurator">
+        <div class="family-combo__progress" aria-label="Progresso da configuração">
+          <div class="family-combo__progress-meta">
+            <span>Passo</span>
+            <span><strong data-current-step>01</strong><i aria-hidden="true"></i>03</span>
+          </div>
+          <div class="family-combo__progress-track" aria-hidden="true">
+            <span data-progress-fill></span>
+          </div>
+        </div>
+
+        <div class="family-combo__steps">
+          <section class="family-combo__step is-active" data-step="1" aria-labelledby="family-combo-step-1-{{ section.id }}">
+            <p class="family-combo__step-kicker">01 — Composição</p>
+            <h3 id="family-combo-step-1-{{ section.id }}" class="family-combo__step-title">
+              Escolha o tamanho<br>da sua família
+            </h3>
+            <p class="family-combo__step-description">{{ section.settings.step1_hint }}</p>
+
+            <div class="family-combo__qty-list">
+              <button type="button" class="family-combo__qty-card" data-qty="3" aria-pressed="false">
+                <span class="family-combo__qty-number">03</span>
+                <span class="family-combo__qty-copy">
+                  <strong>Combo Essencial</strong>
+                  <small>2 Adultos + 1 Infantil</small>
+                  <em data-qty-price="3">Ver preço</em>
+                </span>
+                <span class="family-combo__qty-arrow" aria-hidden="true">→</span>
+              </button>
+
+              <button type="button" class="family-combo__qty-card" data-qty="4" aria-pressed="false">
+                <span class="family-combo__qty-number">04</span>
+                <span class="family-combo__qty-copy">
+                  <strong>Combo Família +</strong>
+                  <small>2 Adultos + 2 Infantis</small>
+                  <em data-qty-price="4">Ver preço</em>
+                </span>
+                <span class="family-combo__qty-arrow" aria-hidden="true">→</span>
+              </button>
+
+              <button type="button" class="family-combo__qty-card" data-qty="5" aria-pressed="false">
+                <span class="family-combo__qty-number">05</span>
+                <span class="family-combo__qty-copy">
+                  <strong>Combo Família Completa</strong>
+                  <small>2 Adultos + 3 Infantis</small>
+                  <em data-qty-price="5">Ver preço</em>
+                </span>
+                <span class="family-combo__qty-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="family-combo__step" data-step="2" aria-labelledby="family-combo-step-2-{{ section.id }}" hidden>
+            <p class="family-combo__step-kicker">02 — Estampa</p>
+            <h3 id="family-combo-step-2-{{ section.id }}" class="family-combo__step-title">
+              Uma estampa para<br>toda a família
+            </h3>
+            <p class="family-combo__step-description">{{ section.settings.model_hint }}</p>
+
+            <div class="family-combo__models" data-model-list></div>
+          </section>
+
+          <section class="family-combo__step" data-step="3" aria-labelledby="family-combo-step-3-{{ section.id }}" hidden>
+            <p class="family-combo__step-kicker">03 — Tamanhos</p>
+            <h3 id="family-combo-step-3-{{ section.id }}" class="family-combo__step-title">
+              Escolha cada<br>tamanho
+            </h3>
+            <p class="family-combo__step-description">{{ section.settings.sizes_hint }}</p>
+
+            <div class="family-combo__size-list" data-sizes-container></div>
+          </section>
+        </div>
+
+        <div class="family-combo__status" data-status role="status" aria-live="polite" hidden></div>
+
+        <footer class="family-combo__footer">
+          <div class="family-combo__price-area">
+            <div>
+              <span class="family-combo__price-label">Valor do combo</span>
+              <span class="family-combo__composition-label" data-composition-label>2 Adultos + 1 Infantil</span>
+            </div>
+
+            <div class="family-combo__prices">
+              <s data-compare-price hidden></s>
+              <strong data-total-price>{{ current_variant.price | money }}</strong>
+            </div>
+          </div>
+
+          <div class="family-combo__actions">
+            <button type="button" class="family-combo__back" data-prev disabled>
+              ← Voltar
+            </button>
+
+            <button type="button" class="family-combo__next" data-next disabled>
+              <span data-next-label>Próximo</span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </footer>
+
+        <form method="post" action="/cart/add" data-atc-form hidden>
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-input>
+          <input type="hidden" name="quantity" value="1">
+
+          <input type="hidden" name="properties[Composição]" value="" data-prop="composition">
+          <input type="hidden" name="properties[Estampa]" value="" data-prop="model">
+          <input type="hidden" name="properties[Tamanhos do combo]" value="" data-prop="selection">
+
+          <input type="hidden" name="properties[_combo_qty]" value="" data-prop="qty">
+          <input type="hidden" name="properties[_adult_product_id]" value="" data-prop="adult-product">
+          <input type="hidden" name="properties[_kids_product_id]" value="" data-prop="kids-product">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    #family-combo-{{ section.id }} {
+      --fc-serif: 'Playfair Display', serif;
+      --fc-sans: 'Montserrat', sans-serif;
+      --fc-ease: cubic-bezier(.19, 1, .22, 1);
+      width: 100%;
+      padding: clamp(2.5rem, 5vw, 5rem) 0;
+      background: var(--fc-bg);
+      color: var(--fc-text);
+      font-family: var(--fc-sans);
+      overflow: hidden;
+    }
+
+    #family-combo-{{ section.id }} *,
+    #family-combo-{{ section.id }} *::before,
+    #family-combo-{{ section.id }} *::after {
+      box-sizing: border-box;
+    }
+
+    #family-combo-{{ section.id }} button,
+    #family-combo-{{ section.id }} select {
+      font: inherit;
+    }
+
+    #family-combo-{{ section.id }} button:focus-visible,
+    #family-combo-{{ section.id }} select:focus-visible {
+      outline: 2px solid var(--fc-accent);
+      outline-offset: 3px;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__container {
+      width: 100%;
+      max-width: var(--fc-container);
+      margin: 0 auto;
+      padding-inline: var(--fc-gutter);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__header {
+      max-width: 720px;
+      margin-bottom: clamp(1.75rem, 3vw, 3rem);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__eyebrow,
+    #family-combo-{{ section.id }} .family-combo__step-kicker {
+      margin: 0 0 .65rem;
+      color: var(--fc-muted);
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: .26em;
+      line-height: 1.4;
+      text-transform: uppercase;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__title {
+      margin: 0;
+      font-family: var(--fc-serif);
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      font-weight: 600;
+      letter-spacing: -.035em;
+      line-height: 1.02;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__intro {
+      max-width: 620px;
+      margin-top: .9rem;
+      color: var(--fc-muted);
+      font-size: .88rem;
+      font-weight: 300;
+      line-height: 1.65;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__intro p {
+      margin: 0;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__builder {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(1.5rem, 4vw, 4rem);
+      align-items: stretch;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__visual-card {
+      position: relative;
+      min-height: 520px;
+      aspect-ratio: 3 / 4;
+      max-height: 760px;
+      margin: 0;
+      overflow: hidden;
+      border-radius: 6px;
+      background: #111;
+      color: #fff;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__media,
+    #family-combo-{{ section.id }} .family-combo__overlay {
+      position: absolute;
+      inset: 0;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__preview-image,
+    #family-combo-{{ section.id }} .family-combo__placeholder {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__preview-image {
+      transition: opacity .55s var(--fc-ease), transform 1.1s var(--fc-ease);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__visual-card:hover .family-combo__preview-image {
+      transform: scale(1.015);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__overlay {
+      background:
+        radial-gradient(900px 520px at 8% 12%, rgb(0 0 0 / .22), transparent 55%),
+        linear-gradient(to top, rgb(0 0 0 / .9) 0%, rgb(0 0 0 / .42) 42%, transparent 78%);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__visual-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      min-height: 100%;
+      padding: clamp(1.15rem, 2.4vw, 2rem);
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__tags {
+      display: flex;
+      gap: .55rem;
+      align-items: center;
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: .25em;
+      line-height: 1.4;
+      text-transform: uppercase;
+      color: rgb(255 255 255 / .78);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__selected-model {
+      margin: 0 0 .55rem;
+      font-size: .67rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgb(255 255 255 / .72);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__visual-title {
+      max-width: 90%;
+      margin: 0;
+      font-family: var(--fc-serif);
+      font-size: clamp(1.65rem, 3vw, 2.5rem);
+      font-weight: 500;
+      letter-spacing: -.025em;
+      line-height: 1.08;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__visual-note {
+      max-width: 520px;
+      margin: 1rem 0 0;
+      padding-top: 1rem;
+      border-top: 1px solid rgb(255 255 255 / .28);
+      color: rgb(255 255 255 / .78);
+      font-size: .76rem;
+      font-weight: 300;
+      line-height: 1.55;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__configurator {
+      display: flex;
+      min-width: 0;
+      padding: clamp(1.25rem, 3vw, 2.4rem);
+      flex-direction: column;
+      border: 1px solid #e8e8e8;
+      background: var(--fc-card-bg);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress {
+      margin-bottom: clamp(2rem, 4vw, 3.2rem);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress-meta {
+      display: flex;
+      margin-bottom: .9rem;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--fc-muted);
+      font-size: .64rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress-meta > span:last-child {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress-meta strong {
+      color: var(--fc-text);
+      font-weight: 700;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress-meta i {
+      width: 30px;
+      height: 1px;
+      display: block;
+      background: #d9d9d9;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress-track {
+      position: relative;
+      height: 1px;
+      overflow: hidden;
+      background: #e9e9e9;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__progress-track span {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 33.333%;
+      background: var(--fc-accent);
+      transition: width .65s var(--fc-ease);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__steps {
+      position: relative;
+      flex: 1;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__step {
+      animation: familyComboEnter-{{ section.id }} .5s var(--fc-ease) both;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__step[hidden] {
+      display: none !important;
+    }
+
+    @keyframes familyComboEnter-{{ section.id }} {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #family-combo-{{ section.id }} .family-combo__step-title {
+      margin: 0;
+      font-family: var(--fc-serif);
+      font-size: clamp(1.75rem, 3.2vw, 2.7rem);
+      font-weight: 500;
+      letter-spacing: -.035em;
+      line-height: 1.04;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__step-description {
+      max-width: 410px;
+      margin: .85rem 0 1.75rem;
+      color: var(--fc-muted);
+      font-size: .79rem;
+      font-weight: 300;
+      line-height: 1.55;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-list {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid #e6e6e6;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-card {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem 0;
+      border: 0;
+      border-bottom: 1px solid #e6e6e6;
+      border-radius: 0;
+      background: transparent;
+      color: var(--fc-text);
+      cursor: pointer;
+      text-align: left;
+      transition: padding .25s ease, opacity .25s ease;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-card:hover:not(:disabled),
+    #family-combo-{{ section.id }} .family-combo__qty-card.is-selected {
+      padding-inline: .7rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-card.is-selected {
+      background: #f5f5f3;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-card:disabled {
+      opacity: .38;
+      cursor: not-allowed;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-number {
+      font-family: var(--fc-serif);
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-copy {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .2rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-copy strong {
+      overflow: hidden;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-copy small {
+      color: var(--fc-muted);
+      font-size: .72rem;
+      font-weight: 300;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-copy em {
+      margin-top: .25rem;
+      color: var(--fc-text);
+      font-size: .72rem;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-arrow {
+      font-size: 1rem;
+      transition: transform .25s ease;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__qty-card:hover .family-combo__qty-arrow {
+      transform: translateX(3px);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__models {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .8rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-card {
+      position: relative;
+      min-width: 0;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid #e3e3e3;
+      border-radius: 0;
+      background: #fff;
+      color: #111;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .25s ease, transform .35s var(--fc-ease);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-card:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: #111;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-card.is-selected {
+      border-color: #111;
+      box-shadow: inset 0 0 0 1px #111;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-card:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-image-wrap {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background: #f3f3f3;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-image {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transition: transform .7s var(--fc-ease);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-card:hover .family-combo__model-image {
+      transform: scale(1.025);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-copy {
+      display: flex;
+      gap: .75rem;
+      align-items: center;
+      justify-content: space-between;
+      padding: .75rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-copy span:first-child {
+      overflow: hidden;
+      font-size: .69rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__model-copy span:last-child {
+      font-size: .85rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__empty {
+      grid-column: 1 / -1;
+      padding: 1rem;
+      border: 1px solid #e5e5e5;
+      color: var(--fc-muted);
+      font-size: .78rem;
+      line-height: 1.55;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__size-list {
+      border-top: 1px solid #e5e5e5;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__size-row {
+      display: grid;
+      grid-template-columns: minmax(90px, .8fr) minmax(0, 1fr) minmax(0, 1fr);
+      gap: .8rem;
+      align-items: center;
+      padding: .85rem 0;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__size-row.has-no-color {
+      grid-template-columns: minmax(110px, .8fr) minmax(0, 1.6fr);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__person {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: .22rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__person strong {
+      font-size: .69rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__person small {
+      color: var(--fc-muted);
+      font-size: .64rem;
+      font-weight: 300;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__field {
+      position: relative;
+      min-width: 0;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__field label {
+      display: block;
+      margin-bottom: .32rem;
+      color: var(--fc-muted);
+      font-size: .56rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__select {
+      width: 100%;
+      min-height: 42px;
+      padding: 0 2.1rem 0 .75rem;
+      border: 1px solid #dedede;
+      border-radius: 0;
+      background-color: #fff;
+      color: #111;
+      font-size: .74rem;
+      cursor: pointer;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__select:disabled {
+      color: #9b9b9b;
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__status {
+      margin-top: 1rem;
+      padding: .8rem 1rem;
+      border: 1px solid #e2bcbc;
+      background: #fff7f7;
+      color: #8b2929;
+      font-size: .72rem;
+      line-height: 1.5;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__footer {
+      margin-top: clamp(2rem, 4vw, 3.25rem);
+    }
+
+    #family-combo-{{ section.id }} .family-combo__price-area {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 1.15rem 0;
+      border-top: 1px solid #dfdfdf;
+      border-bottom: 1px solid #dfdfdf;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__price-area > div:first-child,
+    #family-combo-{{ section.id }} .family-combo__prices {
+      display: flex;
+      flex-direction: column;
+      gap: .25rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__prices {
+      align-items: flex-end;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__price-label {
+      color: var(--fc-muted);
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__composition-label {
+      color: var(--fc-text);
+      font-size: .68rem;
+      font-weight: 500;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__prices s {
+      color: var(--fc-muted);
+      font-size: .7rem;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__prices strong {
+      font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      letter-spacing: -.04em;
+      line-height: 1;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__actions {
+      display: flex;
+      gap: .8rem;
+      margin-top: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__back,
+    #family-combo-{{ section.id }} .family-combo__next {
+      min-height: 46px;
+      border-radius: 0;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: opacity .2s ease, transform .25s ease, background .2s ease;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__back {
+      padding: 0;
+      border: 0;
+      border-bottom: 1px solid transparent;
+      background: transparent;
+      color: var(--fc-text);
+      font-size: .64rem;
+      font-weight: 600;
+      letter-spacing: .16em;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__back:not(:disabled):hover {
+      border-bottom-color: currentColor;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__next {
+      min-width: 170px;
+      display: inline-flex;
+      gap: .8rem;
+      padding: 0 1.25rem;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid var(--fc-accent);
+      background: var(--fc-accent);
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .17em;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__next:not(:disabled):hover {
+      transform: translateY(-2px);
+      background: #262626;
+    }
+
+    #family-combo-{{ section.id }} .family-combo__back:disabled,
+    #family-combo-{{ section.id }} .family-combo__next:disabled {
+      opacity: .32;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @media (min-width: 990px) {
+      #family-combo-{{ section.id }} .family-combo__builder {
+        grid-template-columns: minmax(0, 1.08fr) minmax(420px, .92fr);
+      }
+
+      #family-combo-{{ section.id }} .family-combo__configurator {
+        min-height: 620px;
+      }
+    }
+
+    @media (max-width: 749px) {
+      #family-combo-{{ section.id }} {
+        padding-block: 2.25rem;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__header {
+        padding-inline: 1rem;
+        text-align: center;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__intro {
+        margin-inline: auto;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__visual-card {
+        min-height: 460px;
+        aspect-ratio: 4 / 5;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__visual-content {
+        text-align: center;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__tags {
+        justify-content: center;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__visual-title,
+      #family-combo-{{ section.id }} .family-combo__visual-note {
+        max-width: 100%;
+        margin-inline: auto;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__configurator {
+        padding: 1.2rem;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__models {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #family-combo-{{ section.id }} .family-combo__size-row,
+      #family-combo-{{ section.id }} .family-combo__size-row.has-no-color {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__person {
+        grid-column: 1 / -1;
+        padding-bottom: .15rem;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__price-area {
+        align-items: center;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__next {
+        min-width: 145px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      #family-combo-{{ section.id }} .family-combo__models {
+        grid-template-columns: 1fr;
+      }
+
+      #family-combo-{{ section.id }} .family-combo__qty-card {
+        grid-template-columns: 38px minmax(0, 1fr) auto;
+        gap: .7rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #family-combo-{{ section.id }} *,
+      #family-combo-{{ section.id }} *::before,
+      #family-combo-{{ section.id }} *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+
+  <script type="module">
+    (() => {
+      const root = document.getElementById('family-combo-{{ section.id }}');
+      if (!root || root.dataset.initialized === 'true') return;
+      root.dataset.initialized = 'true';
+
+      try {
+        const builder = root.querySelector('.family-combo__builder');
+        const models = JSON.parse(builder?.dataset.models || '[]');
+        const comboVariants = JSON.parse(builder?.dataset.comboVariants || '[]');
+        const sizeOrder = (builder?.dataset.sizeOrder || '')
+          .split(',')
+          .map(value => value.trim())
+          .filter(Boolean);
+
+        const configuredVariantIds = {
+          3: builder?.dataset.variant3 || '',
+          4: builder?.dataset.variant4 || '',
+          5: builder?.dataset.variant5 || ''
+        };
+
+        const compositionMap = {
+          3: '2 Adultos + 1 Infantil',
+          4: '2 Adultos + 2 Infantis',
+          5: '2 Adultos + 3 Infantis'
+        };
+
+        const state = {
+          step: 1,
+          qty: null,
+          modelId: null,
+          selections: {}
+        };
+
+        const steps = [...root.querySelectorAll('[data-step]')];
+        const qtyButtons = [...root.querySelectorAll('[data-qty]')];
+        const modelList = root.querySelector('[data-model-list]');
+        const sizesContainer = root.querySelector('[data-sizes-container]');
+        const currentStep = root.querySelector('[data-current-step]');
+        const progressFill = root.querySelector('[data-progress-fill]');
+        const prevButton = root.querySelector('[data-prev]');
+        const nextButton = root.querySelector('[data-next]');
+        const nextLabel = root.querySelector('[data-next-label]');
+        const totalPrice = root.querySelector('[data-total-price]');
+        const comparePrice = root.querySelector('[data-compare-price]');
+        const compositionLabel = root.querySelector('[data-composition-label]');
+        const previewComposition = root.querySelector('[data-preview-composition]');
+        const previewModel = root.querySelector('[data-preview-model]');
+        const previewImage = root.querySelector('[data-main-preview]');
+        const status = root.querySelector('[data-status]');
+        const form = root.querySelector('[data-atc-form]');
+
+        const getModel = () => models.find(model => String(model.id) === String(state.modelId));
+
+        function setStatus(message = '', isError = false) {
+          if (!status) return;
+          status.textContent = message;
+          status.hidden = !message;
+          status.style.borderColor = isError ? '#e2bcbc' : '#cfdac7';
+          status.style.background = isError ? '#fff7f7' : '#f7fbf4';
+          status.style.color = isError ? '#8b2929' : '#36542f';
+        }
+
+        function resolveComboVariant(qty) {
+          const configuredId = configuredVariantIds[qty];
+          if (configuredId) {
+            const byConfiguredId = comboVariants.find(variant => String(variant.id) === String(configuredId));
+            if (byConfiguredId) return byConfiguredId;
+          }
+
+          const exactTitle = comboVariants.find(variant => String(variant.title).trim() === String(qty));
+          if (exactTitle) return exactTitle;
+
+          const numberPattern = new RegExp(`(^|\\D)${qty}(\\D|$)`);
+          return comboVariants.find(variant => numberPattern.test(String(variant.title))) || null;
+        }
+
+        function variantsByType(model, type) {
+          return model?.variants?.filter(variant => variant.type === type) || [];
+        }
+
+        function getOptions(variants) {
+          const colors = new Set();
+          const sizes = new Set();
+
+          variants.forEach(variant => {
+            (variant.options || []).forEach(option => {
+              if (sizeOrder.includes(option)) sizes.add(option);
+              else if (option && option !== 'Default Title') colors.add(option);
+            });
+          });
+
+          const sortedSizes = [...sizes].sort((a, b) => {
+            const indexA = sizeOrder.indexOf(a);
+            const indexB = sizeOrder.indexOf(b);
+            if (indexA === -1 && indexB === -1) return String(a).localeCompare(String(b), 'pt-BR');
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+          });
+
+          return { colors: [...colors], sizes: sortedSizes };
+        }
+
+        function findVariant(variants, color, size) {
+          return variants.find(variant => {
+            const options = variant.options || [];
+            const matchesColor = color ? options.includes(color) : true;
+            const matchesSize = size ? options.includes(size) : true;
+            return matchesColor && matchesSize;
+          });
+        }
+
+        function isAvailable(variants, color, size) {
+          return Boolean(findVariant(variants, color, size)?.available);
+        }
+
+        function rowMeta(index) {
+          if (index === 1) return { type: 'adult', title: 'Adulto 1', note: 'Camiseta adulta' };
+          if (index === 2) return { type: 'adult', title: 'Adulto 2', note: 'Camiseta adulta' };
+          if (index === 3) return { type: 'kids', title: 'Infantil 1', note: 'Peça obrigatória' };
+          return { type: 'kids', title: `Infantil ${index - 2}`, note: 'Infantil extra' };
+        }
+
+        function createOption(value, label = value, disabled = false, selected = false) {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = label;
+          option.disabled = disabled;
+          option.selected = selected;
+          return option;
+        }
+
+        function updatePrice() {
+          const variant = state.qty ? resolveComboVariant(state.qty) : null;
+
+          qtyButtons.forEach(button => {
+            const qty = Number(button.dataset.qty);
+            const priceNode = root.querySelector(`[data-qty-price="${qty}"]`);
+            const qtyVariant = resolveComboVariant(qty);
+
+            button.disabled = !qtyVariant || !qtyVariant.available;
+            button.setAttribute('aria-disabled', String(button.disabled));
+
+            if (priceNode) {
+              priceNode.textContent = qtyVariant
+                ? (qtyVariant.available ? qtyVariant.price_formatted : 'Indisponível')
+                : 'Configure a variante';
+            }
+          });
+
+          if (!variant) return;
+
+          if (totalPrice) totalPrice.textContent = variant.price_formatted;
+
+          if (comparePrice) {
+            const showCompare = Boolean(variant.compare_at_formatted && variant.compare_at_price > variant.price);
+            comparePrice.hidden = !showCompare;
+            comparePrice.textContent = showCompare ? variant.compare_at_formatted : '';
+          }
+        }
+
+        function updatePreview() {
+          const composition = state.qty ? compositionMap[state.qty] : compositionMap[3];
+          const model = getModel();
+
+          if (compositionLabel) compositionLabel.textContent = composition;
+          if (previewComposition) previewComposition.textContent = composition;
+          if (previewModel) previewModel.textContent = model?.title || '{{ section.settings.combo_title | escape }}';
+
+          if (previewImage && model?.featured_image && previewImage.src !== model.featured_image) {
+            previewImage.style.opacity = '0';
+            window.setTimeout(() => {
+              previewImage.src = model.featured_image;
+              previewImage.removeAttribute('srcset');
+              previewImage.style.opacity = '1';
+            }, 180);
+          }
+        }
+
+        function canAdvance() {
+          if (state.step === 1) return Boolean(state.qty && resolveComboVariant(state.qty)?.available);
+          if (state.step === 2) return Boolean(state.modelId);
+
+          if (state.step === 3) {
+            const model = getModel();
+            if (!model || !state.qty) return false;
+
+            for (let index = 1; index <= state.qty; index += 1) {
+              const meta = rowMeta(index);
+              const variants = variantsByType(model, meta.type);
+              const options = getOptions(variants);
+              const selection = state.selections[index] || {};
+
+              if (!selection.size) return false;
+              if (options.colors.length && !selection.color) return false;
+              if (!isAvailable(variants, options.colors.length ? selection.color : null, selection.size)) return false;
+            }
+
+            return true;
+          }
+
+          return false;
+        }
+
+        function updateUI() {
+          steps.forEach(step => {
+            const isCurrent = Number(step.dataset.step) === state.step;
+            step.hidden = !isCurrent;
+            step.classList.toggle('is-active', isCurrent);
+          });
+
+          if (currentStep) currentStep.textContent = `0${state.step}`;
+          if (progressFill) progressFill.style.width = `${(state.step / 3) * 100}%`;
+          if (prevButton) prevButton.disabled = state.step === 1;
+          if (nextButton) nextButton.disabled = !canAdvance();
+          if (nextLabel) nextLabel.textContent = state.step === 3 ? 'Adicionar combo' : 'Próximo';
+
+          qtyButtons.forEach(button => {
+            const selected = Number(button.dataset.qty) === state.qty;
+            button.classList.toggle('is-selected', selected);
+            button.setAttribute('aria-pressed', String(selected));
+          });
+
+          updatePrice();
+          updatePreview();
+        }
+
+        function goToStep(step) {
+          if (step < 1 || step > 3) return;
+          state.step = step;
+          setStatus('');
+          updateUI();
+
+          const activeStep = root.querySelector(`[data-step="${step}"]`);
+          activeStep?.querySelector('button:not(:disabled), select:not(:disabled)')?.focus({ preventScroll: true });
+        }
+
+        function renderModels() {
+          if (!modelList) return;
+          modelList.replaceChildren();
+
+          if (!models.length) {
+            const empty = document.createElement('div');
+            empty.className = 'family-combo__empty';
+            empty.textContent = 'Nenhuma estampa válida foi encontrada. Vincule produtos adultos ao combo e configure o produto infantil correspondente no metafield custom.kids_product.';
+            modelList.appendChild(empty);
+            return;
+          }
+
+          models.forEach(model => {
+            const adultAvailable = variantsByType(model, 'adult').some(variant => variant.available);
+            const kidsAvailable = variantsByType(model, 'kids').some(variant => variant.available);
+            const available = adultAvailable && kidsAvailable;
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'family-combo__model-card';
+            button.disabled = !available;
+            button.dataset.modelId = model.id;
+            button.setAttribute('aria-pressed', String(String(state.modelId) === String(model.id)));
+            button.classList.toggle('is-selected', String(state.modelId) === String(model.id));
+
+            const imageMarkup = model.featured_image
+              ? `<div class="family-combo__model-image-wrap"><img src="${model.featured_image}" alt="" class="family-combo__model-image" loading="lazy"></div>`
+              : '<div class="family-combo__model-image-wrap"></div>';
+
+            button.innerHTML = `${imageMarkup}<span class="family-combo__model-copy"><span>${model.title}</span><span aria-hidden="true">${available ? '→' : '—'}</span></span>`;
+
+            button.addEventListener('click', () => {
+              if (!available) return;
+              state.modelId = String(model.id);
+              state.selections = {};
+              renderModels();
+              renderSizeRows();
+              updateUI();
+              window.setTimeout(() => goToStep(3), 220);
+            });
+
+            modelList.appendChild(button);
+          });
+        }
+
+        function renderSizeRows() {
+          if (!sizesContainer) return;
+          sizesContainer.replaceChildren();
+
+          const model = getModel();
+          if (!model || !state.qty) return;
+
+          for (let index = 1; index <= state.qty; index += 1) {
+            const meta = rowMeta(index);
+            const variants = variantsByType(model, meta.type);
+            const options = getOptions(variants);
+            const hasColors = options.colors.length > 0;
+            const selection = state.selections[index] || {};
+
+            if (!state.selections[index]) state.selections[index] = {};
+            if (hasColors && options.colors.length === 1 && !selection.color) {
+              state.selections[index].color = options.colors[0];
+              selection.color = options.colors[0];
+            }
+
+            const row = document.createElement('div');
+            row.className = `family-combo__size-row${hasColors ? '' : ' has-no-color'}`;
+
+            const person = document.createElement('div');
+            person.className = 'family-combo__person';
+            person.innerHTML = `<strong>${meta.title}</strong><small>${meta.note}</small>`;
+            row.appendChild(person);
+
+            if (hasColors) {
+              const colorField = document.createElement('div');
+              colorField.className = 'family-combo__field';
+
+              const colorLabel = document.createElement('label');
+              colorLabel.htmlFor = `family-combo-color-{{ section.id }}-${index}`;
+              colorLabel.textContent = 'Cor';
+
+              const colorSelect = document.createElement('select');
+              colorSelect.id = colorLabel.htmlFor;
+              colorSelect.className = 'family-combo__select';
+              colorSelect.appendChild(createOption('', 'Escolha', false, !selection.color));
+
+              options.colors.forEach(color => {
+                const colorAvailable = variants.some(variant => variant.available && (variant.options || []).includes(color));
+                colorSelect.appendChild(createOption(color, colorAvailable ? color : `${color} — Esgotado`, !colorAvailable, selection.color === color));
+              });
+
+              colorSelect.addEventListener('change', event => {
+                state.selections[index].color = event.target.value;
+                state.selections[index].size = '';
+                renderSizeRows();
+                updateUI();
+              });
+
+              colorField.append(colorLabel, colorSelect);
+              row.appendChild(colorField);
+            }
+
+            const sizeField = document.createElement('div');
+            sizeField.className = 'family-combo__field';
+
+            const sizeLabel = document.createElement('label');
+            sizeLabel.htmlFor = `family-combo-size-{{ section.id }}-${index}`;
+            sizeLabel.textContent = 'Tamanho';
+
+            const sizeSelect = document.createElement('select');
+            sizeSelect.id = sizeLabel.htmlFor;
+            sizeSelect.className = 'family-combo__select';
+            sizeSelect.disabled = hasColors && !selection.color;
+            sizeSelect.appendChild(createOption('', sizeSelect.disabled ? 'Escolha a cor' : 'Escolha', false, !selection.size));
+
+            options.sizes.forEach(size => {
+              const available = isAvailable(variants, hasColors ? selection.color : null, size);
+              sizeSelect.appendChild(createOption(size, available ? size : `${size} — Esgotado`, !available, selection.size === size));
+            });
+
+            sizeSelect.addEventListener('change', event => {
+              state.selections[index].size = event.target.value;
+              updateUI();
+            });
+
+            sizeField.append(sizeLabel, sizeSelect);
+            row.appendChild(sizeField);
+            sizesContainer.appendChild(row);
+          }
+        }
+
+        qtyButtons.forEach(button => {
+          button.addEventListener('click', () => {
+            const qty = Number(button.dataset.qty);
+            const variant = resolveComboVariant(qty);
+            if (!variant?.available) return;
+
+            state.qty = qty;
+            state.selections = Object.fromEntries(
+              Object.entries(state.selections).filter(([index]) => Number(index) <= qty)
+            );
+
+            renderSizeRows();
+            updateUI();
+            window.setTimeout(() => goToStep(2), 220);
+          });
+        });
+
+        prevButton?.addEventListener('click', () => goToStep(state.step - 1));
+
+        nextButton?.addEventListener('click', () => {
+          if (!canAdvance()) return;
+          if (state.step < 3) goToStep(state.step + 1);
+          else submitCombo();
+        });
+
+        async function submitCombo() {
+          const comboVariant = resolveComboVariant(state.qty);
+          const model = getModel();
+
+          if (!comboVariant?.id || !model || !canAdvance()) {
+            setStatus('Revise a composição, a estampa e todos os tamanhos antes de adicionar.', true);
+            return;
+          }
+
+          const selectionLines = [];
+          for (let index = 1; index <= state.qty; index += 1) {
+            const meta = rowMeta(index);
+            const selection = state.selections[index];
+            const parts = [];
+            if (selection.color) parts.push(selection.color);
+            parts.push(`Tam. ${selection.size}`);
+            selectionLines.push(`${meta.title}: ${parts.join(' / ')}`);
+          }
+
+          form.querySelector('[data-variant-input]').value = comboVariant.id;
+          form.querySelector('[data-prop="composition"]').value = compositionMap[state.qty];
+          form.querySelector('[data-prop="model"]').value = model.title;
+          form.querySelector('[data-prop="selection"]').value = selectionLines.join(' | ');
+          form.querySelector('[data-prop="qty"]').value = state.qty;
+          form.querySelector('[data-prop="adult-product"]').value = model.adult_product_id || '';
+          form.querySelector('[data-prop="kids-product"]').value = model.kids_product_id || '';
+
+          nextButton.disabled = true;
+          nextLabel.textContent = 'Adicionando...';
+          setStatus('');
+
+          try {
+            const sectionIds = [...document.querySelectorAll('cart-items-component[data-section-id]')]
+              .map(element => element.dataset.sectionId)
+              .filter(Boolean);
+
+            const formData = new FormData(form);
+            if (sectionIds.length) {
+              formData.set('sections', sectionIds.join(','));
+              formData.set('sections_url', window.location.pathname);
+            }
+
+            const response = await fetch('/cart/add.js', {
+              method: 'POST',
+              headers: { Accept: 'application/json' },
+              body: formData
+            });
+
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.description || payload.message || 'Não foi possível adicionar o combo.');
+
+            document.dispatchEvent(new CustomEvent('cart:update', {
+              bubbles: true,
+              detail: {
+                resource: payload,
+                sourceId: 'combo-familia',
+                data: {
+                  source: 'combo-familia',
+                  itemCount: 1,
+                  sections: payload.sections || null
+                }
+              }
+            }));
+
+            document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+            document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true }));
+
+            const drawerTrigger = document.querySelector('[data-cart-drawer-open], [data-cart-toggle], a[href="/cart"]');
+            if (drawerTrigger?.hasAttribute('data-cart-drawer-open') || drawerTrigger?.hasAttribute('data-cart-toggle')) {
+              drawerTrigger.click();
+            }
+
+            setStatus('Combo adicionado ao carrinho.', false);
+            nextLabel.textContent = 'Adicionado';
+          } catch (error) {
+            console.error('Family Combo Builder:', error);
+            setStatus(error.message || 'Ocorreu um erro ao adicionar o combo.', true);
+            nextLabel.textContent = 'Tentar novamente';
+          } finally {
+            nextButton.disabled = !canAdvance();
+            window.setTimeout(() => {
+              if (nextLabel.textContent === 'Adicionado') nextLabel.textContent = 'Adicionar combo';
+            }, 1800);
+          }
+        }
+
+        renderModels();
+        renderSizeRows();
+        updateUI();
+      } catch (error) {
+        console.error('Family Combo Builder initialization error:', error);
+      }
+    })();
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Combo Família Editorial",
+  "tag": "section",
+  "class": "section-family-combo",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Direção visual"
+    },
+    {
+      "type": "color",
+      "id": "page_bg",
+      "label": "Cor do fundo",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Fundo do configurador",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Cor principal do texto",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "muted_color",
+      "label": "Cor dos textos secundários",
+      "default": "#6B6B6B"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Cor de destaque",
+      "default": "#000000"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Imagem inicial do combo",
+      "info": "Usada antes de o cliente escolher a estampa. Se ficar vazia, será usada a imagem principal do produto do combo."
+    },
+    {
+      "type": "header",
+      "content": "Textos da seção"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "COMBO FAMÍLIA"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Uma estampa. A família inteira."
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Introdução",
+      "default": "<p>O kit começa com 2 camisetas adultas e 1 infantil. Escolha uma única estampa, defina os tamanhos e adicione camisetas infantis extras por um valor especial.</p>"
+    },
+    {
+      "type": "text",
+      "id": "combo_title",
+      "label": "Nome exibido sobre a imagem",
+      "default": "Family Set"
+    },
+    {
+      "type": "text",
+      "id": "visual_tag_1",
+      "label": "Tag visual 1",
+      "default": "FAMÍLIA"
+    },
+    {
+      "type": "text",
+      "id": "visual_tag_2",
+      "label": "Tag visual 2",
+      "default": "MESMA ESTAMPA"
+    },
+    {
+      "type": "text",
+      "id": "step1_hint",
+      "label": "Texto do passo 1",
+      "default": "Todo combo inclui obrigatoriamente 2 camisetas adultas e 1 infantil. As opções maiores adicionam apenas peças infantis."
+    },
+    {
+      "type": "text",
+      "id": "model_hint",
+      "label": "Texto do passo 2",
+      "default": "Escolha a arte que será aplicada em todas as camisetas do combo."
+    },
+    {
+      "type": "text",
+      "id": "sizes_hint",
+      "label": "Texto do passo 3",
+      "default": "Selecione a cor e o tamanho de cada pessoa. As opções esgotadas ficam indisponíveis."
+    },
+    {
+      "type": "header",
+      "content": "Variantes do produto-combo"
+    },
+    {
+      "type": "paragraph",
+      "content": "Cadastre no produto do combo uma variante para cada quantidade e informe os IDs abaixo. O preço menor deve ser definido diretamente nessas variantes."
+    },
+    {
+      "type": "text",
+      "id": "combo_variant_3_id",
+      "label": "ID — 2 Adultos + 1 Infantil"
+    },
+    {
+      "type": "text",
+      "id": "combo_variant_4_id",
+      "label": "ID — 2 Adultos + 2 Infantis"
+    },
+    {
+      "type": "text",
+      "id": "combo_variant_5_id",
+      "label": "ID — 2 Adultos + 3 Infantis"
+    },
+    {
+      "type": "textarea",
+      "id": "size_options",
+      "label": "Ordem dos tamanhos",
+      "default": "2, 4, 6, 8, 10, 12, 14, 16, PP, P, M, G, GG, XG",
+      "info": "Serve para identificar e ordenar tamanhos. A disponibilidade continua vindo das variantes reais dos produtos."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "combo_product",
+      "name": "Estampa do combo",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Produto adulto",
+          "info": "O produto infantil correspondente deve estar vinculado no metafield custom.kids_product deste produto adulto."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Combo Família Editorial"
+    }
+  ]
+}
+{% endschema %}

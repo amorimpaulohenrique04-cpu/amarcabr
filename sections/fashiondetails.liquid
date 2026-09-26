@@ -1,0 +1,551 @@
+{% comment %}
+  PRESTIGE HORIZON V21 - FASHION ACCORDIONS
+  1. Added "Fashion Accordions" below Buy Buttons.
+  2. Size Guide Table (Clean Design).
+  3. Exchange Policy & Care Instructions.
+  4. Keeps all previous fixes (Sticky, Metafields, Swatches).
+{% endcomment %}
+
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign product_form_id = 'product-form-' | append: section.id -%}
+
+<style>
+  /* --- CORES E FONTES --- */
+  :root {
+    --pp-bg: {{ section.settings.bg_color | default: '#ffffff' }};
+    --pp-text: {{ section.settings.text_color | default: '#000000' }};
+    --pp-border: #e0e0e0;
+    --pp-accent: #000000;
+  }
+
+  .pp-section {
+    background-color: var(--pp-bg);
+    color: var(--pp-text);
+    padding-top: 40px; 
+    padding-bottom: 100px;
+    font-family: var(--font-body--family);
+    line-height: 1.5;
+  }
+
+  /* --- GRID PRINCIPAL --- */
+  .pp-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 425px;
+    gap: 60px;
+    align-items: start; 
+  }
+
+  /* --- GALERIA --- */
+  .pp-gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .pp-media-item {
+    position: relative;
+    width: 100%;
+    background: #f4f4f4;
+  }
+  .pp-media-item::before { content: ""; display: block; padding-top: 133%; } /* Ratio 3:4 */
+   
+  .pp-media-item img, .pp-media-item video {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover;
+  }
+
+  /* --- INFO COLUNA (STICKY) --- */
+  .pp-info-col {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 120px; 
+    height: auto; 
+    width: 100%;
+    z-index: 2; 
+  }
+
+  /* --- ELEMENTOS --- */
+  .pp-title {
+    font-family: var(--font-heading--family);
+    font-size: 2.0rem; 
+    margin: 10px 0; 
+    line-height: 1.1; 
+    font-weight: 400;
+  }
+
+  .pp-price {
+    font-size: 1.4rem; 
+    font-weight: 700; margin-bottom: 20px; display: flex; gap: 10px;
+  }
+  .pp-price--sale { color: #d32f2f; }
+  .pp-price--compare { text-decoration: line-through; opacity: 0.6; font-size: 0.95rem; font-weight: 400; }
+
+  .pp-rte { font-size: 0.9rem; margin-bottom: 30px; color: #444; }
+
+  /* --- VARIANTES --- */
+  .pp-variant-group { 
+    margin-bottom: 25px; 
+    background: transparent !important;
+    mask: none !important;
+  }
+  
+  .pp-label {
+    font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;
+  }
+
+  .pp-swatch-list { 
+    display: flex; flex-wrap: wrap; gap: 10px; 
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .pp-visually-hidden { position: absolute; opacity: 0; pointer-events: none; }
+
+  /* SWATCHES */
+  .pp-swatch-label {
+    min-width: 40px; height: 40px; padding: 0 12px;
+    border: 1px solid var(--pp-border);
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem; transition: 0.2s;
+    border-radius: 4px;
+    background-image: none !important;
+    box-shadow: none;
+  }
+
+  input:checked + .pp-swatch-label:not(.pp-swatch-label--visual) {
+    background: #000 !important; 
+    color: #fff; 
+    border-color: #000;
+  }
+
+  .pp-swatch-label--visual {
+    width: 40px !important; height: 40px !important; padding: 0 !important;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-size: cover; background-position: center;
+    position: relative;
+    background-color: #eee; 
+  }
+
+  input:checked + .pp-swatch-label--visual {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #000;
+    border-color: transparent;
+  }
+
+  /* --- BARRA DE BOTÕES --- */
+  .pp-actions-bar {
+    margin-top: 30px;
+    padding: 0; /* Removido padding interno para alinhar com accordions */
+    background: transparent;
+    border: none;
+  }
+
+  .pp-actions-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+
+  .pp-btn {
+    width: 100%; 
+    height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em;
+    cursor: pointer; border: 1px solid #000; transition: 0.2s;
+  }
+
+  #BtnAddToCart { background: #000; color: #fff; }
+  #BtnAddToCart:hover { opacity: 0.9; }
+  #BtnAddToCart.is-added { background: #2e7d32; border-color: #2e7d32; }
+
+  #BtnBuyNow { background: #fff; color: #000; }
+  #BtnBuyNow:hover { background: #f4f4f4; }
+
+  /* --- NOVO: FASHION ACCORDIONS --- */
+  .pp-accordions {
+    margin-top: 35px;
+    border-top: 1px solid #eee;
+  }
+
+  .pp-details {
+    border-bottom: 1px solid #eee;
+    padding: 18px 0;
+  }
+
+  .pp-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .pp-summary::-webkit-details-marker { display: none; } /* Remove triângulo padrão */
+
+  /* Ícone + / - animado */
+  .pp-icon-plus {
+    position: relative; width: 12px; height: 12px;
+  }
+  .pp-icon-plus::before, .pp-icon-plus::after {
+    content: ""; position: absolute; background: #000; transition: transform 0.3s ease;
+  }
+  .pp-icon-plus::before { top: 5px; left: 0; width: 100%; height: 2px; } /* Horizontal */
+  .pp-icon-plus::after { top: 0; left: 5px; width: 2px; height: 100%; } /* Vertical */
+
+  .pp-details[open] .pp-icon-plus::after { transform: rotate(90deg); } /* Vira horizontal (-) */
+  .pp-details[open] .pp-icon-plus { transform: rotate(180deg); } 
+
+  .pp-accordion-content {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* TABELA DE MEDIDAS CLEAN */
+  .pp-size-table {
+    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem;
+  }
+  .pp-size-table th { text-align: left; border-bottom: 1px solid #ddd; padding: 8px 0; color: #000; }
+  .pp-size-table td { border-bottom: 1px solid #f5f5f5; padding: 8px 0; color: #666; }
+  .pp-size-guide-note { font-size: 0.75rem; color: #888; margin-top: 10px; font-style: italic; }
+
+  /* --- MOBILE --- */
+  @media (max-width: 990px) {
+    .pp-container { grid-template-columns: 1fr; gap: 30px; }
+    
+    .pp-info-col { position: relative; top: auto; }
+
+    .pp-gallery-grid { display: flex; overflow-x: auto; gap: 5px; scroll-snap-type: x mandatory; margin: 0 -20px; padding: 0 20px; }
+    .pp-media-item { min-width: 85vw; scroll-snap-align: center; }
+     
+    .pp-actions-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #ffffff;
+      padding: 12px 20px;
+      margin: 0;
+      z-index: 9999;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      border-top: 1px solid #eee;
+    }
+     
+    .pp-btn { height: 48px; font-size: 0.75rem; }
+    
+    /* Espaço extra no mobile para não cobrir o conteúdo com a barra */
+    .pp-accordions { margin-bottom: 60px; }
+  }
+</style>
+
+<section class="pp-section">
+  <div class="pp-container">
+     
+    <div class="pp-gallery-grid">
+      {% for media in product.media %}
+        <div class="pp-media-item">
+          {% if media.media_type == 'video' %}
+            {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+          {% else %}
+            <img src="{{ media | image_url: width: 1000 }}" loading="lazy" alt="{{ media.alt }}">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="pp-info-col">
+      <h1 class="pp-title">{{ product.title }}</h1>
+       
+      <div class="pp-price">
+        <span class="{% if current_variant.compare_at_price > current_variant.price %}pp-price--sale{% endif %}">
+          {{ current_variant.price | money }}
+        </span>
+        {% if current_variant.compare_at_price > current_variant.price %}
+          <span class="pp-price--compare">{{ current_variant.compare_at_price | money }}</span>
+        {% endif %}
+      </div>
+
+      <div class="pp-rte">
+        {{ product.description }}
+      </div>
+
+      {% form 'product', product, id: product_form_id %}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+        
+        {% unless product.has_only_default_variant %}
+          {% for option in product.options_with_values %}
+            {% assign option_name = option.name | downcase %}
+            
+            {% assign is_visual = false %}
+            {% if option_name contains 'cor' or option_name contains 'color' or option_name contains 'estampa' %}
+              {% assign is_visual = true %}
+            {% endif %}
+
+            <div class="pp-variant-group js-variant-group">
+              <label class="pp-label">{{ option.name }}: <span class="js-val" style="font-weight:400; opacity:0.6">{{ option.selected_value }}</span></label>
+              
+              <div class="pp-swatch-list">
+                {% for value in option.values %}
+                  {%- liquid
+                    assign swatch_style = ''
+                    assign use_visual_style = is_visual
+                    
+                    assign variant_match = product.variants | where: 'option1', value | first
+                    unless variant_match
+                       assign variant_match = product.variants | where: 'option2', value | first
+                    endunless
+
+                    if value.swatch.image
+                       assign img = value.swatch.image | image_url: width: 80
+                       assign swatch_style = 'background-image: url(' | append: img | append: ')'
+                       assign use_visual_style = true
+                    elsif value.swatch.color
+                       assign swatch_style = 'background-color: ' | append: value.swatch.color
+                       assign use_visual_style = true
+                    elsif is_visual and variant_match.featured_media
+                       assign img = variant_match.featured_media | image_url: width: 80
+                       assign swatch_style = 'background-image: url(' | append: img | append: ')'
+                    elsif is_visual
+                       assign color_clean = value | downcase | replace: ' ', ''
+                       assign swatch_style = 'background-color: ' | append: color_clean
+                    endif
+                  -%}
+
+                  <div class="pp-swatch-item">
+                    <input type="radio" 
+                           id="swatch-{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                           name="options[{{ option.name }}]" 
+                           value="{{ value | escape }}"
+                           class="pp-visually-hidden"
+                           {% if option.selected_value == value %}checked{% endif %}>
+                    
+                    {% if use_visual_style %}
+                      <label for="swatch-{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                             class="pp-swatch-label pp-swatch-label--visual"
+                             style="{{ swatch_style }}"
+                             title="{{ value }}">
+                      </label>
+                    {% else %}
+                      <label for="swatch-{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                             class="pp-swatch-label">
+                        {{ value }}
+                      </label>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        {% endunless %}
+
+        <div class="pp-actions-bar">
+          <div class="pp-actions-grid">
+            <button type="submit" name="add" id="BtnAddToCart" class="pp-btn" {% unless current_variant.available %}disabled{% endunless %}>
+              {% if current_variant.available %}Adicionar à Sacola{% else %}Esgotado{% endif %}
+            </button>
+            <button type="button" id="BtnBuyNow" class="pp-btn">
+              Comprar Agora
+            </button>
+          </div>
+        </div>
+
+      {% endform %}
+
+      <div class="pp-accordions">
+        
+        <details class="pp-details">
+          <summary class="pp-summary">
+            <span>Guia de Medidas</span>
+            <div class="pp-icon-plus"></div>
+          </summary>
+          <div class="pp-accordion-content">
+            <p style="margin-bottom:10px;">Compare as medidas com uma peça que você já tem:</p>
+            <table class="pp-size-table">
+              <thead>
+                <tr>
+                  <th>Tamanho</th>
+                  <th>Largura (cm)</th>
+                  <th>Comprimento (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>P</td><td>50</td><td>68</td></tr>
+                <tr><td>M</td><td>52</td><td>70</td></tr>
+                <tr><td>G</td><td>54</td><td>72</td></tr>
+                <tr><td>GG</td><td>56</td><td>74</td></tr>
+                <tr><td>XG</td><td>60</td><td>78</td></tr>
+              </tbody>
+            </table>
+            <div class="pp-size-guide-note">* Medidas aproximadas. Margem de tolerância de +/- 2cm.</div>
+          </div>
+        </details>
+
+        <details class="pp-details">
+          <summary class="pp-summary">
+            <span>Detalhes e Cuidados</span>
+            <div class="pp-icon-plus"></div>
+          </summary>
+          <div class="pp-accordion-content">
+            <strong>Material:</strong> 100% Algodão Premium.<br>
+            <strong>Toque:</strong> Macio e respirável.<br><br>
+            <strong>Instruções de Lavagem:</strong>
+            <ul style="margin-top:5px; padding-left: 20px;">
+              <li>Lavar à mão ou ciclo delicado.</li>
+              <li>Não usar secadora (pode encolher).</li>
+              <li>Passar em temperatura média.</li>
+              <li>Não passar ferro sobre a estampa.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="pp-details">
+          <summary class="pp-summary">
+            <span>Envio e Trocas</span>
+            <div class="pp-icon-plus"></div>
+          </summary>
+          <div class="pp-accordion-content">
+            <p><strong>Envio Rápido:</strong> Pedidos despachados em até 24h úteis após confirmação.</p>
+            <p style="margin-top:10px;"><strong>Troca Fácil:</strong></p>
+            <p>Não serviu? Não se preocupe.</p>
+            <ul style="padding-left: 20px; margin-top:5px;">
+              <li>1ª Troca Grátis.</li>
+              <li>Prazo de 7 dias corridos após recebimento.</li>
+              <li>Devolução do dinheiro garantida caso desista da compra.</li>
+            </ul>
+          </div>
+        </details>
+
+      </div>
+      {% if section.settings.show_cross %}
+      <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+        <p style="font-size: 0.7rem; text-transform: uppercase; margin-bottom: 10px;">Combine com:</p>
+        
+        {% assign cross_products = product.metafields.custom.combine.value %}
+        {% if cross_products == blank %}
+           {% assign cross_products = product.collections.first.products %}
+        {% endif %}
+
+        {% assign count = 0 %}
+        {% for rel in cross_products %}
+          {% if rel.id != product.id and count < 2 %}
+            {% assign count = count | plus: 1 %}
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+              <a href="{{ rel.url }}" style="display:contents">
+                <img src="{{ rel.featured_image | image_url: width: 100 }}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 2px;">
+                <div style="flex: 1;">
+                  <div style="font-size: 0.75rem; font-weight: 600; color: var(--pp-text);">{{ rel.title }}</div>
+                  <div style="font-size: 0.7rem; color: #666;">{{ rel.price | money }}</div>
+                </div>
+                <span style="font-size: 1.1rem; text-decoration: none; color: #000;">+</span>
+              </a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+
+<script type="module">
+const productJson = {{ product.variants | json }};
+
+  document.querySelectorAll('.pp-variant-group input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      this.closest('.pp-variant-group').querySelector('.js-val').textContent = this.value;
+
+      const formData = new FormData(document.getElementById('{{ product_form_id }}'));
+      const formOpts = [];
+      document.querySelectorAll('.pp-variant-group').forEach(grp => {
+        const checked = grp.querySelector('input:checked');
+        if(checked) formOpts.push(checked.value);
+      });
+
+      const matched = productJson.find(v => {
+        return v.options.every((val, i) => val === formOpts[i]);
+      });
+
+      const addBtn = document.getElementById('BtnAddToCart');
+      const buyBtn = document.getElementById('BtnBuyNow');
+      const hiddenId = document.querySelector('input[name="id"]');
+      const priceEl = document.querySelector('.pp-price');
+
+      if(matched) {
+        hiddenId.value = matched.id;
+        
+        let priceHtml = `<span>${formatMoney(matched.price)}</span>`;
+        if(matched.compare_at_price > matched.price) {
+          priceHtml = `<span class="pp-price--sale">${formatMoney(matched.price)}</span> <span class="pp-price--compare">${formatMoney(matched.compare_at_price)}</span>`;
+        }
+        priceEl.innerHTML = priceHtml;
+
+        if(matched.available) {
+          addBtn.textContent = "Adicionar à Sacola"; addBtn.disabled = false; buyBtn.disabled = false;
+        } else {
+          addBtn.textContent = "Esgotado"; addBtn.disabled = true; buyBtn.disabled = true;
+        }
+        window.history.replaceState({}, '', '?variant='+matched.id);
+      } else {
+        addBtn.textContent = "Indisponível"; addBtn.disabled = true; buyBtn.disabled = true;
+      }
+    });
+  });
+
+  document.getElementById('BtnAddToCart').addEventListener('click', function(e) {
+    e.preventDefault();
+    const btn = this;
+    const old = btn.textContent;
+    btn.textContent = "Adicionando...";
+    btn.disabled = true;
+
+    fetch('/cart/add.js', {
+      method: 'POST',
+      body: new FormData(document.getElementById('{{ product_form_id }}'))
+    })
+    .then(r => r.ok ? r.json() : Promise.reject(r))
+    .then(() => {
+      btn.textContent = "Adicionado!";
+      btn.classList.add('is-added');
+      document.documentElement.dispatchEvent(new CustomEvent('cart:refresh', {bubbles: true}));
+      document.documentElement.dispatchEvent(new CustomEvent('cart:open', {bubbles: true}));
+      setTimeout(() => { btn.textContent = old; btn.classList.remove('is-added'); btn.disabled = false; }, 2000);
+    })
+    .catch(() => {
+      btn.textContent = "Erro ao adicionar";
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('BtnBuyNow').addEventListener('click', function() {
+    const form = document.getElementById('{{ product_form_id }}');
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = 'return_to'; input.value = '/checkout';
+    form.appendChild(input);
+    form.submit();
+  });
+
+  function formatMoney(cents) {
+    return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Horizon V21 Fashion",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#000000" },
+    { "type": "checkbox", "id": "show_cross", "label": "Cross Sell", "default": true }
+  ],
+  "presets": [{ "name": "Horizon V21 Fashion" }]
+}
+{% endschema %}

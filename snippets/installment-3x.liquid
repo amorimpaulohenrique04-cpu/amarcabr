@@ -1,0 +1,46 @@
+{%- comment -%
+  Parcelamento 3x — valor do metafield custom.pix_price (mesmo visual em todo o tema).
+  Uso: {% render 'installment-3x', product: product %} ou variant: variant, cart_total: cart.total_price
+  Exibe: "3x de R$ XX,XX" (valor = pix_price / 3; pix_price em centavos como no Shopify).
+{%- endcomment -%}
+{%- liquid
+  assign pix_raw = nil
+  if variant != blank
+    assign v_pix = variant.metafields.custom.pix_price.value | default: variant.metafields.custom.pix_price
+    if v_pix != blank
+      assign pix_raw = v_pix
+    endif
+  endif
+  if pix_raw == nil and product != blank
+    assign p_pix = product.metafields.custom.pix_price.value | default: product.metafields.custom.pix_price
+    if p_pix != blank
+      assign pix_raw = p_pix
+    endif
+  endif
+  if pix_raw == nil and product != blank
+    assign first_v = product.selected_or_first_available_variant
+    assign f_pix = first_v.metafields.custom.pix_price.value | default: first_v.metafields.custom.pix_price
+    if f_pix != blank
+      assign pix_raw = f_pix
+    endif
+  endif
+  if pix_raw == nil and cart_total != blank and cart_total > 0
+    assign pix_raw = cart_total
+  endif
+  if pix_raw == nil and product != blank
+    assign pix_raw = product.price
+  endif
+  assign amount = pix_raw | default: 0
+  if amount <= 0
+    assign show = false
+  else
+    assign show = true
+    assign installment_val = amount | divided_by: 3
+    assign formatted = installment_val | money_without_trailing_zeros
+  endif
+-%}
+{%- if show -%}
+  <span class="installment-3x" data-installment-amount="{{ amount }}">
+    3x de {{ formatted }}
+  </span>
+{%- endif -%}

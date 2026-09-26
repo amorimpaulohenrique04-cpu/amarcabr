@@ -1,0 +1,7 @@
+{%- comment -%} PERFORMANCE: Critical CSS já está inline no theme.liquid (critical-inline-css). Removido critical-css duplicado. {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'base.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{{ 'base.css' | asset_url }}"></noscript>
+<link rel="stylesheet" href="{{ 'theme-optimizations.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{{ 'theme-optimizations.css' | asset_url }}"></noscript>
+<link rel="stylesheet" href="{{ 'overflow-list.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="{{ 'overflow-list.css' | asset_url }}"></noscript>

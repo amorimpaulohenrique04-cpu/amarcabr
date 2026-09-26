@@ -1,0 +1,115 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "am-product-premium",
+      "settings": {
+        "bg_color": "#f8f8f8",
+        "text_color": "#000000",
+        "btn_primary_bg": "#000000",
+        "btn_primary_text": "#ffffff",
+        "btn_primary_border": "#000000",
+        "btn_primary_bg_hover": "#111111",
+        "btn_primary_text_hover": "#ffffff",
+        "btn_primary_border_hover": "#111111",
+        "btn_secondary_bg": "#ffffff",
+        "btn_secondary_text": "#000000",
+        "btn_secondary_border": "#000000",
+        "btn_secondary_bg_hover": "#f4f4f4",
+        "btn_secondary_text_hover": "#000000",
+        "btn_secondary_border_hover": "#000000",
+        "acc_size_title": "Guia de Medidas",
+        "acc_care_title": "Detalhes e Cuidados",
+        "acc_care_content": "<strong>Material:</strong> 100% Algodão Premium.<br>\n<strong>Toque:</strong> Macio e respirável.<br><br>\n<strong>Instruções de Lavagem:</strong>\n<ul style=\"margin-top:5px; padding-left: 20px;\">\n  <li>Lavar à mão ou ciclo delicado.</li>\n  <li>Não usar secadora (pode encolher).</li>\n  <li>Passar em temperatura média.</li>\n  <li>Não passar ferro sobre a estampa.</li>\n</ul>",
+        "acc_ship_title": "Envio e Trocas",
+        "acc_ship_content": "<p><strong>Envio rápido:</strong> pedidos despachados em até <strong>24h úteis</strong> após a confirmação do pagamento.</p>\n\n<p><strong>Troca fácil:</strong> não serviu? Fique tranquilo(a), a troca é simples.</p>\n\n<p><strong>Arrependimento:</strong> até <strong>7 dias corridos</strong> após o recebimento (CDC). Produto <strong>sem uso</strong>, com <strong>etiquetas</strong> e <strong>embalagem original</strong>.</p>\n\n<p><strong>Defeito ou envio incorreto:</strong> solicitação em até <strong>30 dias</strong>. <strong>Troca sem custo</strong>.</p>\n\n<p><strong>Troca por tamanho ou modelo:</strong> até <strong>15 dias</strong>. Produto <strong>novo</strong> e <strong>sem uso</strong>. <strong>Frete</strong> por conta do cliente.</p>\n\n<p><strong>Reembolso:</strong> após conferência do produto, via <strong>estorno</strong> ou <strong>crédito na loja</strong>.</p>\n\n<p><strong>Como solicitar:</strong> entre em contato informando <strong>nº do pedido</strong> e <strong>motivo</strong>.</p>\n\n<p><strong>⚠️ Atenção:</strong> produtos em promoção podem ter regras específicas. Não aceitamos itens com <strong>sinais de uso</strong>.</p>",
+        "show_cross": true,
+        "show_payment_terms": true
+      }
+    },
+    "custom_liquid_gaDYkC": {
+      "type": "custom-liquid",
+      "name": "t:names.custom_liquid",
+      "settings": {
+        "custom_liquid": "<div class=\"bundle-selector\" style=\"margin-bottom: 20px; padding: 15px; border: 1px solid #e8e8e8; border-radius: 4px;\">\n  <h4 style=\"margin-top:0;\">Personalize seu Combo:</h4>\n\n  {% assign combo_products = product.metafields.custom.combo_products.value %}\n  \n  {% for item in combo_products %}\n    <div class=\"combo-item\" style=\"margin-bottom: 15px;\">\n      <label style=\"display:block; font-weight:bold; margin-bottom:5px;\">{{ item.title }}:</label>\n      <select class=\"combo-variant-select\" data-product-title=\"{{ item.title }}\" style=\"width:100%; padding: 8px; border: 1px solid #ccc;\">\n        {% for variant in item.variants %}\n          {% if variant.available %}\n            <option value=\"{{ variant.id }}\">{{ variant.title }} - {{ variant.price | money }}</option>\n          {% else %}\n            <option disabled>{{ variant.title }} - Esgotado</option>\n          {% endif %}\n        {% endfor %}\n      </select>\n    </div>\n  {% endfor %}\n\n  <input type=\"hidden\" name=\"id\" value=\"{{ product.selected_or_first_available_variant.id }}\">\n</div>\n\n<script>\ndocument.addEventListener('DOMContentLoaded', function() {\n  const form = document.querySelector('form[action=\"/cart/add\"]');\n  if (!form) return;\n\n  form.addEventListener('submit', function(e) {\n    e.preventDefault();\n    const selects = document.querySelectorAll('.combo-variant-select');\n    let items = [];\n    selects.forEach(select => { items.push({ id: select.value, quantity: 1 }); });\n    fetch(window.Shopify.routes.root + 'cart/add.js', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ 'items': items })\n    })\n    .then(response => { window.location.href = '/checkout'; })\n    .catch(error => console.error('Erro:', error));\n  });\n});\n</script>",
+        "color_scheme": "",
+        "section_width": "page-width",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "am_stamp_story_VpCJez": {
+      "type": "am-stamp-story",
+      "name": "A MARCA — Estampa",
+      "settings": {
+        "bg_color": "#fdfbf7",
+        "text_color": "#1a1a1a",
+        "accent_color": "#ff3b30",
+        "main_title": "{{ product.title }}",
+        "subtitle": "Que ilumina sua essência",
+        "moodboard_image": "{{ product.metafields.custom.stamp_image_a.value }}",
+        "bio_title": "HELLO!",
+        "bio_text": "<p>{{ product.metafields.custom.breve_descricao | metafield_tag }}</p>",
+        "bio_note": "Antes do espelho, existe propósito! =)",
+        "profile_image": "{{ product.metafields.custom.stamp_image_b.value }}",
+        "profile_name": "A MARCA",
+        "profile_role": "Designer",
+        "profile_vibe": "Faith",
+        "linked_product": "{{ product }}",
+        "editorial_quote": "\"Fashion is the armor to survive the reality of everyday life.\""
+      }
+    },
+    "product_recommendations": {
+      "type": "product-recommendations",
+      "settings": {
+        "collection": "t-shirt-autoral",
+        "products_to_show": 4,
+        "show_title": true,
+        "title_text": "Você também vai gostar",
+        "title_icon": "shopify://shop_images/SELO3.png",
+        "title_icon_size": 18,
+        "title_color": "#52201b",
+        "title_size": 26,
+        "title_weight": "500",
+        "title_gap": 10,
+        "show_view_all_link": false,
+        "view_all_text": "Ver todos os produtos",
+        "view_all_link": "",
+        "section_max_width": 1200,
+        "hover_cta_label": "eu quero",
+        "cta_desktop_width": 160,
+        "cta_desktop_font_size": 11,
+        "cta_desktop_padding": 12,
+        "cta_mobile_size": 40,
+        "columns_desktop": 4,
+        "columns_tablet": 3,
+        "columns_mobile": "2",
+        "grid_gap": 20,
+        "image_ratio": "3/4",
+        "card_radius": 8,
+        "card_bg": "#ffffff",
+        "heading_color": "#000000",
+        "price_color": "#1a1a1a",
+        "sale_label": "Sale",
+        "sale_metafield_namespace": "custom",
+        "sale_metafield_key": "sale",
+        "badge_bg": "#000000",
+        "badge_text": "#ffffff",
+        "enable_hover_image": true,
+        "show_installments": true,
+        "installments_text": "[count]x de [price]",
+        "padding_top": 37,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": ["main","custom_liquid_gaDYkC","am_stamp_story_VpCJez","product_recommendations"]
+}

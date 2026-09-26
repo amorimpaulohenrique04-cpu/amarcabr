@@ -1,0 +1,252 @@
+{%- comment -%}
+  Search Results Page with Editorial Product Grid - V9 integration
+  Luxury refined version
+{%- endcomment -%}
+
+{%- paginate search.results by 24 -%}
+
+{%- style -%}
+  .search-results-header {
+    background: #fff;
+    padding: 60px 20px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .search-results-header__label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #999;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .search-results-header h1 {
+    font-family: var(--font-body);
+    font-size: 24px;
+    font-weight: 300;
+    color: #000;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .search-results-header h1 span { font-weight: 600; font-style: italic; }
+
+  .no-results-box {
+    border-left: 2px solid #000;
+    background: #fafafa;
+    padding: 20px 24px;
+    margin: 40px 0;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 0.01em;
+  }
+  .recommendation-title {
+    font-family: var(--font-body);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 60px 0 32px;
+    letter-spacing: -0.02em;
+    text-align: center;
+  }
+
+  #shopify-section-{{ section.id }} {
+    --grid-desktop: {{ section.settings.columns_desktop | default: 4 }};
+    --grid-tablet: {{ section.settings.columns_tablet | default: 3 }};
+    --grid-mobile: {{ section.settings.columns_mobile | default: 2 }};
+    --gap: {{ section.settings.grid_gap | default: 20 }}px;
+    --card-bg: {{ section.settings.card_bg | default: '#fff' }};
+    --heading-color: {{ section.settings.heading_color | default: '#000' }};
+    --price-color: {{ section.settings.price_color | default: '#1a1a1a' }};
+    --radius: {{ section.settings.card_radius | default: 0 }}px;
+    --aspect-ratio: {{ section.settings.image_ratio | default: '4/5' }};
+    --badge-bg: {{ section.settings.badge_bg | default: '#000' }};
+    --badge-text: {{ section.settings.badge_text | default: '#fff' }};
+    --font-body: 'Inter', sans-serif;
+    --cta-desktop-min-width: {{ section.settings.cta_desktop_width | default: 160 }}px;
+    --cta-desktop-font-size: {{ section.settings.cta_desktop_font_size | default: 11 }}px;
+    --cta-desktop-padding: {{ section.settings.cta_desktop_padding | default: 12 }}px;
+    --cta-mobile-size: {{ section.settings.cta_mobile_size | default: 40 }}px;
+    --cta-mobile-icon-size: calc(var(--cta-mobile-size) / 2.2);
+  }
+
+  .eurus-grid { padding: 40px 0; width: 100%; box-sizing: border-box; }
+  .eurus-grid__wrapper { max-width: 1200px; margin: 0 auto; padding: 0 16px; width: 100%; min-width: 0; box-sizing: border-box; }
+  .eurus-grid__container {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-mobile), minmax(0, 1fr));
+    gap: var(--gap);
+    width: 100%;
+    min-width: 0;
+  }
+  @media (min-width: 768px) { .eurus-grid__container { grid-template-columns: repeat(var(--grid-tablet), minmax(0, 1fr)); } }
+  @media (min-width: 1024px) { .eurus-grid__container { grid-template-columns: repeat(var(--grid-desktop), minmax(0, 1fr)); } }
+
+  .eurus-card { position: relative; background-color: var(--card-bg); border-radius: var(--radius); display: flex; flex-direction: column; min-width: 0; }
+  .eurus-card__media-wrap {
+    position: relative; width: 100%; aspect-ratio: var(--aspect-ratio);
+    overflow: hidden; background-color: #f4f4f4; border-radius: var(--radius);
+  }
+  .eurus-card__media { position: absolute; inset: 0; display: block; z-index: 1; }
+  .eurus-card__media img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.4s ease;
+  }
+  @media (hover: hover) { .eurus-card:hover .eurus-card__media img { transform: scale(1.05); } }
+  .eurus-card__img--secondary { position: absolute; inset: 0; opacity: 0; z-index: 1; }
+  @media (hover: hover) { .eurus-card:hover .eurus-card__img--secondary { opacity: 1; } .eurus-card:hover .eurus-card__img--primary { opacity: 0; } }
+
+  .eurus-hover-cta {
+    position: absolute; left: 50%; bottom: 24px;
+    min-width: var(--cta-desktop-min-width); padding: var(--cta-desktop-padding) 0;
+    background: #fff; color: #000; border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    font-family: var(--font-body); font-weight: 700; font-size: var(--cta-desktop-font-size);
+    letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none;
+    display: flex; align-items: center; justify-content: center;
+    transform: translate(-50%, 15px); opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.4s ease;
+  }
+  @media (hover: hover) and (min-width: 1024px) {
+    .eurus-card:hover .eurus-hover-cta { transform: translate(-50%, 0); opacity: 1; }
+    .eurus-hover-cta:hover { background: #000; color: #fff; transform: translate(-50%, -2px); }
+  }
+
+  .eurus-btn-mobile {
+    display: flex; align-items: center; justify-content: center;
+    position: absolute; bottom: 12px; right: 12px;
+    width: var(--cta-mobile-size); height: var(--cta-mobile-size);
+    border-radius: 50%; background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 5;
+  }
+  .eurus-btn-mobile svg {
+    width: var(--cta-mobile-icon-size); height: var(--cta-mobile-icon-size);
+    fill: none; stroke: currentColor; stroke-width: 1.3px;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  @media (min-width: 1024px) { .eurus-btn-mobile { display: none; } }
+
+  .eurus-card__content { padding: 16px 0 24px 0; text-align: left; }
+  .eurus-card__title { font-weight: 700; font-size: 13px; color: var(--heading-color); text-decoration: none; margin-bottom: 6px; display: block; letter-spacing: 0.02em; }
+  .eurus-card__price { font-weight: 500; font-size: 14px; color: var(--price-color); display: flex; gap: 8px; align-items: center; }
+  .eurus-card__price--compare { text-decoration: line-through; opacity: 0.4; font-size: 12px; font-weight: 400; }
+  .eurus-card__installments { font-size: 11px; color: #999; margin-top: 4px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.05em; }
+  .eurus-card__installments .installment-3x { display: block; }
+  .eurus-card__sale-tag {
+    position: absolute; top: 12px; left: 12px;
+    padding: 4px 10px; background: var(--badge-bg); color: var(--badge-text);
+    font-size: 9px; font-weight: 700; z-index: 10; border-radius: 0; letter-spacing: 0.1em;
+  }
+{%- endstyle -%}
+
+<div class="search-results-header">
+  <div class="page-width">
+    <span class="search-results-header__label">Resultados da busca</span>
+    <h1>Procurando por: <span>"{{ search.terms | escape }}"</span></h1>
+  </div>
+</div>
+
+<div id="shopify-section-{{ section.id }}" class="eurus-grid">
+  <div class="eurus-grid__wrapper">
+    
+    {%- if search.results_count == 0 -%}
+      <div class="no-results-box">
+        Nenhum produto foi encontrado para sua pesquisa.
+      </div>
+      
+      {%- if section.settings.recommendation_collection != blank -%}
+        <h2 class="recommendation-title">Você também pode gostar de:</h2>
+        <div class="eurus-grid__container">
+          {%- for product in section.settings.recommendation_collection.products limit: 4 -%}
+             {%- assign product_url = product.url -%}
+             <div class="eurus-card">
+              <div class="eurus-card__media-wrap">
+                <a href="{{ product_url }}" class="eurus-card__media">
+                  {{ product.featured_media | image_url: width: 800 | image_tag: class: 'eurus-card__img--primary', loading: 'lazy', decoding: 'async' }}
+                </a>
+              </div>
+              <div class="eurus-card__content">
+                <a href="{{ product_url }}" class="eurus-card__title">{{ product.title }}</a>
+                <div class="eurus-card__price">
+                   <span>{{ product.price | money_without_trailing_zeros }}</span>
+                </div>
+              </div>
+             </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    {%- else -%}
+      <div class="eurus-grid__container">
+        {%- for item in search.results -%}
+          {%- if item.object_type == 'product' -%}
+            {%- assign product = item -%}
+            {%- assign product_url = product.url -%}
+            <div class="eurus-card">
+              <div class="eurus-card__media-wrap">
+                <a href="{{ product_url }}" class="eurus-card__media">
+                  {{ product.featured_media | image_url: width: 800 | image_tag: class: 'eurus-card__img--primary', loading: 'lazy', decoding: 'async' }}
+                  {%- if product.media[1] != nil -%}
+                    {{ product.media[1] | image_url: width: 800 | image_tag: class: 'eurus-card__img--secondary', loading: 'lazy', decoding: 'async' }}
+                  {%- endif -%}
+                </a>
+                
+                <a href="{{ product_url }}" class="eurus-hover-cta">{{ section.settings.hover_cta_label | default: 'VER DETALHES' }}</a>
+                <a href="{{ product_url }}" class="eurus-btn-mobile">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    <rect x="5" y="8" width="14" height="13" rx="1"></rect>
+                  </svg>
+                </a>
+
+                {%- if product.compare_at_price > product.price -%}
+                  {%- assign saved_amount = product.compare_at_price | minus: product.price | times: 100.0 | divided_by: product.compare_at_price | round -%}
+                  <span class="eurus-card__sale-tag">OFF {{ saved_amount }}%</span>
+                {%- endif -%}
+              </div>
+
+              <div class="eurus-card__content">
+                <a href="{{ product_url }}" class="eurus-card__title">{{ product.title }}</a>
+                <div class="eurus-card__price">
+                   <span>{{ product.price | money_without_trailing_zeros }}</span>
+                   {%- if product.compare_at_price > product.price -%}
+                    <span class="eurus-card__price--compare">{{ product.compare_at_price | money_without_trailing_zeros }}</span>
+                   {%- endif -%}
+                </div>
+                <div class="eurus-card__installments">
+                  {%- render 'installment-3x', product: product -%}
+                </div>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+      
+      {%- if paginate.pages > 1 -%}
+        <div class="pagination">
+          {{ paginate | default_pagination }}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Main Search Results",
+  "settings": [
+    { "type": "collection", "id": "recommendation_collection", "label": "Coleção de Recomendação" },
+    { "type": "range", "id": "columns_desktop", "min": 2, "max": 5, "default": 4, "label": "Colunas PC" },
+    { "type": "range", "id": "columns_tablet", "min": 2, "max": 4, "default": 3, "label": "Colunas Tablet" },
+    { "type": "select", "id": "columns_mobile", "label": "Colunas Mobile", "options": [{"value":"1","label":"1"},{"value":"2","label":"2"}], "default": "2" },
+    { "type": "text", "id": "hover_cta_label", "label": "Botão Hover", "default": "CHOOSE OPTIONS" },
+    { "type": "range", "id": "grid_gap", "min": 10, "max": 40, "default": 20, "label": "Espaçamento Grid" },
+    { "type": "color", "id": "badge_bg", "label": "Cor Fundo Badge", "default": "#000000" },
+    { "type": "color", "id": "badge_text", "label": "Cor Texto Badge", "default": "#ffffff" }
+  ]
+}
+{% endschema %}

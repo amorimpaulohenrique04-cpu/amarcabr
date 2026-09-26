@@ -1,0 +1,906 @@
+<section class="lx-wrap" style="
+  --lx-bg: {{ section.settings.page_bg }};
+  --lx-card: {{ section.settings.card_bg }};
+  --lx-border: {{ section.settings.border_color }};
+  --lx-text: {{ section.settings.text_color }};
+  --lx-muted: {{ section.settings.muted_color }};
+  --lx-radius: {{ section.settings.radius }}px;
+  --lx-shadow: {{ section.settings.shadow }};
+  --lx-max: var(--am-header-max, 1240px);
+  --lx-padding-x: var(--am-header-x, 16px);
+  --font-heading: {{ settings.type_header_font.family }}, sans-serif;
+  --font-body: {{ settings.type_body_font.family }}, sans-serif;
+">
+
+<style>
+  /* ═══ ANTI-FOUC ═══ */
+  .lx-wrap{opacity:0;animation:lxFadeIn .3s ease .05s forwards}
+  @keyframes lxFadeIn{to{opacity:1}}
+
+  /* ═══ CORE ═══ */
+  .lx-wrap{background:var(--lx-bg);color:var(--lx-text);padding:clamp(24px,5vw,80px) var(--lx-padding-x);font-family:var(--font-body);position:relative;z-index:1}
+  .lx-container{max-width:var(--lx-max);margin:0 auto;padding-inline:var(--lx-padding-x);box-sizing:border-box}
+  .lx-card{background:var(--lx-card);border:1px solid var(--lx-border);border-radius:var(--lx-radius);box-shadow:var(--lx-shadow)}
+
+  /* ═══ BENTO ═══ */
+  .lx-bento{display:grid;gap:12px;grid-template-columns:1fr;margin-bottom:32px}
+  @media(min-width:990px){.lx-bento{grid-template-columns:4fr 5fr 3fr;align-items:stretch;gap:16px}}
+  .lx-intro{padding:22px 20px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+  @media(min-width:990px){.lx-intro{text-align:left;padding:48px}}
+  .lx-h1{font-family:var(--font-heading);font-weight:400;letter-spacing:-.02em;font-size:clamp(22px,2.5vw,52px);line-height:1.15;margin:0 0 10px;color:var(--lx-text)}
+  @media(min-width:990px){.lx-h1{line-height:1.1;margin-bottom:16px}}
+  .lx-italic{font-style:italic;font-family:serif;font-weight:400;display:inline-block}
+  .lx-p{color:var(--lx-muted);font-size:13px;line-height:1.45;margin-bottom:0;margin-inline:auto}
+  .lx-p:not(:last-child){margin-bottom:18px}
+  @media(min-width:990px){.lx-p{margin-inline:0;max-width:40ch;line-height:1.6}}
+  .lx-btn{display:inline-flex;align-items:center;gap:10px;background:#111;color:#fff;text-decoration:none;border-radius:999px;padding:12px 20px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;transition:transform .25s,box-shadow .25s;margin:0 auto}
+  @media(min-width:990px){.lx-btn{margin:0;padding:14px 24px;font-size:12px}}
+  .lx-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+
+  /* ═══ HERO MEDIA ═══ */
+  .lx-heroMedia{position:relative;min-height:300px}
+  .lx-heroFrame{position:relative;overflow:hidden;border-radius:calc(var(--lx-radius) + 4px);border:1px solid rgba(255,255,255,.5);background:#f0f0f0;box-shadow:0 20px 50px rgba(0,0,0,.06);height:100%}
+  .lx-heroImg{width:100%;height:100%;object-fit:cover;transition:transform .8s;display:block}
+  .lx-heroMedia:hover .lx-heroImg{transform:scale(1.03)}
+  .lx-heroFallback{width:100%;height:100%;background:#eee;min-height:300px}
+  .lx-badge{position:absolute;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);padding:6px 12px;border-radius:999px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 10px rgba(0,0,0,.05);pointer-events:none}
+  .lx-dot{width:5px;height:5px;border-radius:50%;background:#111}
+  .lx-badge--topleft{top:16px;left:16px}
+  .lx-badge--bottomright{bottom:16px;right:16px}
+  .lx-badge--bottomleft{bottom:16px;left:16px}
+
+  /* ═══ SIDE ═══ */
+  .lx-side{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(min-width:990px){.lx-side{display:flex;flex-direction:column;gap:16px}}
+  .lx-miniStat,.lx-miniPromo{padding:16px;display:flex;flex-direction:column;justify-content:space-between;min-height:auto}
+  @media(min-width:990px){.lx-miniStat{padding:24px;min-height:180px}.lx-miniPromo{padding:24px;min-height:220px}}
+  .lx-miniStatText{font-weight:500;font-size:13px;color:#111;line-height:1.3;margin:0}
+  @media(min-width:990px){.lx-miniStatText{font-size:15px;line-height:1.4}}
+  .lx-miniRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+  .lx-avatars{display:flex}
+  .lx-avatar{width:28px;height:28px;border-radius:50%;border:2px solid #fff;margin-left:-8px;object-fit:cover}
+  @media(min-width:990px){.lx-avatar{width:36px;height:36px;margin-left:-10px}}
+  .lx-avatar:first-child{margin-left:0}
+  .lx-arrow{font-size:18px;opacity:.6}
+  .lx-miniPromo{position:relative;overflow:hidden}
+  .lx-miniPromoTop{position:relative;z-index:2}
+  .lx-miniPromoTitle{margin:0;font-family:var(--font-heading);font-size:14px;color:#fff;letter-spacing:.02em;line-height:1.1}
+  @media(min-width:990px){.lx-miniPromoTitle{font-size:20px}}
+  .lx-pill{display:inline-block;font-size:8px;padding:3px 6px;border-radius:4px;background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.2);margin-top:6px}
+  .lx-miniPromoImg{position:absolute;right:-25%;bottom:-10%;width:90%;transform:rotate(8deg);transition:transform .5s;filter:drop-shadow(0 10px 20px rgba(0,0,0,.2));pointer-events:none}
+  .lx-miniPromo:hover .lx-miniPromoImg{transform:rotate(0deg) scale(1.05)}
+  @media(min-width:990px){.lx-miniPromoImg{right:-15%;bottom:-15%;width:75%}}
+  .lx-miniPromoFoot{color:rgba(255,255,255,.8);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-top:24px;position:relative;z-index:2}
+
+  /* ═══ COMBO ═══ */
+  .lx-combo{padding:clamp(24px,4vw,48px);margin-top:16px}
+  .lx-comboHead{text-align:center;margin-bottom:24px;max-width:600px;margin-inline:auto}
+  .lx-eyebrow{display:block;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--lx-muted);font-weight:700;margin-bottom:8px}
+  .lx-h2{margin:0;font-family:var(--font-heading);font-weight:400;font-size:clamp(24px,2.5vw,38px);color:var(--lx-text)}
+  .lx-sub{margin:8px 0 0;color:var(--lx-muted);font-size:13px;padding:0 10px}
+
+  .lx-comboGrid{position:relative;display:grid;grid-template-columns:1fr;gap:12px;margin:24px 0}
+  @media(min-width:990px){.lx-comboGrid{grid-template-columns:1fr 1fr;gap:40px;margin:32px 0}}
+
+  .lx-connector{display:none}
+  @media(min-width:990px){.lx-connector{display:flex;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid var(--lx-border);align-items:center;justify-content:center;color:var(--lx-muted);z-index:2;box-shadow:0 4px 12px rgba(0,0,0,.05)}}
+
+  .lx-slot{position:relative;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:12px;transition:border-color .2s}
+  @media(min-width:990px){.lx-slot{padding:16px}}
+  .lx-slot:hover{border-color:rgba(0,0,0,.15)}
+
+  .lx-slotBody{display:flex;gap:12px;align-items:center;position:relative}
+  @media(min-width:990px){.lx-slotBody{align-items:flex-start;gap:16px}}
+
+  .lx-thumb{width:72px;height:72px;border-radius:10px;background:#fafafa;border:1px solid rgba(0,0,0,.05);overflow:hidden;flex-shrink:0;position:relative;display:flex;align-items:center;justify-content:center}
+  @media(min-width:990px){.lx-thumb{width:88px;height:88px;border-radius:12px}}
+  .lx-thumbPh{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f7f7f7;color:#ddd}
+  .lx-thumbPhNum{font-family:var(--font-heading);font-size:20px;opacity:.5;color:#bbb}
+  .lx-thumbImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+  .lx-thumbImg:not([hidden]){opacity:1}
+
+  .lx-controls{flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;position:relative}
+
+  /* ═══ CUSTOM SELECT ═══ */
+  .lx-csel{position:relative;width:100%}
+  .lx-csel[hidden]{display:none}
+  .lx-csel-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-family:inherit;font-size:12px;color:var(--lx-text);cursor:pointer;transition:border-color .2s,background .2s;text-align:left;height:42px}
+  @media(min-width:990px){.lx-csel-trigger{padding:12px 14px;font-size:13px;height:auto;border-radius:10px}}
+  .lx-csel-trigger:hover{border-color:#bbb;background:#fafafa}
+  .lx-csel-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px;font-weight:500}
+  .lx-csel-chevron{flex-shrink:0;color:#999;transition:transform .2s}
+  .lx-csel.is-open .lx-csel-chevron{transform:rotate(180deg)}
+
+  .lx-csel-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 12px 24px rgba(0,0,0,.12);z-index:9999;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .2s cubic-bezier(.16,1,.3,1),visibility .2s,transform .2s cubic-bezier(.16,1,.3,1);overflow:hidden;pointer-events:none;max-height:250px}
+  .lx-csel.is-open .lx-csel-dropdown{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+
+  .lx-csel-list{list-style:none;margin:0;padding:0;max-height:250px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .lx-csel-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;font-size:12px;color:var(--lx-text);cursor:pointer;transition:background .1s;border-bottom:1px solid #f5f5f5}
+  .lx-csel-opt:last-child{border-bottom:none}
+  .lx-csel-opt:hover{background:#f7f7f7}
+  .lx-csel-opt.is-selected{background:#f0f0f0;font-weight:600}
+  .lx-csel-opt[data-disabled="true"]{opacity:.5;cursor:not-allowed;background:#fff}
+  .lx-csel-optImg{width:24px;height:24px;border-radius:4px;object-fit:cover;border:1px solid rgba(0,0,0,.1);flex-shrink:0}
+  .lx-csel-optText{flex:1}
+  .lx-csel-optMeta{font-size:10px;color:var(--lx-muted);margin-top:2px}
+
+  /* ═══ FIX MOBILE SELECT / ZOOM ═══ */
+  @media (max-width: 989px) {
+    .lx-csel,
+    .lx-controls,
+    .lx-slot,
+    .lx-slotBody {
+      min-width: 0;
+    }
+
+    .lx-csel-trigger,
+    .lx-csel-opt {
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .lx-csel-trigger {
+      min-height: 48px;
+      padding: 12px 14px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .lx-csel-dropdown {
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      max-width: 100%;
+      transform-origin: top center;
+    }
+
+    .lx-thumb {
+      width: 72px;
+      height: 72px;
+      flex: 0 0 72px;
+    }
+
+    .lx-controls {
+      overflow: visible;
+    }
+  }
+
+  /* ═══ FOOTER ═══ */
+  .lx-divider{height:1px;background:rgba(0,0,0,.06);margin:20px 0;width:100%}
+  .lx-comboFoot{display:flex;flex-direction:column;gap:16px;align-items:stretch;text-align:center}
+  @media(min-width:990px){.lx-comboFoot{flex-direction:row;justify-content:space-between;text-align:left}}
+  .lx-total{display:flex;flex-direction:column;align-items:center}
+  @media(min-width:990px){.lx-total{align-items:flex-start}}
+  .lx-totalLabel{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--lx-muted);font-weight:700}
+  .lx-totalValue{font-family:var(--font-heading);font-weight:400;font-size:32px;line-height:1;margin-top:4px;color:var(--lx-text)}
+  @media(min-width:990px){.lx-totalValue{font-size:36px}}
+  .lx-totalHint{color:var(--lx-muted);font-size:11px;margin-top:4px}
+
+  .lx-atcBtn{width:100%;border:0;border-radius:999px;padding:16px 20px;font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;background:#111;color:#fff;cursor:pointer;transition:transform .2s,box-shadow .2s,background .2s;position:relative;overflow:hidden}
+  @media(min-width:990px){.lx-atcBtn{max-width:400px;padding:18px 32px;font-size:12px}}
+  .lx-atcBtn:hover:not([disabled]){transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.15)}
+  .lx-atcBtn[disabled]{background:#e5e5e5;color:#999;cursor:not-allowed;transform:none;box-shadow:none}
+
+  /* ═══ FEATURES ═══ */
+  .lx-features{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}
+  @media(min-width:990px){.lx-features{grid-template-columns:3fr 5fr 4fr;align-items:stretch;gap:24px;margin-top:40px}}
+  .lx-featureCard{padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  @media(min-width:990px){.lx-featureCard{padding:32px}}
+  .lx-featureImg{width:80px;height:auto;margin-bottom:16px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.1))}
+  @media(min-width:990px){.lx-featureImg{width:100px;margin-bottom:20px}}
+  .lx-h4{margin:0;font-family:var(--font-heading);font-weight:400;font-size:18px;color:var(--lx-text)}
+  @media(min-width:990px){.lx-h4{font-size:20px}}
+  .lx-kicker{margin:8px 0 0;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.5)}
+  .lx-featureQuote{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  .lx-quote{margin:0 0 16px;font-family:var(--font-heading);font-style:italic;font-size:clamp(18px,2vw,24px);color:rgba(0,0,0,.7);line-height:1.4}
+  .lx-stars{font-size:11px;letter-spacing:.1em;color:#111}
+  .lx-testimonial{padding:24px;position:relative;overflow:hidden}
+  @media(min-width:990px){.lx-testimonial{padding:32px}}
+  .lx-testimonialText{font-weight:500;font-size:16px;line-height:1.4;color:#111;margin:0 0 20px;position:relative;z-index:1}
+  @media(min-width:990px){.lx-testimonialText{font-size:18px;margin-bottom:24px}}
+  .lx-person{display:flex;gap:12px;align-items:center}
+  .lx-personImg{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.8)}
+  @media(min-width:990px){.lx-personImg{width:48px;height:48px}}
+  .lx-personName{font-size:12px;font-weight:700;color:#111}
+  @media(min-width:990px){.lx-personName{font-size:13px}}
+  .lx-personSub{font-size:10px;color:rgba(0,0,0,.6);margin-top:2px}
+  @media(min-width:990px){.lx-personSub{font-size:11px}}
+  .lx-testimonialMark{position:absolute;right:-10px;bottom:-30px;font-size:120px;opacity:.08;line-height:1;pointer-events:none}
+  .lx-testimonialArrow{position:absolute;right:16px;top:16px;font-size:18px;opacity:.6}
+</style>
+
+<div class="lx-container">
+
+  <div class="lx-bento">
+    <div class="lx-card lx-intro">
+      <h1 class="lx-h1">
+        {{ section.settings.hero_title }}
+        <span class="lx-italic">{{ section.settings.hero_title_italic }}</span>
+      </h1>
+      <div class="lx-p">{{ section.settings.hero_body }}</div>
+      {%- if section.settings.hero_button_label != blank and section.settings.hero_button_link != blank -%}
+        <a class="lx-btn" href="{{ section.settings.hero_button_link }}">
+          {{ section.settings.hero_button_label }} <span class="lx-btn-ico" aria-hidden="true">→</span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <div class="lx-heroMedia">
+      <div class="lx-heroFrame">
+        {%- if section.settings.hero_image != blank -%}
+          {{ section.settings.hero_image | image_url: width: 1600 | image_tag: class: "lx-heroImg", loading: "lazy", alt: section.settings.hero_image.alt | default: "Imagem principal" }}
+        {%- else -%}
+          <div class="lx-heroFallback" aria-hidden="true"></div>
+        {%- endif -%}
+
+        {%- if section.settings.badge_1 != blank -%}
+          <div class="lx-badge lx-badge--topleft"><span class="lx-dot"></span>{{ section.settings.badge_1 }}</div>
+        {%- endif -%}
+        {%- if section.settings.badge_2 != blank -%}
+          <div class="lx-badge lx-badge--bottomright"><span class="lx-dot"></span>{{ section.settings.badge_2 }}</div>
+        {%- endif -%}
+        {%- if section.settings.badge_3 != blank -%}
+          <div class="lx-badge lx-badge--bottomleft"><span class="lx-dot"></span>{{ section.settings.badge_3 }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="lx-side">
+      <div class="lx-card lx-miniStat" style="background: {{ section.settings.stat_card_bg }};">
+        <p class="lx-miniStatText">{{ section.settings.stat_text }}</p>
+        <div class="lx-miniRow">
+          <div class="lx-avatars" aria-hidden="true">
+            {%- if section.settings.avatar_1 != blank -%}
+              {{ section.settings.avatar_1 | image_url: width: 80 | image_tag: class: "lx-avatar", loading: "lazy" }}
+            {%- endif -%}
+            {%- if section.settings.avatar_2 != blank -%}
+              {{ section.settings.avatar_2 | image_url: width: 80 | image_tag: class: "lx-avatar", loading: "lazy" }}
+            {%- endif -%}
+          </div>
+          <span class="lx-arrow" aria-hidden="true">↗</span>
+        </div>
+      </div>
+
+      <div class="lx-card lx-miniPromo" style="background: {{ section.settings.promo_card_bg }};">
+        <div class="lx-miniPromoTop">
+          <h3 class="lx-miniPromoTitle">{{ section.settings.promo_title }}</h3>
+          {%- if section.settings.promo_tag != blank -%}
+            <span class="lx-pill">{{ section.settings.promo_tag }}</span>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.promo_image != blank -%}
+          {{ section.settings.promo_image | image_url: width: 1000 | image_tag: class: "lx-miniPromoImg", loading: "lazy", alt: section.settings.promo_image.alt | default: "Promo" }}
+        {%- endif -%}
+
+        {%- if section.settings.promo_footer != blank -%}
+          <div class="lx-miniPromoFoot">{{ section.settings.promo_footer }}</div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  {%- assign current_variant = product.selected_or_first_available_variant -%}
+  {%- assign mf_products_1 = product.metafields.custom.combo_products.value -%}
+
+  {%- capture lx_products_1_json -%}
+  [
+    {%- if mf_products_1 != blank -%}
+      {%- for p in mf_products_1 -%}
+        {%- if p != blank -%}
+          {%- unless forloop.first -%},{%- endunless -%}
+          {%- assign p_img_url = '' -%}
+          {%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 600 -%}{%- endif -%}
+          {
+            "id": {{ p.id | json }},
+            "handle": {{ p.handle | json }},
+            "title": {{ p.title | json }},
+            "featured_image": {{ p_img_url | json }},
+            "variants": [
+              {%- for v in p.variants -%}
+                {%- unless forloop.first -%},{%- endunless -%}
+                {%- assign v_img = v.featured_image | default: p.featured_image -%}
+                {%- assign v_img_url = '' -%}
+                {%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 600 -%}{%- endif -%}
+                {
+                  "id": {{ v.id | json }},
+                  "title": {{ v.title | json }},
+                  "available": {{ v.available | json }},
+                  "price": {{ v.price | json }},
+                  "featured_image": {{ v_img_url | json }}
+                }
+              {%- endfor -%}
+            ]
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'combo_product' and block.settings.product != blank -%}
+          {%- assign p = block.settings.product -%}
+          {%- unless forloop.first -%},{%- endunless -%}
+          {%- assign p_img_url = '' -%}
+          {%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 600 -%}{%- endif -%}
+          {
+            "id": {{ p.id | json }},
+            "handle": {{ p.handle | json }},
+            "title": {{ p.title | json }},
+            "featured_image": {{ p_img_url | json }},
+            "variants": [
+              {%- for v in p.variants -%}
+                {%- unless forloop.first -%},{%- endunless -%}
+                {%- assign v_img = v.featured_image | default: p.featured_image -%}
+                {%- assign v_img_url = '' -%}
+                {%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 600 -%}{%- endif -%}
+                {
+                  "id": {{ v.id | json }},
+                  "title": {{ v.title | json }},
+                  "available": {{ v.available | json }},
+                  "price": {{ v.price | json }},
+                  "featured_image": {{ v_img_url | json }}
+                }
+              {%- endfor -%}
+            ]
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  ]
+  {%- endcapture -%}
+
+  {%- assign mf_products_2 = product.metafields.custom.combo_products2.value -%}
+  {%- capture lx_products_2_json -%}
+  [
+    {%- if mf_products_2 != blank -%}
+      {%- for p in mf_products_2 -%}
+        {%- if p != blank -%}
+          {%- unless forloop.first -%},{%- endunless -%}
+          {%- assign p_img_url = '' -%}
+          {%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 600 -%}{%- endif -%}
+          {
+            "id": {{ p.id | json }},
+            "handle": {{ p.handle | json }},
+            "title": {{ p.title | json }},
+            "featured_image": {{ p_img_url | json }},
+            "variants": [
+              {%- for v in p.variants -%}
+                {%- unless forloop.first -%},{%- endunless -%}
+                {%- assign v_img = v.featured_image | default: p.featured_image -%}
+                {%- assign v_img_url = '' -%}
+                {%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 600 -%}{%- endif -%}
+                {
+                  "id": {{ v.id | json }},
+                  "title": {{ v.title | json }},
+                  "available": {{ v.available | json }},
+                  "price": {{ v.price | json }},
+                  "featured_image": {{ v_img_url | json }}
+                }
+              {%- endfor -%}
+            ]
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  ]
+  {%- endcapture -%}
+
+  {%- assign trimmed_2 = lx_products_2_json | strip | remove: ' ' | remove: newline -%}
+  {%- if trimmed_2 == '[]' or trimmed_2 == blank -%}
+    {%- assign lx_products_2_json = lx_products_1_json -%}
+  {%- endif -%}
+
+  <div class="lx-combo lx-card">
+    <div class="lx-comboHead">
+      <span class="lx-eyebrow">{{ section.settings.combo_eyebrow }}</span>
+      <h2 class="lx-h2">{{ section.settings.combo_title }}</h2>
+      <p class="lx-sub">{{ section.settings.combo_subtitle }}</p>
+    </div>
+
+    <div class="lx-comboGrid" data-lx-price="{{ current_variant.price | money | escape }}">
+      <div class="lx-connector" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1V13M13 7L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+
+      {%- for i in (1..2) -%}
+        <div
+          class="lx-slot"
+          data-slot="{{ i }}"
+          data-products="{% if i == 1 %}{{ lx_products_1_json | strip_newlines | escape }}{% else %}{{ lx_products_2_json | strip_newlines | escape }}{% endif %}"
+        >
+          <div class="lx-slotBody">
+            <div class="lx-thumb" data-thumb>
+              <div class="lx-thumbPh" aria-hidden="true">
+                <span class="lx-thumbPhNum">{{ i }}</span>
+              </div>
+              <img class="lx-thumbImg" data-thumb-img alt="" loading="lazy" hidden>
+            </div>
+
+            <div class="lx-controls">
+              <div class="lx-csel" data-csel="product">
+                <button type="button" class="lx-csel-trigger" data-trigger>
+                  <span class="lx-csel-label" data-label>{{ section.settings.choice_label }} {{ i }}</span>
+                  <svg class="lx-csel-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="lx-csel-dropdown">
+                  <ul class="lx-csel-list" data-list></ul>
+                </div>
+                <input type="hidden" data-input-product>
+              </div>
+
+              <div class="lx-csel lx-csel--variant" data-csel="variant" hidden>
+                <button type="button" class="lx-csel-trigger" data-trigger>
+                  <span class="lx-csel-label" data-label>{{ section.settings.select_variant_placeholder }}</span>
+                  <svg class="lx-csel-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="lx-csel-dropdown">
+                  <ul class="lx-csel-list" data-list></ul>
+                </div>
+                <input type="hidden" data-input-variant>
+              </div>
+            </div>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    <div class="lx-divider"></div>
+
+    <div class="lx-comboFoot">
+      <div class="lx-total">
+        <span class="lx-totalLabel">{{ section.settings.total_label }}</span>
+        <div class="lx-totalValue" data-total>{{ current_variant.price | money }}</div>
+        {%- if section.settings.total_hint != blank -%}
+          <div class="lx-totalHint">{{ section.settings.total_hint }}</div>
+        {%- endif -%}
+      </div>
+
+      <form class="lx-atc" method="post" action="/cart/add" data-atc-form>
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <input type="hidden" name="properties[_combo_choice_1_product]" value="" data-prop="c1p">
+        <input type="hidden" name="properties[_combo_choice_1_variant]" value="" data-prop="c1v">
+        <input type="hidden" name="properties[_combo_choice_2_product]" value="" data-prop="c2p">
+        <input type="hidden" name="properties[_combo_choice_2_variant]" value="" data-prop="c2v">
+
+        <button class="lx-atcBtn" type="submit" disabled data-atc-btn>
+          <span>{{ section.settings.atc_label }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="lx-features">
+    <div class="lx-card lx-featureCard" style="background: {{ section.settings.feature_left_bg }};">
+      {%- if section.settings.feature_left_image != blank -%}
+        {{ section.settings.feature_left_image | image_url: width: 500 | image_tag: class: "lx-featureImg", loading: "lazy", alt: section.settings.feature_left_image.alt | default: "Feature" }}
+      {%- endif -%}
+      <h4 class="lx-h4">{{ section.settings.feature_left_title }}</h4>
+      <p class="lx-kicker">{{ section.settings.feature_left_kicker }}</p>
+    </div>
+
+    <div class="lx-featureQuote">
+      <p class="lx-quote">{{ section.settings.quote_text }}</p>
+      <div class="lx-stars" aria-hidden="true">
+        ★★★★★ <span class="lx-rating">{{ section.settings.rating_text }}</span>
+      </div>
+    </div>
+
+    <div class="lx-card lx-testimonial" style="background: {{ section.settings.testimonial_bg }};">
+      <div class="lx-testimonialTop">
+        <p class="lx-testimonialText">{{ section.settings.testimonial_text }}</p>
+        <div class="lx-person">
+          {%- if section.settings.testimonial_avatar != blank -%}
+            {{ section.settings.testimonial_avatar | image_url: width: 100 | image_tag: class: "lx-personImg", loading: "lazy", alt: section.settings.testimonial_avatar.alt | default: "Cliente" }}
+          {%- endif -%}
+          <div class="lx-personMeta">
+            <div class="lx-personName">{{ section.settings.testimonial_name }}</div>
+            <div class="lx-personSub">{{ section.settings.testimonial_sub }}</div>
+          </div>
+        </div>
+      </div>
+      <span class="lx-testimonialMark" aria-hidden="true">❞</span>
+      <span class="lx-testimonialArrow" aria-hidden="true">↗</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var root = document.currentScript.closest('.lx-wrap');
+  if (!root) return;
+
+  var grid = root.querySelector('.lx-comboGrid');
+  var form = root.querySelector('[data-atc-form]');
+  var btn = root.querySelector('[data-atc-btn]');
+  var totalEl = root.querySelector('[data-total]');
+  var initPx = grid ? (grid.getAttribute('data-lx-price') || '') : '';
+  var slots = root.querySelectorAll('.lx-slot');
+  var mobileMq = window.matchMedia('(max-width: 989px)');
+
+  function isMobile(){
+    return mobileMq.matches;
+  }
+
+  function closeAll(){
+    root.querySelectorAll('.lx-csel.is-open').forEach(function(el){
+      el.classList.remove('is-open');
+    });
+  }
+
+  function openSelect(csel){
+    if (!csel || csel.hidden) return;
+    closeAll();
+    csel.classList.add('is-open');
+  }
+
+  document.addEventListener('pointerdown', function(e){
+    if (!e.target.closest('.lx-csel')) closeAll();
+  }, { passive: true });
+
+  window.addEventListener('resize', closeAll, { passive: true });
+  window.addEventListener('orientationchange', closeAll, { passive: true });
+  window.addEventListener('scroll', closeAll, { passive: true });
+
+  function renderOpts(csel, items, type, onSelect){
+    var list = csel.querySelector('[data-list]');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    items.forEach(function(item){
+      var li = document.createElement('li');
+      li.className = 'lx-csel-opt';
+
+      var label = item.title || '';
+      var sub = '';
+
+      if (type === 'variant') {
+        label = item.title === 'Default Title' ? 'Único' : item.title;
+        if (!item.available) {
+          li.setAttribute('data-disabled', 'true');
+          sub = 'Esgotado';
+        }
+      }
+
+      var html = '';
+
+      if (type === 'product' && item.featured_image) {
+        html += '<img src="' + item.featured_image + '" class="lx-csel-optImg" loading="lazy" alt="">';
+      }
+
+      html += '<div class="lx-csel-optText"><div>' + label + '</div>';
+      if (sub) html += '<div class="lx-csel-optMeta">' + sub + '</div>';
+      html += '</div>';
+
+      li.innerHTML = html;
+
+      li.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (li.hasAttribute('data-disabled')) return;
+
+        var prev = list.querySelector('.is-selected');
+        if (prev) prev.classList.remove('is-selected');
+
+        li.classList.add('is-selected');
+
+        var labelEl = csel.querySelector('[data-label]');
+        var hiddenInput = csel.querySelector('input[type="hidden"]');
+
+        if (labelEl) labelEl.textContent = label;
+        if (hiddenInput) hiddenInput.value = item.id;
+
+        csel.classList.remove('is-open');
+        onSelect(item);
+      });
+
+      list.appendChild(li);
+    });
+  }
+
+  function initSlot(slot){
+    var products = [];
+
+    try {
+      products = JSON.parse(slot.getAttribute('data-products') || '[]');
+    } catch(e) {
+      products = [];
+    }
+
+    slot._products = products;
+
+    var pSel = slot.querySelector('[data-csel="product"]');
+    var vSel = slot.querySelector('[data-csel="variant"]');
+    var thumbImg = slot.querySelector('[data-thumb-img]');
+
+    if (!pSel || !vSel) return;
+
+    var pTrigger = pSel.querySelector('[data-trigger]');
+    var vTrigger = vSel.querySelector('[data-trigger]');
+
+    if (pTrigger) {
+      pTrigger.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        var open = pSel.classList.contains('is-open');
+        closeAll();
+        if (!open) pSel.classList.add('is-open');
+      });
+    }
+
+    renderOpts(pSel, products, 'product', function(product){
+      if (product.featured_image) {
+        thumbImg.src = product.featured_image;
+        thumbImg.hidden = false;
+      } else {
+        thumbImg.hidden = true;
+        thumbImg.removeAttribute('src');
+      }
+
+      vSel.hidden = false;
+
+      var variantInput = vSel.querySelector('input[type="hidden"]');
+      var variantLabel = vSel.querySelector('[data-label]');
+
+      if (variantInput) variantInput.value = '';
+      if (variantLabel) variantLabel.textContent = '{{ section.settings.select_variant_placeholder }}';
+
+      renderOpts(vSel, product.variants || [], 'variant', function(variant){
+        if (variant.featured_image) {
+          thumbImg.src = variant.featured_image;
+          thumbImg.hidden = false;
+        }
+        syncForm();
+      });
+
+      if (product.variants && product.variants.length === 1 && product.variants[0].available) {
+        var opt = vSel.querySelector('.lx-csel-opt');
+        if (opt) opt.click();
+      } else {
+        if (!isMobile()) {
+          setTimeout(function(){
+            openSelect(vSel);
+          }, 120);
+        }
+      }
+
+      syncForm();
+    });
+
+    if (vTrigger) {
+      vTrigger.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (vSel.hidden) return;
+
+        var open = vSel.classList.contains('is-open');
+        closeAll();
+        if (!open) vSel.classList.add('is-open');
+      });
+    }
+  }
+
+  function getSlotData(slot){
+    var products = slot._products || [];
+    var pidInput = slot.querySelector('[data-csel="product"] input');
+    var vidInput = slot.querySelector('[data-csel="variant"] input');
+
+    var pid = pidInput ? pidInput.value : '';
+    var vid = vidInput ? vidInput.value : '';
+
+    var p = null;
+    var v = null;
+
+    for (var i = 0; i < products.length; i++) {
+      if (String(products[i].id) === String(pid)) {
+        p = products[i];
+        break;
+      }
+    }
+
+    if (p && p.variants) {
+      for (var j = 0; j < p.variants.length; j++) {
+        if (String(p.variants[j].id) === String(vid)) {
+          v = p.variants[j];
+          break;
+        }
+      }
+    }
+
+    return { p: p, v: v };
+  }
+
+  function syncForm(){
+    if (!form || slots.length < 2) return;
+
+    var d1 = getSlotData(slots[0]);
+    var d2 = getSlotData(slots[1]);
+
+    var c1p = form.querySelector('[data-prop="c1p"]');
+    var c1v = form.querySelector('[data-prop="c1v"]');
+    var c2p = form.querySelector('[data-prop="c2p"]');
+    var c2v = form.querySelector('[data-prop="c2v"]');
+
+    if (c1p) c1p.value = d1.p ? d1.p.title : '';
+    if (c1v) c1v.value = d1.v ? d1.v.title : '';
+    if (c2p) c2p.value = d2.p ? d2.p.title : '';
+    if (c2v) c2v.value = d2.v ? d2.v.title : '';
+
+    if (btn) btn.disabled = !(d1.p && d1.v && d2.p && d2.v);
+    if (totalEl) totalEl.textContent = initPx;
+  }
+
+  if (form) {
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+      if (!btn || btn.disabled) return;
+
+      syncForm();
+
+      var origText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Adicionando...';
+
+      try {
+        var sIds = [];
+        document.querySelectorAll('cart-items-component[data-section-id]').forEach(function(el){
+          if (el.dataset.sectionId) sIds.push(el.dataset.sectionId);
+        });
+
+        var fd = new FormData(form);
+
+        if (sIds.length) {
+          fd.set('sections', sIds.join(','));
+          fd.set('sections_url', window.location.pathname);
+        }
+
+        var res = await fetch('/cart/add.js', {
+          method: 'POST',
+          body: fd
+        });
+
+        var data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Falha ao adicionar');
+        }
+
+        var hdrId = sIds[0] || 'header_section';
+
+        function fireUpdate(s){
+          document.dispatchEvent(new CustomEvent('cart:update', {
+            bubbles: true,
+            detail: {
+              resource: {},
+              sourceId: 'combo-libre',
+              data: {
+                source: 'combo-libre',
+                itemCount: 1,
+                sections: s || undefined
+              }
+            }
+          }));
+        }
+
+        function openDrawer(){
+          try {
+            document.dispatchEvent(new CustomEvent('cart:open', { bubbles: true }));
+            return;
+          } catch(_) {}
+
+          var b = document.querySelector('[data-cart-drawer-open]');
+          if (b) b.click();
+        }
+
+        if (data.sections && data.sections[hdrId]) {
+          fireUpdate(data.sections);
+          openDrawer();
+        } else {
+          var u = new URL(window.location.href);
+          u.searchParams.set('sections', hdrId);
+
+          fetch(u)
+            .then(function(r){ return r.json(); })
+            .then(function(j){
+              if (j && j[hdrId]) fireUpdate(j);
+              openDrawer();
+            })
+            .catch(openDrawer);
+        }
+
+        btn.textContent = 'Adicionado!';
+      } catch(err) {
+        btn.textContent = 'Erro';
+        alert(err.message || 'Erro ao adicionar ao carrinho.');
+      }
+
+      setTimeout(function(){
+        btn.disabled = false;
+        btn.textContent = origText;
+      }, 2000);
+    });
+  }
+
+  slots.forEach(initSlot);
+  syncForm();
+})();
+</script>
+
+</section>
+
+{% schema %}
+{
+  "name": "Combo Livre",
+  "settings": [
+    { "type": "range",  "id": "max_width",   "label": "Largura máxima (px)", "min": 980, "max": 1400, "step": 10, "default": 1200 },
+    { "type": "color",  "id": "page_bg",     "label": "Background da seção", "default": "#f6f2ee" },
+    { "type": "color",  "id": "card_bg",     "label": "Background dos cards", "default": "#ffffff" },
+    { "type": "color",  "id": "border_color","label": "Cor da borda",         "default": "#e5e5e5" },
+    { "type": "color",  "id": "text_color",  "label": "Cor do texto",         "default": "#1a1a1a" },
+    { "type": "color",  "id": "muted_color", "label": "Cor do texto secundário","default": "#666666" },
+    { "type": "range",  "id": "radius",      "label": "Raio (px)", "min": 12, "max": 48, "step": 2, "default": 24 },
+    { "type": "text",   "id": "shadow",      "label": "Box-shadow", "default": "0 20px 40px rgba(0,0,0,0.06)" },
+
+    { "type": "header", "content": "Hero" },
+    { "type": "text",      "id": "hero_title",         "label": "Título",          "default": "Revele o Potencial" },
+    { "type": "text",      "id": "hero_title_italic",  "label": "Título (Itálico)","default": "da sua Pele" },
+    { "type": "richtext",  "id": "hero_body",          "label": "Corpo",           "default": "<p>Descrição curta e elegante.</p>" },
+    { "type": "text",      "id": "hero_button_label",  "label": "Botão",           "default": "Comprar Agora" },
+    { "type": "url",       "id": "hero_button_link",   "label": "Link" },
+    { "type": "image_picker","id": "hero_image",       "label": "Imagem Hero" },
+    { "type": "text",      "id": "badge_1",            "label": "Badge 1" },
+    { "type": "text",      "id": "badge_2",            "label": "Badge 2" },
+    { "type": "text",      "id": "badge_3",            "label": "Badge 3" },
+
+    { "type": "header", "content": "Cards Laterais" },
+    { "type": "color",        "id": "stat_card_bg", "label": "BG Stat",      "default": "#e8e4e0" },
+    { "type": "text",         "id": "stat_text",    "label": "Texto Stat",   "default": "Mais de 3k clientes satisfeitos." },
+    { "type": "image_picker", "id": "avatar_1",     "label": "Avatar 1" },
+    { "type": "image_picker", "id": "avatar_2",     "label": "Avatar 2" },
+    { "type": "color",        "id": "promo_card_bg","label": "BG Promo",     "default": "#8eb1c4" },
+    { "type": "text",         "id": "promo_title",  "label": "Título Promo", "default": "New Collection" },
+    { "type": "text",         "id": "promo_tag",    "label": "Tag Promo",    "default": "2024" },
+    { "type": "image_picker", "id": "promo_image",  "label": "Imagem Promo" },
+    { "type": "text",         "id": "promo_footer", "label": "Footer Promo", "default": "Limited Edition" },
+
+    { "type": "header", "content": "Combo Builder" },
+    { "type": "text", "id": "combo_eyebrow",  "label": "Eyebrow",               "default": "Monte seu Kit" },
+    { "type": "text", "id": "combo_title",    "label": "Título Combo",          "default": "Crie seu Combo" },
+    { "type": "text", "id": "combo_subtitle", "label": "Subtítulo",             "default": "Escolha 2 produtos abaixo" },
+    { "type": "text", "id": "choice_label",   "label": "Label Escolha",         "default": "Escolha o produto" },
+    { "type": "text", "id": "select_variant_placeholder","label": "Placeholder Variante","default": "Selecione a opção" },
+    { "type": "text", "id": "total_label",    "label": "Label Total",           "default": "Total" },
+    { "type": "text", "id": "total_hint",     "label": "Texto Apoio Total",     "default": "Frete calculado no checkout" },
+    { "type": "text", "id": "atc_label",      "label": "Texto Botão ATC",       "default": "Adicionar Combo ao Carrinho" },
+
+    { "type": "header", "content": "Features / Footer" },
+    { "type": "color",        "id": "feature_left_bg",     "label": "BG Feature Left",    "default": "#f5f5f5" },
+    { "type": "image_picker", "id": "feature_left_image",  "label": "Img Feature Left" },
+    { "type": "text",         "id": "feature_left_title",  "label": "Titulo Feature Left" },
+    { "type": "text",         "id": "feature_left_kicker", "label": "Kicker Feature Left" },
+    { "type": "textarea",     "id": "quote_text",          "label": "Quote",              "default": "Depoimento principal aqui." },
+    { "type": "text",         "id": "rating_text",         "label": "Rating Text",        "default": "4.9/5" },
+    { "type": "color",        "id": "testimonial_bg",      "label": "BG Testimonial",     "default": "#dcc6b9" },
+    { "type": "textarea",     "id": "testimonial_text",    "label": "Texto Testimonial",  "default": "Amei o produto!" },
+    { "type": "image_picker", "id": "testimonial_avatar",  "label": "Avatar Testimonial" },
+    { "type": "text",         "id": "testimonial_name",    "label": "Nome Testimonial",   "default": "Ana S." },
+    { "type": "text",         "id": "testimonial_sub",     "label": "Sub Testimonial",    "default": "Cliente Verificada" }
+  ],
+  "blocks": [
+    {
+      "type": "combo_product",
+      "name": "Produto do Combo",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Produto" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Combo Livre" }
+  ]
+}
+{% endschema %}

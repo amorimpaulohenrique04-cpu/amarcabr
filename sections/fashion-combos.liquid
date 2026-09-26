@@ -1,0 +1,418 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"></noscript>
+<link rel="stylesheet" href="{{ 'component-fashion-combos.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'component-fashion-combos.css' | asset_url | stylesheet_tag }}</noscript>
+
+<style>
+  /* === CRITICAL CSS — previne FOUC no primeiro paint === */
+  .fashion-elegant {
+    padding: clamp(2rem,3vw,3.5rem) 0 clamp(2.5rem,4vw,4rem);
+    background-color: #fff;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
+  }
+  .fashion-elegant__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem,2.2vw,2rem);
+  }
+  .fashion-elegant__header {
+    margin-bottom: clamp(1.5rem,2.5vw,2.25rem);
+    text-align: left;
+    color: #121212;
+    max-width: 60rem;
+  }
+  .fashion-elegant__section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem,3vw,2.6rem);
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .fashion-elegant__subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    margin-top: 0.5rem;
+  }
+  .fashion-elegant__track {
+    display: grid;
+    gap: clamp(1rem,1.5vw,1.5rem);
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(0,1fr);
+  }
+  @media (min-width: 600px) {
+    .fashion-elegant__track { grid-template-columns: repeat(2,1fr); }
+  }
+  .fashion-elegant__card {
+    position: relative;
+    min-height: 0;
+    aspect-ratio: 3 / 4;
+    max-height: 420px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (max-width: 599px) {
+    .fashion-elegant__card { max-height: 380px; aspect-ratio: 4 / 5; }
+  }
+  .fashion-elegant__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .fashion-elegant__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .fashion-elegant__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(1000px 500px at 10% 15%, rgb(0 0 0 / 0.22), transparent 55%),
+      linear-gradient(to top, rgb(0 0 0 / 0.88) 0%, rgb(0 0 0 / 0.4) 40%, transparent 100%);
+  }
+  .fashion-elegant__content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: clamp(1rem,1.5vw,1.5rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    text-align: left;
+  }
+  .fashion-elegant__info-top {
+    margin-bottom: auto;
+    padding-top: clamp(4rem,8vw,6rem);
+  }
+  .fashion-elegant__tags {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.75);
+    margin-bottom: 0.6rem;
+  }
+  .fashion-elegant__card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.3rem,1.8vw,1.7rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    max-width: 90%;
+    margin: 0 0 0.4rem 0;
+  }
+  .fashion-elegant__footer {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .fashion-elegant__action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgb(255 255 255 / 0.25);
+    padding-top: 0.9rem;
+    gap: 0.75rem;
+  }
+  .fashion-elegant__price-box {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+  }
+  .fashion-elegant__currency {
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .fashion-elegant__price {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  .fashion-elegant__btn {
+    background: transparent;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.65rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+  .fashion-elegant__description {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    font-weight: 300;
+    opacity: 0.75;
+    max-width: 85%;
+  }
+  .fashion-elegant__extra-note {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  /* === CSS INTELIGENTE PARA DESKTOP === */
+  @media (min-width: 990px) {
+    #fashion-elegant-{{ section.id }} .fashion-elegant__track {
+      display: grid;
+      width: 100%;
+      gap: 30px;
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+    }
+
+    #fashion-elegant-{{ section.id }} .fashion-elegant__track[data-count="4"] {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+  }
+
+  /* === AJUSTES MOBILE === */
+  @media (max-width: 749px) {
+    #fashion-elegant-{{ section.id }} {
+      text-align: center;
+    }
+
+    #fashion-elegant-{{ section.id }} .fashion-elegant__track {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 0 16px;
+    }
+
+    #fashion-elegant-{{ section.id }} .fashion-elegant__card {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    #fashion-elegant-{{ section.id }} .fashion-elegant__header,
+    #fashion-elegant-{{ section.id }} .fashion-elegant__content,
+    #fashion-elegant-{{ section.id }} .fashion-elegant__tags,
+    #fashion-elegant-{{ section.id }} .fashion-elegant__footer,
+    #fashion-elegant-{{ section.id }} .fashion-elegant__action-row {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    
+    #fashion-elegant-{{ section.id }} .fashion-elegant__section-title,
+    #fashion-elegant-{{ section.id }} .fashion-elegant__subtitle,
+    #fashion-elegant-{{ section.id }} .fashion-elegant__description, 
+    #fashion-elegant-{{ section.id }} .fashion-elegant__extra-note {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+</style>
+
+<section class="fashion-elegant" id="fashion-elegant-{{ section.id }}">
+  <div class="fashion-elegant__container">
+    
+    {% if section.settings.title != blank %}
+      <div class="fashion-elegant__header">
+        <h2 class="fashion-elegant__section-title">{{ section.settings.title }}</h2>
+        {% if section.settings.subtitle != blank %}
+          <span class="fashion-elegant__subtitle">{{ section.settings.subtitle }}</span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="fashion-elegant__wrapper">
+      <div class="fashion-elegant__track" data-count="{{ section.blocks.size }}">
+        {% for block in section.blocks %}
+          {% if block.type == 'combo' %}
+            <article class="fashion-elegant__card" {{ block.shopify_attributes }}>
+              
+              <div class="fashion-elegant__media">
+                {% if block.settings.image != blank %}
+                  <img 
+                    src="{{ block.settings.image | image_url: width: 800 }}" 
+                    alt="{{ block.settings.title | escape }}"
+                    loading="lazy"
+                    width="400"
+                    height="533"
+                    class="fashion-elegant__img"
+                  >
+                {% else %}
+                  {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                {% endif %}
+                <div class="fashion-elegant__overlay"></div>
+              </div>
+
+              <div class="fashion-elegant__content">
+                
+                <div class="fashion-elegant__info-top">
+                  <div class="fashion-elegant__tags">
+                    {% if block.settings.tag_1 != blank %}
+                      <span class="fashion-elegant__tag">{{ block.settings.tag_1 }}</span>
+                    {% endif %}
+                    {% if block.settings.tag_2 != blank %}
+                      <span class="fashion-elegant__separator">/</span>
+                      <span class="fashion-elegant__tag">{{ block.settings.tag_2 }}</span>
+                    {% endif %}
+                  </div>
+                  
+                  <h3 class="fashion-elegant__card-title">{{ block.settings.title }}</h3>
+                  
+                  {% if block.settings.description != blank %}
+                    <p class="fashion-elegant__description">{{ block.settings.description }}</p>
+                  {% endif %}
+                </div>
+
+                <div class="fashion-elegant__footer">
+                  
+                  {% if block.settings.extra_info != blank %}
+                    <div class="fashion-elegant__extra-note">
+                      <span>+ {{ block.settings.extra_info }}</span>
+                    </div>
+                  {% else %}
+                    <div class="fashion-elegant__extra-spacer"></div>
+                  {% endif %}
+
+                  <div class="fashion-elegant__action-row">
+                    <div class="fashion-elegant__price-box">
+                      {% assign price_reais = block.settings.price | divided_by: 100 %}
+                      {% assign price_centavos = block.settings.price | modulo: 100 %}
+                      <span class="fashion-elegant__currency">R$</span>
+                      <span class="fashion-elegant__price">{{ price_reais }},{{ price_centavos | prepend: '00' | slice: -2, 2 }}</span>
+                    </div>
+                    
+                    <a href="{{ block.settings.button_link | default: '#' }}" class="fashion-elegant__btn">
+                      COMPRAR <span class="arrow">→</span>
+                    </a>
+                  </div>
+                </div>
+
+              </div>
+            </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Moda Elegante V5",
+  "tag": "section",
+  "class": "section-fashion-elegant",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "COLEÇÃO 2024"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Editorials"
+    },
+    {
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Colunas no desktop",
+      "info": "Se houver 4 itens, o layout inteligente forçará 2 colunas para manter a simetria.",
+      "options": [
+        { "value": "2", "label": "2 colunas" },
+        { "value": "3", "label": "3 colunas" }
+      ],
+      "default": "3"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "combo",
+      "name": "Look",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag_1",
+          "label": "Tag 1",
+          "default": "BESTIES"
+        },
+        {
+          "type": "text",
+          "id": "tag_2",
+          "label": "Tag 2",
+          "default": "TREND"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título",
+          "default": "Melhores Amigas"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Descrição",
+          "default": "Sincronia perfeita para compartilhar momentos inesquecíveis."
+        },
+        {
+          "type": "text",
+          "id": "extra_info",
+          "label": "Info Extra (Opcional)",
+          "placeholder": "T-shirt infantil extra: R$ 69,90"
+        },
+        {
+          "type": "number",
+          "id": "price",
+          "label": "Preço (centavos)",
+          "default": 15990
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagem (Vertical)"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Moda Elegante V5",
+      "blocks": [
+        { "type": "combo" },
+        { "type": "combo" },
+        { "type": "combo" },
+        { "type": "combo" }
+      ]
+    }
+  ]
+}
+{% endschema %}

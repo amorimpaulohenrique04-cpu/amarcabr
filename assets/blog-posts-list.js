@@ -1,0 +1,2 @@
+import PaginatedList from '@theme/paginated-list';export default class BlogPostsList extends PaginatedList{}
+if(!customElements.get('blog-posts-list')){customElements.define('blog-posts-list',BlogPostsList)}

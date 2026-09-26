@@ -1,0 +1,147 @@
+{% comment %}
+  A MARCA — Cart Drawer (Side Cart)
+  - Section fixa (injetada no layout/theme.liquid)
+  - Atualiza via cart-items-component (AJAX /cart/change.js + sections rendering)
+  - Auto-open após add-to-cart (CartAddEvent) se auto-open estiver presente
+{% endcomment %}
+
+<link rel="stylesheet" href="{{ 'am-cart-drawer.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'am-cart-drawer.css' | asset_url | stylesheet_tag }}</noscript>
+
+
+<cart-drawer-component class="cart-drawer" auto-open>
+  <dialog
+    ref="dialog"
+    class="cart-drawer__dialog"
+    aria-label="{{ 'accessibility.cart' | t }}"
+  >
+    <header class="cart-drawer__header">
+      <div class="cart-drawer__title">Carrinho</div>
+      <button class="cart-drawer__close" type="button" data-cart-drawer-close aria-label="Fechar">
+        <span class="svg-wrapper" aria-hidden="true">{{ 'icon-close.svg' | inline_asset_content }}</span>
+      </button>
+    </header>
+
+    <div class="cart-drawer__content">
+      <div class="cart-drawer__items-wrap" data-section-id="{{ section.id }}">
+        <span class="visually-hidden" ref="cartItemCount" aria-hidden="true">{{- cart.item_count -}}</span>
+
+        {% if cart.empty? %}
+          <p class="cart-drawer__empty">Seu carrinho está vazio.</p>
+          <a class="cart-drawer__secondary" href="{{ settings.empty_cart_button_link | default: routes.all_products_collection_url }}" data-cart-drawer-close>
+            {{ 'actions.continue_shopping' | t }}
+          </a>
+        {% else %}
+          <div class="cart-drawer__items">
+            {% for item in cart.items %}
+              <div
+                class="cart-drawer__item"
+                ref="cartItemRows[]"
+                data-key="{{ item.key }}"
+                data-line="{{ forloop.index }}"
+              >
+                <a class="cart-drawer__thumb" href="{{ item.url }}">
+                  {{ item.image | image_url: width: 160 | image_tag: loading: 'lazy', alt: item.product.title }}
+                </a>
+
+                <div class="cart-drawer__meta">
+                  <button
+                    class="cart-drawer__remove-x"
+                    type="button"
+                    data-cart-drawer-remove
+                    data-line="{{ forloop.index }}"
+                    aria-label="Remover item"
+                    title="Remover item"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+
+                  <a class="cart-drawer__name" href="{{ item.url }}">{{ item.product.title }}</a>
+
+                  {% if item.variant_title and item.variant_title != 'Default Title' %}
+                    <div class="cart-drawer__variant">{{ item.variant_title }}</div>
+                  {% endif %}
+
+                  <div class="cart-drawer__row">
+                    <div class="cart-drawer__actions">
+                      <div class="quantity-selector-wrapper">
+                        <div class="quantity-selector cart-drawer__qty" role="group" aria-label="Quantidade de {{ item.product.title | escape }}">
+                          <button
+                            class="button quantity-minus button-unstyled"
+                            type="button"
+                            name="minus"
+                            data-cart-drawer-qty="decrease"
+                            aria-label="Diminuir quantidade"
+                            {% if item.quantity <= 1 %}disabled{% endif %}
+                          >
+                            <span class="visually-hidden">{{ 'accessibility.decrease_quantity' | t }}</span>
+                            <span class="svg-wrapper icon-plus">{{- 'icon-minus.svg' | inline_asset_content -}}</span>
+                          </button>
+
+                          <input
+                            type="number"
+                            class="cart-drawer__qty-input"
+                            value="{{ item.quantity }}"
+                            min="1"
+                            inputmode="numeric"
+                            aria-label="{{ 'accessibility.quantity' | t }}"
+                            readonly
+                          >
+
+                          <button
+                            class="button quantity-plus button-unstyled"
+                            type="button"
+                            name="plus"
+                            data-cart-drawer-qty="increase"
+                            aria-label="Aumentar quantidade"
+                          >
+                            <span class="visually-hidden">{{ 'accessibility.increase_quantity' | t }}</span>
+                            <span class="svg-wrapper icon-plus">{{- 'icon-plus.svg' | inline_asset_content -}}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="cart-drawer__price">{{ item.final_line_price | money }}</div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% unless cart.empty? %}
+      <footer class="cart-drawer__footer cart-drawer__summary">
+        <div class="cart-drawer__subtotal" ref="cartTotal">
+          <span>Subtotal</span>
+          <strong>{{ cart.total_price | money }}</strong>
+        </div>
+
+        <div class="cart-drawer__buttons">
+          <form action="{{ routes.cart_url }}" method="post">
+            <button class="cart-drawer__primary" name="checkout" type="submit">
+              Finalizar compra
+            </button>
+          </form>
+
+          <a class="cart-drawer__secondary" href="{{ routes.cart_url }}">
+            Ver carrinho
+          </a>
+        </div>
+
+        <div class="cart-drawer__note">Frete e tributos calculados no checkout.</div>
+      </footer>
+    {% endunless %}
+  </dialog>
+</cart-drawer-component>
+
+{% schema %}
+{
+  "name": "Cart drawer (A MARCA)",
+  "tag": "section",
+  "class": "section-cart-drawer",
+  "settings": []
+}
+{% endschema %}

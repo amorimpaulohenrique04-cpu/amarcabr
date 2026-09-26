@@ -1,0 +1,1702 @@
+{% comment %}
+  A MARCA — Popup Pré-venda Child of God
+  Construído em Liquid + HTML + CSS + JS.
+  Nenhum texto/CTA/decoração depende de uma arte achatada.
+  Apenas a fotografia editorial é uma imagem de conteúdo.
+
+  Instalação:
+  Sections > Add a new section > popup-child-of-god-built
+  Cole este arquivo inteiro e adicione a seção no Theme Editor.
+{% endcomment %}
+
+{% liquid
+  assign popup_id = 'amarca-cog-' | append: section.id
+  assign product = section.settings.product
+
+  assign campaign_image_desktop = section.settings.campaign_image
+  if campaign_image_desktop == blank and product != blank
+    assign campaign_image_desktop = product.featured_image
+  endif
+
+  assign campaign_image_mobile = section.settings.campaign_image_mobile
+  if campaign_image_mobile == blank
+    assign campaign_image_mobile = campaign_image_desktop
+  endif
+
+  assign cta_url = section.settings.cta_link
+  if cta_url == blank and product != blank
+    assign cta_url = product.url
+  endif
+
+  assign price_output = section.settings.price_text
+  if price_output == blank and product != blank
+    assign price_output = product.price | money
+  endif
+  if price_output == blank
+    assign price_output = 'R$ 149,90'
+  endif
+%}
+
+{% if section.settings.enabled %}
+  <div
+    id="{{ popup_id }}"
+    class="cog-modal"
+    data-cog-modal
+    data-delay="{{ section.settings.delay_seconds | times: 1000 }}"
+    data-trigger="{{ section.settings.trigger }}"
+    data-scroll-percent="{{ section.settings.scroll_percent }}"
+    data-frequency="{{ section.settings.frequency }}"
+    data-hide-days="{{ section.settings.hide_days }}"
+    data-storage-key="amarca-cog-{{ section.id }}"
+    aria-hidden="true"
+  >
+    <div class="cog-modal__backdrop" data-cog-close></div>
+
+    <section
+      class="cog-modal__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="{{ popup_id }}-title"
+      tabindex="-1"
+    >
+      <button class="cog-modal__close" type="button" data-cog-close aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 5 19 19M19 5 5 19" />
+        </svg>
+      </button>
+
+      <div class="cog-modal__media">
+        <div class="cog-modal__paper cog-modal__paper--back" aria-hidden="true"></div>
+
+        <div class="cog-modal__photo-frame">
+          {% if campaign_image_desktop != blank %}
+            <picture class="cog-modal__picture">
+              {% if campaign_image_mobile != blank %}
+                <source
+                  media="(max-width: 899px)"
+                  srcset="{{ campaign_image_mobile | image_url: width: 480 }} 480w, {{ campaign_image_mobile | image_url: width: 640 }} 640w, {{ campaign_image_mobile | image_url: width: 800 }} 800w, {{ campaign_image_mobile | image_url: width: 1000 }} 1000w"
+                  sizes="90vw"
+                >
+              {% endif %}
+              {{
+                campaign_image_desktop
+                | image_url: width: 1400
+                | image_tag:
+                  class: 'cog-modal__photo',
+                  loading: 'eager',
+                  fetchpriority: 'high',
+                  widths: '640, 800, 1000, 1200, 1400',
+                  sizes: '(max-width: 899px) 90vw, 54vw',
+                  alt: section.settings.campaign_image_alt
+              }}
+            </picture>
+          {% else %}
+            <div class="cog-modal__photo-placeholder">
+              <span>Adicione a foto da campanha</span>
+            </div>
+          {% endif %}
+        </div>
+
+        {% if section.settings.show_crown %}
+          <svg class="cog-doodle cog-doodle--crown" viewBox="0 0 120 100" aria-hidden="true">
+            <path d="M18 77 11 26l30 24L58 12l23 38 29-28-9 57Z"/>
+            <path d="M23 86c23 5 49 4 73 0"/>
+          </svg>
+        {% endif %}
+
+        {% if section.settings.show_star %}
+          <svg class="cog-doodle cog-doodle--star" viewBox="0 0 110 110" aria-hidden="true">
+            <path d="M54 5 64 37 92 17 77 45 108 52 76 61 96 89 66 72 56 105 47 73 16 94 34 63 4 53 36 45 17 18 47 37Z"/>
+          </svg>
+        {% endif %}
+
+        {% if section.settings.show_heart %}
+          <svg class="cog-doodle cog-doodle--heart" viewBox="0 0 80 70" aria-hidden="true">
+            <path d="M40 61S8 43 8 22C8 9 25 4 40 20 55 4 72 9 72 22c0 21-32 39-32 39Z"/>
+          </svg>
+        {% endif %}
+
+        <div class="cog-doodle cog-doodle--rays" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </div>
+
+        {% if section.settings.note_text != blank %}
+          <div class="cog-modal__note" aria-hidden="true">
+            <span>{{ section.settings.note_text | escape | newline_to_br }}</span>
+            <svg viewBox="0 0 38 34">
+              <path d="M19 29S4 20 4 10c0-7 9-9 15 0 6-9 15-7 15 0 0 10-15 19-15 19Z"/>
+            </svg>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="cog-modal__content">
+        <div class="cog-modal__content-inner">
+          {% if section.settings.eyebrow != blank %}
+            <p class="cog-modal__eyebrow">{{ section.settings.eyebrow }}</p>
+          {% endif %}
+
+          <div class="cog-modal__headline-wrap">
+            {% if section.settings.headline_image != blank %}
+              {{
+                section.settings.headline_image
+                | image_url: width: 900
+                | image_tag:
+                  class: 'cog-modal__headline-image',
+                  loading: 'eager',
+                  widths: '320, 480, 640, 760, 900',
+                  sizes: '(max-width: 749px) 78vw, 390px',
+                  alt: section.settings.headline_alt
+              }}
+              <h2 id="{{ popup_id }}-title" class="visually-hidden">
+                {{ section.settings.headline_line_1 }} {{ section.settings.headline_line_2 }}
+              </h2>
+            {% else %}
+              <h2 id="{{ popup_id }}-title" class="cog-modal__headline">
+                <span>{{ section.settings.headline_line_1 }}</span>
+                <span>{{ section.settings.headline_line_2 }}</span>
+              </h2>
+            {% endif %}
+          </div>
+
+          <div class="cog-modal__offer">
+            <h3 class="cog-modal__product-title">{{ section.settings.product_title }}</h3>
+
+            {% if section.settings.description != blank %}
+              <div class="cog-modal__description">
+                {{ section.settings.description }}
+              </div>
+            {% endif %}
+
+            <div class="cog-modal__price-row">
+              <span class="cog-modal__price">{{ price_output }}</span>
+
+              <span class="cog-modal__price-rays" aria-hidden="true">
+                <i></i><i></i><i></i>
+              </span>
+            </div>
+
+            {% if cta_url != blank %}
+              <a class="cog-modal__cta" href="{{ cta_url }}">
+                <span>{{ section.settings.cta_label }}</span>
+                <svg viewBox="0 0 28 18" aria-hidden="true">
+                  <path d="M1 9h23M17 2l7 7-7 7"/>
+                </svg>
+              </a>
+            {% else %}
+              <button class="cog-modal__cta cog-modal__cta--disabled" type="button" disabled>
+                <span>{{ section.settings.cta_label }}</span>
+                <svg viewBox="0 0 28 18" aria-hidden="true">
+                  <path d="M1 9h23M17 2l7 7-7 7"/>
+                </svg>
+              </button>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <style>
+    {% if section.settings.headline_font != blank %}
+      {{ section.settings.headline_font | font_face: font_display: 'swap' }}
+    {% endif %}
+    {% if section.settings.body_font != blank %}
+      {{ section.settings.body_font | font_face: font_display: 'swap' }}
+    {% endif %}
+
+    #{{ popup_id }} {
+      --cog-bg: {{ section.settings.background_color }};
+      --cog-ink: {{ section.settings.ink_color }};
+      --cog-paper: {{ section.settings.paper_color }};
+      --cog-accent: {{ section.settings.accent_color }};
+      --cog-coral: {{ section.settings.coral_color }};
+      --cog-button: {{ section.settings.button_color }};
+      --cog-button-text: {{ section.settings.button_text_color }};
+      --cog-overlay: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+      --cog-radius: {{ section.settings.radius }}px;
+      --cog-headline-font:
+        {% if section.settings.headline_font != blank %}
+          {{ section.settings.headline_font.family | json }},
+          {{ section.settings.headline_font.fallback_families }}
+        {% else %}
+          "Arial Rounded MT Bold", "Trebuchet MS", Arial, sans-serif
+        {% endif %};
+      --cog-body-font:
+        {% if section.settings.body_font != blank %}
+          {{ section.settings.body_font.family | json }},
+          {{ section.settings.body_font.fallback_families }}
+        {% else %}
+          Inter, Arial, sans-serif
+        {% endif %};
+
+      position: fixed;
+      inset: 0;
+      z-index: 2147483000;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      font-family: var(--cog-body-font);
+      transition: opacity .18s ease, visibility .18s ease;
+    }
+
+    #{{ popup_id }}.is-open {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #{{ popup_id }} *,
+    #{{ popup_id }} *::before,
+    #{{ popup_id }} *::after {
+      box-sizing: border-box;
+    }
+
+    #{{ popup_id }} .cog-modal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(18, 15, 12, var(--cog-overlay));
+      backdrop-filter: blur({{ section.settings.overlay_blur }}px);
+      -webkit-backdrop-filter: blur({{ section.settings.overlay_blur }}px);
+    }
+
+    #{{ popup_id }} .cog-modal__panel {
+      position: relative;
+      z-index: 1;
+      height: min(490px, calc(100svh - 96px), calc(57.88vw - 30px));
+      width: auto;
+      aspect-ratio: 1218 / 705;
+      display: grid;
+      grid-template-columns: 57% 43%;
+      overflow: hidden;
+      border: 0;
+      border-radius: var(--cog-radius);
+      background: var(--cog-bg);
+      box-shadow: 0 18px 60px rgba(31, 21, 11, .19);
+      outline: none;
+      transform: translateY(8px) scale(.995);
+      transition: transform .22s cubic-bezier(.2,.75,.2,1);
+    }
+
+    #{{ popup_id }}.is-open .cog-modal__panel {
+      transform: translateY(0) scale(1);
+    }
+
+    #{{ popup_id }} .cog-modal__close {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      z-index: 40;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--cog-paper);
+      cursor: pointer;
+      opacity: .9;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity .15s ease, transform .15s ease, background-color .15s ease;
+    }
+
+    #{{ popup_id }} .cog-modal__close:hover {
+      opacity: 1;
+      transform: rotate(4deg);
+    }
+
+    #{{ popup_id }} .cog-modal__close svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.55;
+      stroke-linecap: round;
+    }
+
+    #{{ popup_id }} .cog-modal__media {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      padding: 14px 0 14px 14px;
+      isolation: isolate;
+    }
+
+    #{{ popup_id }} .cog-modal__paper--back {
+      position: absolute;
+      z-index: -1;
+      inset: 19px 3.5% 20px 21px;
+      background: color-mix(in srgb, var(--cog-paper) 91%, var(--cog-bg));
+      clip-path: polygon(
+        2% 3%, 18% 2%, 36% 3%, 54% 1%, 74% 3%, 97% 2%,
+        99% 19%, 98% 39%, 100% 59%, 97% 80%, 98% 97%,
+        80% 96%, 62% 99%, 44% 97%, 24% 99%, 2% 96%,
+        1% 78%, 2% 57%, 0% 36%
+      );
+      transform: rotate(-.45deg);
+      opacity: .45;
+    }
+
+    #{{ popup_id }} .cog-modal__photo-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      border: 0;
+      outline: 0;
+      box-shadow: none;
+      background: var(--cog-paper);
+      clip-path: polygon(
+        2% 3%, 18% 2%, 35% 3%, 52% 1%, 70% 3%, 97% 2%,
+        99% 18%, 98% 36%, 100% 54%, 98% 73%, 99% 96%,
+        80% 97%, 63% 99%, 47% 97%, 29% 99%, 3% 96%,
+        1% 79%, 2% 59%, 0% 41%, 2% 21%
+      );
+    }
+
+    #{{ popup_id }} .cog-modal__picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #{{ popup_id }} .cog-modal__picture > img {
+      width: 100%;
+      height: 100%;
+    }
+
+    #{{ popup_id }} .cog-modal__photo {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      object-fit: cover;
+      object-position: {{ section.settings.image_position }};
+      background: transparent;
+      border: 0;
+      outline: 0;
+      box-shadow: none;
+    }
+
+    #{{ popup_id }} .cog-modal__photo-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: var(--cog-paper);
+      color: var(--cog-ink);
+      font-weight: 650;
+      text-align: center;
+    }
+
+    #{{ popup_id }} .cog-doodle {
+      position: absolute;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #{{ popup_id }} .cog-doodle path {
+      vector-effect: non-scaling-stroke;
+    }
+
+    #{{ popup_id }} .cog-doodle--crown {
+      top: 13px;
+      left: 13px;
+      width: clamp(50px, 4.5vw, 66px);
+      overflow: visible;
+      transform: rotate(-8deg);
+    }
+
+    #{{ popup_id }} .cog-doodle--crown path {
+      fill: none;
+      stroke: var(--cog-accent);
+      stroke-width: 6;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    #{{ popup_id }} .cog-doodle--star {
+      top: 5px;
+      right: 7%;
+      width: clamp(51px, 4.6vw, 67px);
+      transform: rotate(-4deg);
+    }
+
+    #{{ popup_id }} .cog-doodle--star path {
+      fill: var(--cog-coral);
+      stroke: none;
+    }
+
+    #{{ popup_id }} .cog-doodle--heart {
+      top: 33%;
+      left: 1px;
+      width: clamp(28px, 2.35vw, 35px);
+      transform: rotate(-8deg);
+    }
+
+    #{{ popup_id }} .cog-doodle--heart path {
+      fill: var(--cog-coral);
+    }
+
+    #{{ popup_id }} .cog-doodle--rays {
+      top: 37%;
+      right: -2px;
+      width: 38px;
+      height: 44px;
+    }
+
+    #{{ popup_id }} .cog-doodle--rays i {
+      position: absolute;
+      left: 6px;
+      width: 25px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--cog-accent);
+      transform-origin: left center;
+    }
+
+    #{{ popup_id }} .cog-doodle--rays i:nth-child(1) { top: 5px; transform: rotate(-54deg); }
+    #{{ popup_id }} .cog-doodle--rays i:nth-child(2) { top: 20px; transform: rotate(-10deg); }
+    #{{ popup_id }} .cog-doodle--rays i:nth-child(3) { top: 35px; transform: rotate(35deg); }
+
+    #{{ popup_id }} .cog-modal__note {
+      position: absolute;
+      z-index: 6;
+      left: 8.5%;
+      bottom: 16px;
+      width: clamp(118px, 10.4vw, 140px);
+      min-height: 84px;
+      padding: 12px 13px 10px;
+      display: grid;
+      align-content: center;
+      gap: 2px;
+      overflow: visible;
+      color: var(--cog-ink);
+      background: var(--cog-paper);
+      clip-path: polygon(
+        5% 0, 95% 3%, 100% 88%, 82% 93%, 64% 100%,
+        45% 95%, 24% 99%, 0 89%, 4% 65%, 0 42%, 5% 20%
+      );
+      transform: rotate(-2.8deg);
+      font-family: "Segoe Print", "Bradley Hand", cursive;
+      font-size: clamp(13px, 1vw, 16px);
+      line-height: 1.08;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    #{{ popup_id }} .cog-modal__note span { display: block; }
+
+    #{{ popup_id }} .cog-modal__note svg {
+      width: 22px;
+      justify-self: end;
+      fill: none;
+      stroke: var(--cog-ink);
+      stroke-width: 2.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    #{{ popup_id }} .cog-modal__content {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      padding: 26px 22px 22px 28px;
+    }
+
+    #{{ popup_id }} .cog-modal__content-inner {
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    #{{ popup_id }} .cog-modal__eyebrow {
+      margin: 0 0 10px;
+      color: var(--cog-paper);
+      font-size: clamp(8px, .7vw, 10px);
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    #{{ popup_id }} .cog-modal__headline-wrap {
+      width: 100%;
+      margin: 0 0 26px;
+      overflow: visible;
+    }
+
+    #{{ popup_id }} .cog-modal__headline-image {
+      display: block;
+      width: min(82%, 316px);
+      height: auto;
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
+    #{{ popup_id }} .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    #{{ popup_id }} .cog-modal__headline {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--cog-paper);
+      font-family: var(--cog-headline-font);
+      font-weight: {{ section.settings.headline_weight }};
+      font-size: clamp(43px, 4vw, 61px);
+      line-height: .88;
+      letter-spacing: -.055em;
+      text-align: center;
+    }
+
+    #{{ popup_id }} .cog-modal__headline span {
+      display: block;
+      width: max-content;
+      max-width: none;
+      white-space: nowrap;
+    }
+
+    #{{ popup_id }} .cog-modal__offer {
+      width: 100%;
+      min-width: 0;
+    }
+
+    #{{ popup_id }} .cog-modal__product-title {
+      margin: 0 0 7px;
+      color: var(--cog-paper);
+      font-size: clamp(22px, 1.9vw, 28px);
+      line-height: 1.02;
+      font-weight: 600;
+      letter-spacing: -.04em;
+      white-space: nowrap;
+    }
+
+    #{{ popup_id }} .cog-modal__description {
+      max-width: 100%;
+      color: var(--cog-paper);
+      font-size: clamp(12px, .98vw, 14.5px);
+      line-height: 1.22;
+      letter-spacing: -.014em;
+    }
+
+    #{{ popup_id }} .cog-modal__description p { margin: 0; }
+    #{{ popup_id }} .cog-modal__description em { font-style: italic; opacity: .9; }
+
+    #{{ popup_id }} .cog-modal__price-row {
+      margin: 14px 0 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+    }
+
+    #{{ popup_id }} .cog-modal__price {
+      color: var(--cog-paper);
+      font-size: clamp(36px, 3.35vw, 50px);
+      line-height: .92;
+      font-weight: 400;
+      letter-spacing: -.055em;
+      white-space: nowrap;
+    }
+
+    #{{ popup_id }} .cog-modal__price-rays {
+      position: relative;
+      width: 40px;
+      height: 36px;
+      flex: 0 0 40px;
+    }
+
+    #{{ popup_id }} .cog-modal__price-rays i {
+      position: absolute;
+      left: 3px;
+      width: 30px;
+      height: 4px;
+      background: var(--cog-accent);
+      border-radius: 999px;
+      transform-origin: left center;
+    }
+
+    #{{ popup_id }} .cog-modal__price-rays i:nth-child(1) { top: 2px; transform: rotate(-24deg); }
+    #{{ popup_id }} .cog-modal__price-rays i:nth-child(2) { top: 16px; transform: rotate(1deg); }
+    #{{ popup_id }} .cog-modal__price-rays i:nth-child(3) { top: 30px; transform: rotate(25deg); }
+
+    #{{ popup_id }} .cog-modal__cta {
+      width: 100%;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      padding: 11px 20px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--cog-button);
+      color: var(--cog-button-text);
+      text-decoration: none;
+      font: 800 clamp(11px, .9vw, 13px)/1 var(--cog-body-font);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .18s ease, filter .18s ease;
+    }
+
+    #{{ popup_id }} .cog-modal__cta:hover {
+      transform: translateY(-1px);
+      filter: saturate(.94) brightness(1.015);
+    }
+
+    #{{ popup_id }} .cog-modal__cta svg {
+      width: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform .18s ease;
+    }
+
+    #{{ popup_id }} .cog-modal__cta:hover svg { transform: translateX(3px); }
+    #{{ popup_id }} .cog-modal__cta--disabled { opacity: .62; cursor: default; }
+
+    #{{ popup_id }} :focus-visible {
+      outline: 2px solid var(--cog-paper);
+      outline-offset: 4px;
+    }
+
+    html.cog-modal-lock,
+    html.cog-modal-lock body {
+      overflow: hidden !important;
+      overscroll-behavior: none;
+    }
+
+    @media (max-width: 1100px) and (min-width: 900px) {
+      #{{ popup_id }} .cog-modal__content { padding: 22px 18px 18px 23px; }
+      #{{ popup_id }} .cog-modal__headline-wrap { margin-bottom: 20px; }
+      #{{ popup_id }} .cog-modal__headline-image { width: min(80%, 280px); }
+      #{{ popup_id }} .cog-modal__product-title { font-size: clamp(20px, 2.1vw, 25px); }
+      #{{ popup_id }} .cog-modal__price-row { margin: 11px 0 13px; }
+      #{{ popup_id }} .cog-modal__cta { min-height: 42px; }
+    }
+
+    @media (max-width: 899px) and (orientation: portrait) {
+      #{{ popup_id }} {
+        padding: 16px;
+      }
+
+      #{{ popup_id }} .cog-modal__panel {
+        width: min(90vw, 660px);
+        height: auto;
+        max-height: min(82svh, 720px);
+        aspect-ratio: auto;
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: none;
+      }
+
+      #{{ popup_id }} .cog-modal__panel::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Mobile: área de toque confortável, mas círculo visual discreto. */
+      #{{ popup_id }} .cog-modal__close {
+        top: max(6px, env(safe-area-inset-top));
+        right: max(6px, env(safe-area-inset-right));
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        color: var(--cog-ink);
+        box-shadow: none;
+        opacity: 1;
+      }
+
+      #{{ popup_id }} .cog-modal__close::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 30px;
+        transform: translate(-50%, -50%);
+        border-radius: 999px;
+        background: rgba(255, 245, 232, .94);
+        box-shadow: 0 2px 8px rgba(52, 24, 7, .12);
+      }
+
+      #{{ popup_id }} .cog-modal__close svg {
+        position: relative;
+        z-index: 1;
+        width: 14px;
+        height: 14px;
+        stroke-width: 1.6;
+      }
+
+      #{{ popup_id }} .cog-modal__media {
+        height: clamp(220px, 30svh, 280px);
+        min-height: 0;
+        padding: 11px 11px 0;
+      }
+
+      #{{ popup_id }} .cog-modal__paper--back {
+        inset: 16px 17px 7px;
+      }
+
+      /* Mobile usa a MESMA arquitetura visual do desktop:
+         a foto preenche o frame e o próprio clip-path da moldura faz o recorte.
+         Sem padding interno, sem cartão branco e sem segunda camada retangular. */
+      #{{ popup_id }} .cog-modal__photo-frame {
+        height: 100%;
+        padding: 0;
+        overflow: hidden;
+        background: var(--cog-paper);
+      }
+
+      #{{ popup_id }} .cog-modal__picture {
+        display: block;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        overflow: hidden;
+        position: static;
+        background: transparent;
+      }
+
+      #{{ popup_id }} .cog-modal__photo {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        object-fit: cover;
+        object-position: center center;
+      }
+
+      #{{ popup_id }} .cog-modal__content {
+        height: auto;
+        padding: 16px 24px 21px;
+      }
+
+      #{{ popup_id }} .cog-modal__content-inner {
+        height: auto;
+      }
+
+      #{{ popup_id }} .cog-modal__eyebrow {
+        margin-bottom: 7px;
+        color: var(--cog-paper);
+        font-size: 9px;
+        line-height: 1.2;
+        white-space: normal;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-wrap {
+        margin-bottom: 15px;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-image {
+        width: min(58%, 278px);
+        filter: drop-shadow(0 1px 0 rgba(74, 33, 12, .2));
+      }
+
+      #{{ popup_id }} .cog-modal__product-title {
+        margin-bottom: 6px;
+        color: var(--cog-paper);
+        font-size: 25px;
+        line-height: 1.04;
+        white-space: normal;
+      }
+
+      #{{ popup_id }} .cog-modal__description {
+        max-width: 480px;
+        color: var(--cog-paper);
+        font-size: 14px;
+        line-height: 1.24;
+      }
+
+      #{{ popup_id }} .cog-modal__price-row {
+        justify-content: flex-start;
+        margin: 12px 0 15px;
+        gap: 10px;
+      }
+
+      #{{ popup_id }} .cog-modal__price {
+        color: var(--cog-paper);
+        font-size: 42px;
+      }
+
+      #{{ popup_id }} .cog-modal__price-rays {
+        transform: scale(.86);
+        transform-origin: left center;
+      }
+
+      #{{ popup_id }} .cog-modal__cta {
+        min-height: 48px;
+        font-size: 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__note {
+        left: auto;
+        right: 28px;
+        bottom: 9px;
+        width: 108px;
+        min-height: 72px;
+        padding: 9px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #{{ popup_id }} {
+        padding: 14px;
+      }
+
+      #{{ popup_id }} .cog-modal__panel {
+        width: min(92vw, 500px);
+        max-height: min(80svh, 650px);
+        border-radius: min(var(--cog-radius), 12px);
+      }
+
+      #{{ popup_id }} .cog-modal__close {
+        top: max(5px, env(safe-area-inset-top));
+        right: max(5px, env(safe-area-inset-right));
+      }
+
+      #{{ popup_id }} .cog-modal__close::before {
+        width: 28px;
+        height: 28px;
+      }
+
+      #{{ popup_id }} .cog-modal__close svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      #{{ popup_id }} .cog-modal__media {
+        height: clamp(195px, 27svh, 230px);
+        min-height: 0;
+        padding: 8px 8px 0;
+      }
+
+      #{{ popup_id }} .cog-modal__paper--back {
+        inset: 13px 13px 5px;
+      }
+
+      #{{ popup_id }} .cog-modal__photo-frame,
+      #{{ popup_id }} .cog-modal__picture {
+        padding: 0;
+      }
+
+      #{{ popup_id }} .cog-doodle--crown {
+        top: 5px;
+        left: 7px;
+        width: 47px;
+      }
+
+      #{{ popup_id }} .cog-doodle--star {
+        top: 2px;
+        right: 8%;
+        width: 48px;
+      }
+
+      #{{ popup_id }} .cog-doodle--heart {
+        width: 25px;
+      }
+
+      #{{ popup_id }} .cog-doodle--rays {
+        transform: scale(.72);
+        transform-origin: right center;
+      }
+
+      #{{ popup_id }} .cog-modal__note {
+        left: auto;
+        right: 17px;
+        bottom: 7px;
+        width: 98px;
+        min-height: 64px;
+        padding: 7px 8px;
+        font-size: 11px;
+        line-height: 1.08;
+      }
+
+      #{{ popup_id }} .cog-modal__note svg {
+        width: 17px;
+      }
+
+      #{{ popup_id }} .cog-modal__content {
+        padding: 13px 16px 17px;
+      }
+
+      #{{ popup_id }} .cog-modal__eyebrow {
+        margin-bottom: 5px;
+        color: var(--cog-paper);
+        font-size: 8px;
+        letter-spacing: .15em;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-wrap {
+        margin-bottom: 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-image {
+        width: min(64%, 238px);
+      }
+
+      #{{ popup_id }} .cog-modal__product-title {
+        color: var(--cog-paper);
+        font-size: 22px;
+      }
+
+      #{{ popup_id }} .cog-modal__description {
+        color: var(--cog-paper);
+        font-size: 13px;
+        line-height: 1.24;
+      }
+
+      #{{ popup_id }} .cog-modal__price-row {
+        margin: 10px 0 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__price {
+        color: var(--cog-paper);
+        font-size: 37px;
+      }
+
+      #{{ popup_id }} .cog-modal__price-rays {
+        transform: scale(.75);
+        transform-origin: left center;
+      }
+
+      #{{ popup_id }} .cog-modal__cta {
+        min-height: 45px;
+        padding-inline: 15px;
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      #{{ popup_id }} {
+        padding: 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__panel {
+        width: 92vw;
+        max-height: min(78svh, 610px);
+      }
+
+      #{{ popup_id }} .cog-modal__media {
+        height: clamp(180px, 25svh, 205px);
+        min-height: 0;
+      }
+
+      #{{ popup_id }} .cog-modal__note {
+        left: auto;
+        right: 14px;
+        bottom: 6px;
+        width: 90px;
+        min-height: 58px;
+        font-size: 10px;
+      }
+
+      #{{ popup_id }} .cog-modal__content {
+        padding: 11px 14px 15px;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-image {
+        width: min(66%, 220px);
+      }
+
+      #{{ popup_id }} .cog-modal__product-title {
+        font-size: 20px;
+      }
+
+      #{{ popup_id }} .cog-modal__description {
+        font-size: 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__price {
+        font-size: 34px;
+      }
+
+      #{{ popup_id }} .cog-modal__cta {
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 899px) and (orientation: landscape) and (max-height: 520px) {
+      #{{ popup_id }} {
+        padding: 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__panel {
+        width: auto;
+        height: min(84svh, 335px);
+        max-width: 92vw;
+        max-height: 84svh;
+        aspect-ratio: 1218 / 705;
+        grid-template-columns: 56% 44%;
+        overflow: hidden;
+      }
+
+      #{{ popup_id }} .cog-modal__close {
+        top: 5px;
+        right: 5px;
+        width: 38px;
+        height: 38px;
+        background: transparent;
+        box-shadow: none;
+        opacity: 1;
+      }
+
+      #{{ popup_id }} .cog-modal__close::before {
+        width: 28px;
+        height: 28px;
+      }
+
+      #{{ popup_id }} .cog-modal__close svg {
+        width: 13px;
+        height: 13px;
+        stroke-width: 1.6;
+      }
+
+      #{{ popup_id }} .cog-modal__media {
+        height: 100%;
+        min-height: 0;
+        padding: 8px 0 8px 8px;
+      }
+
+      #{{ popup_id }} .cog-modal__paper--back {
+        inset: 12px 8px 12px 12px;
+      }
+
+      #{{ popup_id }} .cog-modal__content {
+        height: 100%;
+        padding: 12px 13px 11px 16px;
+      }
+
+      #{{ popup_id }} .cog-modal__content-inner {
+        height: 100%;
+        justify-content: center;
+      }
+
+      #{{ popup_id }} .cog-modal__eyebrow {
+        margin-bottom: 3px;
+        color: var(--cog-paper);
+        font-size: 6.5px;
+        white-space: nowrap;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-wrap {
+        margin-bottom: 8px;
+      }
+
+      #{{ popup_id }} .cog-modal__headline-image {
+        width: min(72%, 192px);
+      }
+
+      #{{ popup_id }} .cog-modal__product-title {
+        margin-bottom: 3px;
+        color: var(--cog-paper);
+        font-size: 16px;
+        white-space: nowrap;
+      }
+
+      #{{ popup_id }} .cog-modal__description {
+        color: var(--cog-paper);
+        font-size: 9px;
+        line-height: 1.15;
+      }
+
+      #{{ popup_id }} .cog-modal__price-row {
+        justify-content: center;
+        margin: 6px 0 7px;
+        gap: 5px;
+      }
+
+      #{{ popup_id }} .cog-modal__price {
+        color: var(--cog-paper);
+        font-size: 26px;
+      }
+
+      #{{ popup_id }} .cog-modal__price-rays {
+        transform: scale(.58);
+        transform-origin: left center;
+      }
+
+      #{{ popup_id }} .cog-modal__cta {
+        min-height: 34px;
+        padding: 8px 12px;
+        gap: 8px;
+        font-size: 8px;
+      }
+
+      #{{ popup_id }} .cog-modal__cta svg {
+        width: 16px;
+      }
+
+      #{{ popup_id }} .cog-modal__note {
+        left: auto;
+        right: 14px;
+        bottom: 6px;
+        width: 78px;
+        min-height: 50px;
+        padding: 5px;
+        font-size: 9px;
+      }
+
+      #{{ popup_id }} .cog-doodle--crown {
+        width: 40px;
+      }
+
+      #{{ popup_id }} .cog-doodle--star {
+        width: 41px;
+      }
+
+      #{{ popup_id }} .cog-doodle--heart {
+        width: 21px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #{{ popup_id }},
+      #{{ popup_id }} .cog-modal__panel,
+      #{{ popup_id }} .cog-modal__cta,
+      #{{ popup_id }} .cog-modal__cta svg,
+      #{{ popup_id }} .cog-modal__close {
+        transition: none !important;
+      }
+    }
+  </style>
+
+  <script>
+    (() => {
+      const root = document.getElementById({{ popup_id | json }});
+      if (!root || root.dataset.initialized === 'true') return;
+      root.dataset.initialized = 'true';
+
+      const panel = root.querySelector('.cog-modal__panel');
+      const closers = root.querySelectorAll('[data-cog-close]');
+      const storageKey = root.dataset.storageKey;
+      const frequency = root.dataset.frequency || 'session';
+      const hideDays = Number(root.dataset.hideDays || 7);
+      const trigger = root.dataset.trigger || 'delay';
+      const delay = Number(root.dataset.delay || 4000);
+      const scrollPercent = Number(root.dataset.scrollPercent || 30);
+
+      let previousFocus = null;
+      let opened = false;
+      let triggerBound = false;
+
+      const now = () => Date.now();
+
+      function canShow() {
+        if (window.Shopify && Shopify.designMode) return true;
+
+        try {
+          if (frequency === 'always') return true;
+
+          if (frequency === 'session') {
+            return sessionStorage.getItem(storageKey) !== '1';
+          }
+
+          if (frequency === 'days') {
+            const last = Number(localStorage.getItem(storageKey) || 0);
+            return !last || now() - last >= hideDays * 86400000;
+          }
+        } catch (e) {}
+
+        return true;
+      }
+
+      function remember() {
+        if (window.Shopify && Shopify.designMode) return;
+
+        try {
+          if (frequency === 'session') {
+            sessionStorage.setItem(storageKey, '1');
+          } else if (frequency === 'days') {
+            localStorage.setItem(storageKey, String(now()));
+          }
+        } catch (e) {}
+      }
+
+      function getFocusable() {
+        return [...panel.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )].filter((el) => el.offsetParent !== null);
+      }
+
+      function onKeydown(event) {
+        if (!opened) return;
+
+        if (event.key === 'Escape') {
+          close(true);
+          return;
+        }
+
+        if (event.key !== 'Tab') return;
+
+        const focusables = getFocusable();
+        if (!focusables.length) {
+          event.preventDefault();
+          panel.focus();
+          return;
+        }
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+
+      function open() {
+        if (opened || !canShow()) return;
+
+        opened = true;
+        previousFocus = document.activeElement;
+        root.classList.add('is-open');
+        root.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('cog-modal-lock');
+        document.addEventListener('keydown', onKeydown);
+
+        requestAnimationFrame(() => {
+          const focusables = getFocusable();
+          (focusables[0] || panel).focus({ preventScroll: true });
+        });
+      }
+
+      function close(shouldRemember = true) {
+        if (!opened) return;
+
+        opened = false;
+        root.classList.remove('is-open');
+        root.setAttribute('aria-hidden', 'true');
+        document.documentElement.classList.remove('cog-modal-lock');
+        document.removeEventListener('keydown', onKeydown);
+
+        if (shouldRemember) remember();
+
+        if (previousFocus && typeof previousFocus.focus === 'function') {
+          previousFocus.focus({ preventScroll: true });
+        }
+      }
+
+      closers.forEach((el) => el.addEventListener('click', () => close(true)));
+
+      function bindScrollTrigger() {
+        if (triggerBound) return;
+        triggerBound = true;
+
+        const onScroll = () => {
+          const doc = document.documentElement;
+          const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+          const progress = (window.scrollY / max) * 100;
+
+          if (progress >= scrollPercent) {
+            window.removeEventListener('scroll', onScroll);
+            open();
+          }
+        };
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      }
+
+      function bindExitTrigger() {
+        if (triggerBound) return;
+        triggerBound = true;
+
+        const onMouseLeave = (event) => {
+          if (event.clientY <= 8) {
+            document.removeEventListener('mouseleave', onMouseLeave);
+            open();
+          }
+        };
+
+        document.addEventListener('mouseleave', onMouseLeave);
+      }
+
+      function schedule() {
+        if (!canShow()) return;
+
+        if (trigger === 'scroll') {
+          bindScrollTrigger();
+        } else if (trigger === 'exit') {
+          bindExitTrigger();
+        } else {
+          window.setTimeout(open, Math.max(0, delay));
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', schedule, { once: true });
+      } else {
+        schedule();
+      }
+
+      document.addEventListener('shopify:section:select', (event) => {
+        if (event.detail?.sectionId === {{ section.id | json }}) open();
+      });
+
+      document.addEventListener('shopify:section:deselect', (event) => {
+        if (event.detail?.sectionId === {{ section.id | json }}) close(false);
+      });
+
+      document.addEventListener('shopify:section:unload', (event) => {
+        if (event.detail?.sectionId === {{ section.id | json }}) {
+          document.documentElement.classList.remove('cog-modal-lock');
+          document.removeEventListener('keydown', onKeydown);
+        }
+      });
+    })();
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Popup Child of God",
+  "tag": "section",
+  "class": "section-popup-child-of-god-built",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Conteúdo"
+    },
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Ativar popup",
+      "default": true
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Produto do kit"
+    },
+    {
+      "type": "image_picker",
+      "id": "campaign_image",
+      "label": "Foto editorial — desktop"
+    },
+    {
+      "type": "image_picker",
+      "id": "campaign_image_mobile",
+      "label": "Foto editorial — mobile",
+      "info": "Use um enquadramento vertical pensado para celular. Se ficar vazio, o popup usa automaticamente a foto desktop."
+    },
+    {
+      "type": "text",
+      "id": "campaign_image_alt",
+      "label": "ALT da foto",
+      "default": "Crianças usando a coleção Child of God"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Enquadramento da foto",
+      "default": "center center",
+      "options": [
+        { "value": "center center", "label": "Centro" },
+        { "value": "center top", "label": "Topo" },
+        { "value": "center bottom", "label": "Base" },
+        { "value": "left center", "label": "Esquerda" },
+        { "value": "right center", "label": "Direita" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Linha superior",
+      "default": "DIA DAS CRIANÇAS · EDIÇÃO ESPECIAL"
+    },
+    {
+      "type": "text",
+      "id": "headline_line_1",
+      "label": "Headline — linha 1",
+      "default": "Pré-venda"
+    },
+    {
+      "type": "text",
+      "id": "headline_line_2",
+      "label": "Headline — linha 2",
+      "default": "Liberada!"
+    },
+    {
+      "type": "image_picker",
+      "id": "headline_image",
+      "label": "PNG Pré-venda Liberada",
+      "info": "Use o PNG transparente do lettering. Quando preenchido, substitui a headline em texto."
+    },
+    {
+      "type": "text",
+      "id": "headline_alt",
+      "label": "ALT do lettering",
+      "default": "Pré-venda Liberada!"
+    },
+    {
+      "type": "text",
+      "id": "product_title",
+      "label": "Título",
+      "default": "Kit Child of God"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Descrição",
+      "default": "<p>T-shirt infantil Child of God<br>+ Garrafa personalizável <em>com cartela de figurinhas</em></p>"
+    },
+    {
+      "type": "text",
+      "id": "price_text",
+      "label": "Preço manual (opcional)",
+      "info": "Se vazio, usa o preço do produto selecionado.",
+      "default": "R$ 149,90"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Texto do botão",
+      "default": "GARANTIR MEU KIT"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Link do botão",
+      "info": "Se vazio, usa o produto selecionado."
+    },
+    {
+      "type": "textarea",
+      "id": "note_text",
+      "label": "Bilhete sobre a foto",
+      "default": "infância\ntambém\né propósito"
+    },
+    {
+      "type": "header",
+      "content": "Tipografia"
+    },
+    {
+      "type": "font_picker",
+      "id": "headline_font",
+      "label": "Fonte da headline",
+      "default": "assistant_n7"
+    },
+    {
+      "type": "select",
+      "id": "headline_weight",
+      "label": "Peso da headline",
+      "default": "800",
+      "options": [
+        { "value": "700", "label": "Bold" },
+        { "value": "800", "label": "Extra bold" },
+        { "value": "900", "label": "Black" }
+      ]
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "Fonte dos textos",
+      "default": "assistant_n4"
+    },
+
+    {
+      "type": "header",
+      "content": "Cores"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Fundo",
+      "default": "#E5A74B"
+    },
+    {
+      "type": "color",
+      "id": "paper_color",
+      "label": "Off-white",
+      "default": "#FFF5E8"
+    },
+    {
+      "type": "color",
+      "id": "ink_color",
+      "label": "Marrom",
+      "default": "#4A210C"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Mostarda dos desenhos",
+      "default": "#D99218"
+    },
+    {
+      "type": "color",
+      "id": "coral_color",
+      "label": "Coral dos desenhos",
+      "default": "#EF5E3D"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Botão",
+      "default": "#E86648"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texto do botão",
+      "default": "#FFF8EA"
+    },
+
+    {
+      "type": "header",
+      "content": "Elementos gráficos"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_crown",
+      "label": "Mostrar coroa",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_star",
+      "label": "Mostrar estrela",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heart",
+      "label": "Mostrar coração",
+      "default": true
+    },
+
+    {
+      "type": "header",
+      "content": "Comportamento"
+    },
+    {
+      "type": "select",
+      "id": "trigger",
+      "label": "Quando abrir",
+      "default": "delay",
+      "options": [
+        { "value": "delay", "label": "Após alguns segundos" },
+        { "value": "scroll", "label": "Após rolar a página" },
+        { "value": "exit", "label": "Intenção de saída (desktop)" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "delay_seconds",
+      "label": "Atraso",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "scroll_percent",
+      "label": "Percentual de rolagem",
+      "min": 10,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "frequency",
+      "label": "Frequência",
+      "default": "session",
+      "options": [
+        { "value": "always", "label": "Sempre" },
+        { "value": "session", "label": "Uma vez por sessão" },
+        { "value": "days", "label": "Ocultar por X dias depois de fechar" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "hide_days",
+      "label": "Dias oculto",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "unit": "d",
+      "default": 7
+    },
+
+    {
+      "type": "header",
+      "content": "Modal"
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "label": "Arredondamento",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Escurecimento do site",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "overlay_blur",
+      "label": "Blur do fundo",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "Popup Child of God"
+    }
+  ]
+}
+{% endschema %}

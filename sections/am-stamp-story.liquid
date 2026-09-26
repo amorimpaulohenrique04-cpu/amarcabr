@@ -1,0 +1,276 @@
+{%- comment -%}
+  Fashion Story ULTRA Optimized
+  - Performance: Srcset dinâmico (serve imagens leves no mobile)
+  - SEO: Tags semânticas (<figure>, <article>) e Alt Text
+  - Minificação: Uso de tags nativas do Shopify
+{%- endcomment -%}
+
+{%- liquid
+  assign sid = section.id
+  assign prod = section.settings.linked_product
+  # Define tamanhos de imagem baseados no layout Bento para economizar banda
+  assign main_img_widths = '375, 550, 750, 1100'
+  assign profile_img_widths = '150, 300, 400'
+-%}
+
+{% style %}
+  #fs-{{ sid }} {
+    --bg: {{ section.settings.bg_color }};
+    --text: {{ section.settings.text_color }};
+    --accent: {{ section.settings.accent_color }};
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 0;
+    overflow: hidden;
+  }
+
+  /* Container */
+  #fs-{{ sid }} .wrap {
+    max-width: var(--am-header-max, var(--page-width, 1240px));
+    margin: 0 auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+  }
+
+  /* Header */
+  #fs-{{ sid }} .head { text-align: center; margin-bottom: 24px; }
+  #fs-{{ sid }} .head h2 {
+    font-size: clamp(32px, 5vw, 64px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  #fs-{{ sid }} .head p {
+    font-size: 13px; margin-top: 8px; font-family: monospace;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent);
+  }
+
+  /* Grid Layout */
+  #fs-{{ sid }} .bento {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr 1fr; /* Mobile: 2 colunas para mosaico */
+    grid-auto-flow: dense;
+  }
+
+  /* Cards Base */
+  #fs-{{ sid }} .box {
+    background: #fff;
+    padding: 16px;
+    border: 1px solid rgba(0,0,0,0.1); /* Borda mais sutil para performance visual */
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+
+  /* Mobile Logic */
+  #fs-{{ sid }} .box-main-img { grid-column: span 2; aspect-ratio: 4/5; padding: 0; }
+  #fs-{{ sid }} .box-bio { grid-column: span 2; }
+  #fs-{{ sid }} .box-prod { grid-column: span 2; }
+  #fs-{{ sid }} .box-profile-img { grid-column: span 1; aspect-ratio: 1; padding: 0; }
+  #fs-{{ sid }} .box-data { grid-column: span 1; font-size: 12px; justify-content: center; }
+
+  /* Imagens */
+  #fs-{{ sid }} figure { margin: 0; width: 100%; height: 100%; }
+  #fs-{{ sid }} img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+  #fs-{{ sid }} .box:hover img { transform: scale(1.05); }
+
+  /* Tipografia */
+  #fs-{{ sid }} .bio-p { font-size: 15px; line-height: 1.5; color: #444; }
+  #fs-{{ sid }} .hand-note { 
+    font-family: cursive, sans-serif; color: var(--accent); 
+    margin-top: 12px; transform: rotate(-2deg); font-size: 14px;
+  }
+
+  /* Data Table */
+  #fs-{{ sid }} .box-data { background: #f3f4f6; gap: 8px; }
+  #fs-{{ sid }} .data-row { display: flex; flex-direction: column; border-bottom: 1px solid #ddd; padding: 4px 0; line-height: 1.2; }
+  #fs-{{ sid }} .data-row:last-child { border-bottom: 0; }
+  #fs-{{ sid }} .data-row span:first-child { font-weight: 800; text-transform: uppercase; font-size: 10px; opacity: 0.7; }
+
+  /* Link Produto */
+  #fs-{{ sid }} .prod-box { 
+    background: var(--accent); color: #fff; text-decoration: none; 
+    text-align: center; align-items: center; justify-content: center; min-height: 120px;
+    transition: opacity 0.3s;
+  }
+  #fs-{{ sid }} .prod-box:hover { opacity: 0.9; }
+  #fs-{{ sid }} .prod-box h3 { font-size: clamp(20px, 2vw, 32px); margin: 0; line-height: 1; }
+  #fs-{{ sid }} .prod-box span { font-size: 12px; margin-top: 8px; text-transform: uppercase; border-bottom: 1px solid #fff; }
+
+  /* Process Strip (Snap Scroll) */
+  #fs-{{ sid }} .process-strip {
+    display: flex; gap: 12px; margin-top: 24px; overflow-x: auto; padding-bottom: 15px;
+    scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  #fs-{{ sid }} .process-strip::-webkit-scrollbar { display: none; }
+  #fs-{{ sid }} .step { flex: 0 0 100px; scroll-snap-align: center; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  #fs-{{ sid }} .step-img {
+    width: 100%; aspect-ratio: 1; border: 1px solid #eee; margin-bottom: 6px; 
+    border-radius: 50%; overflow: hidden; background: #fff;
+  }
+
+  /* Desktop Query */
+  @media (min-width: 900px) {
+    #fs-{{ sid }} { padding: 40px 0; }
+    #fs-{{ sid }} .bento { gap: 16px; grid-template-columns: repeat(4, 1fr); grid-template-rows: auto auto; }
+    #fs-{{ sid }} .box { padding: 24px; }
+    
+    /* Layout Mapping */
+    #fs-{{ sid }} .box-main-img { grid-column: 1 / 2; grid-row: 1 / 3; }
+    #fs-{{ sid }} .box-bio { grid-column: 2 / 4; grid-row: 1 / 2; }
+    #fs-{{ sid }} .box-profile-img { grid-column: 4 / 5; grid-row: 1 / 2; }
+    #fs-{{ sid }} .box-data { grid-column: 2 / 3; grid-row: 2 / 3; font-size: 14px; }
+    #fs-{{ sid }} .box-prod { grid-column: 3 / 5; grid-row: 2 / 3; }
+
+    #fs-{{ sid }} .data-row { flex-direction: row; justify-content: space-between; align-items: center; }
+    #fs-{{ sid }} .data-row span:first-child { font-size: 12px; }
+    
+    #fs-{{ sid }} .process-strip { justify-content: center; margin-top: 40px; gap: 40px; padding-bottom: 0; scroll-snap-type: none; }
+    #fs-{{ sid }} .step { flex: 0 0 120px; }
+  }
+{% endstyle %}
+
+<div id="fs-{{ sid }}">
+  <div class="wrap">
+    
+    <header class="head">
+      <h2>{{ section.settings.main_title }}</h2>
+      <p>{{ section.settings.subtitle }}</p>
+    </header>
+
+    <div class="bento">
+      
+      <figure class="box box-main-img">
+        {% if section.settings.moodboard_image %}
+          {{ section.settings.moodboard_image | image_url: width: 1100 | image_tag: 
+            widths: main_img_widths, 
+            sizes: '(min-width: 900px) 25vw, 100vw',
+            loading: 'lazy',
+            alt: section.settings.main_title
+          }}
+        {% else %}
+          {{ 'collection-1' | placeholder_svg_tag }}
+        {% endif %}
+      </figure>
+
+      <article class="box bio-box box-bio">
+        <h3 class="bio-title" style="font-weight: 700; margin: 0 0 8px 0; font-size: 16px;">{{ section.settings.bio_title }}</h3>
+        
+        {% assign bio_text = section.settings.bio_text | default: " " %}
+        {% if prod != blank and prod.metafields.custom.bio_story != blank %}
+           {% assign bio_text = prod.metafields.custom.bio_story | metafield_text %}
+        {% endif %}
+        
+        <div class="bio-p">
+           {% if bio_text contains '<p>' %}{{ bio_text }}{% else %}<p>{{ bio_text }}</p>{% endif %}
+        </div>
+
+        {% if section.settings.bio_note != blank %}
+          <div class="hand-note">{{ section.settings.bio_note }}</div>
+        {% endif %}
+      </article>
+
+      <figure class="box box-profile-img">
+        {% if section.settings.profile_image %}
+          {{ section.settings.profile_image | image_url: width: 400 | image_tag: 
+            widths: profile_img_widths,
+            sizes: '(min-width: 900px) 25vw, 50vw',
+            loading: 'lazy',
+            alt: section.settings.profile_name
+          }}
+        {% else %}
+          {{ 'fashion-1' | placeholder_svg_tag }}
+        {% endif %}
+      </figure>
+
+      <div class="box box-data">
+        <div class="data-row"><span>Name</span> <span>{{ section.settings.profile_name }}</span></div>
+        <div class="data-row"><span>Role</span> <span>{{ section.settings.profile_role }}</span></div>
+        <div class="data-row"><span>Vibe</span> <span>{{ section.settings.profile_vibe }}</span></div>
+      </div>
+
+      {% if prod != blank %}
+        <a href="{{ prod.url }}" class="box prod-box box-prod" aria-label="Shop {{ prod.title }}">
+          <span>We Recommend</span>
+          <h3>{{ prod.title }}</h3>
+          <span>{{ prod.price | money_without_trailing_zeros }} &rarr;</span>
+        </a>
+      {% else %}
+        <div class="box prod-box box-prod" style="background: #1a1a1a;">
+           <h3>{{ section.settings.editorial_quote }}</h3>
+        </div>
+      {% endif %}
+
+    </div>
+
+    <div class="process-strip">
+      {% for block in section.blocks %}
+        <div class="step" {{ block.shopify_attributes }}>
+          <div class="step-img">
+            {% if block.settings.image %}
+              {{ block.settings.image | image_url: width: 240 | image_tag: loading: 'lazy', widths: '120, 240' }}
+            {% else %}
+              {{ 'product-2' | placeholder_svg_tag }}
+            {% endif %}
+          </div>
+          <div>{{ block.settings.caption }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Ultra Fashion Story",
+  "settings": [
+    { "type": "header", "content": "Visual Identity" },
+    { "type": "color", "id": "bg_color", "label": "Background", "default": "#fdfbf7" },
+    { "type": "color", "id": "text_color", "label": "Text", "default": "#1a1a1a" },
+    { "type": "color", "id": "accent_color", "label": "Accent", "default": "#ff3b30" },
+
+    { "type": "header", "content": "Headings" },
+    { "type": "text", "id": "main_title", "label": "Title", "default": "The Concept" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Visual Narrative 2026" },
+
+    { "type": "header", "content": "Story Content" },
+    { "type": "image_picker", "id": "moodboard_image", "label": "Main Vertical Image" },
+    { "type": "text", "id": "bio_title", "label": "Bio Title", "default": "Hi, I'm Fer." },
+    { "type": "richtext", "id": "bio_text", "label": "Bio Text" },
+    { "type": "text", "id": "bio_note", "label": "Handwritten Note", "default": "Since 1999" },
+
+    { "type": "header", "content": "Profile Card" },
+    { "type": "image_picker", "id": "profile_image", "label": "Profile Image" },
+    { "type": "text", "id": "profile_name", "label": "Name", "default": "Julee" },
+    { "type": "text", "id": "profile_role", "label": "Role", "default": "Designer" },
+    { "type": "text", "id": "profile_vibe", "label": "Vibe", "default": "Iconic" },
+
+    { "type": "header", "content": "Commerce Logic" },
+    { "type": "product", "id": "linked_product", "label": "Featured Product" },
+    { "type": "textarea", "id": "editorial_quote", "label": "Fallback Quote", "default": "Fashion is armor." }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Process Step",
+      "limit": 5,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "caption", "label": "Caption", "default": "Step" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Ultra Fashion Story",
+      "blocks": [
+        { "type": "step", "settings": {"caption": "01. Sketch"} },
+        { "type": "step", "settings": {"caption": "02. Fabric"} },
+        { "type": "step", "settings": {"caption": "03. Sew"} },
+        { "type": "step", "settings": {"caption": "04. Wear"} }
+      ]
+    }
+  ]
+}
+{% endschema %}

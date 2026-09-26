@@ -1,0 +1,117 @@
+{% comment %}
+  A MARCA — Manifesto
+  - Imagem full width
+  - Altura natural da imagem (full height do arquivo)
+  - Desktop + Mobile
+  - Sem ajustes de altura
+{% endcomment %}
+
+<section class="am-manifesto section-{{ section.id }}">
+  <div class="am-manifesto__bleed">
+
+    {% if section.settings.image_desktop != blank or section.settings.image_mobile != blank %}
+      <picture class="am-manifesto__picture">
+
+        {% if section.settings.image_mobile != blank %}
+          <source
+            media="(max-width: 768px)"
+            srcset="{{ section.settings.image_mobile | image_url: width: 480 }} 480w,
+                    {{ section.settings.image_mobile | image_url: width: 768 }} 768w,
+                    {{ section.settings.image_mobile | image_url: width: 1024 }} 1024w,
+                    {{ section.settings.image_mobile | image_url: width: 1400 }} 1400w"
+            width="{{ section.settings.image_mobile.width }}"
+            height="{{ section.settings.image_mobile.height }}"
+          >
+        {% endif %}
+
+        {% if section.settings.image_desktop != blank %}
+          <img
+            src="{{ section.settings.image_desktop | image_url: width: 1400 }}"
+            srcset="{{ section.settings.image_desktop | image_url: width: 480 }} 480w,
+                    {{ section.settings.image_desktop | image_url: width: 768 }} 768w,
+                    {{ section.settings.image_desktop | image_url: width: 1024 }} 1024w,
+                    {{ section.settings.image_desktop | image_url: width: 1400 }} 1400w,
+                    {{ section.settings.image_desktop | image_url: width: 1800 }} 1800w,
+                    {{ section.settings.image_desktop | image_url: width: 2200 }} 2200w,
+                    {{ section.settings.image_desktop | image_url: width: 2600 }} 2600w"
+            sizes="100vw"
+            alt="{{ section.settings.image_desktop.alt | escape }}"
+            width="{{ section.settings.image_desktop.width }}"
+            height="{{ section.settings.image_desktop.height }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {% else %}
+          {%- comment -%} fallback: usa mobile também no desktop {%- endcomment -%}
+          <img
+            src="{{ section.settings.image_mobile | image_url: width: 1400 }}"
+            srcset="{{ section.settings.image_mobile | image_url: width: 480 }} 480w,
+                    {{ section.settings.image_mobile | image_url: width: 768 }} 768w,
+                    {{ section.settings.image_mobile | image_url: width: 1024 }} 1024w,
+                    {{ section.settings.image_mobile | image_url: width: 1400 }} 1400w,
+                    {{ section.settings.image_mobile | image_url: width: 1800 }} 1800w,
+                    {{ section.settings.image_mobile | image_url: width: 2200 }} 2200w,
+                    {{ section.settings.image_mobile | image_url: width: 2600 }} 2600w"
+            sizes="100vw"
+            alt="{{ section.settings.image_mobile.alt | escape }}"
+            width="{{ section.settings.image_mobile.width }}"
+            height="{{ section.settings.image_mobile.height }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {% endif %}
+
+      </picture>
+    {% endif %}
+
+  </div>
+
+  <style>
+    /* Zera qualquer espaçamento do tema */
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} > *{
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* Full width real */
+    .section-{{ section.id }} .am-manifesto__bleed{
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+
+    /* Imagem */
+    .section-{{ section.id }} .am-manifesto__picture,
+    .section-{{ section.id }} .am-manifesto__picture img{
+      width: 100%;
+      height: auto; /* altura natural da imagem */
+      display: block;
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "A MARCA — Manifesto",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "Imagem (desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Imagem (mobile)"
+    }
+  ],
+  "presets": [
+    {
+      "name": "A MARCA — Manifesto"
+    }
+  ]
+}
+{% endschema %}

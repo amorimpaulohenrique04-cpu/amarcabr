@@ -1,0 +1,13 @@
+export class PaginatedListAspectRatioHelper{#imageRatioSetting=null;#ASPECT_RATIOS={square:'1',portrait:'0.8',landscape:'1.778',};constructor({templateCard}){if(!Shopify.designMode)return;this.#storeImageRatioSettings(templateCard)}
+processNewElements(){if(!Shopify.designMode)return;requestAnimationFrame(()=>{this.#imageRatioSetting==='adapt'?this.#fixAdaptiveAspectRatios():this.#applyFixedAspectRatio()})}
+#storeImageRatioSettings(templateCard){this.#imageRatioSetting=templateCard.getAttribute('data-image-ratio')}
+#fixAdaptiveAspectRatios(){const newCardGalleries=this.#getUnprocessedGalleries();if(!newCardGalleries.length)return;const productRatioCache=new Map();newCardGalleries.forEach((gallery)=>{if(!(gallery instanceof HTMLElement))return;const productId=gallery.getAttribute('data-product-id');if(productId&&productRatioCache.has(productId)){this.#applyAspectRatioToGallery(gallery,productRatioCache.get(productId));return}
+const img=gallery.querySelector('img');if(!img){this.#applyAspectRatioToGallery(gallery,'1');return}
+const loadAndSetRatio=()=>{if(!img.naturalWidth||!img.naturalHeight)return;const imgRatio=this.#getSafeImageAspectRatio(img.naturalWidth,img.naturalHeight);if(productId){productRatioCache.set(productId,imgRatio)}
+this.#applyAspectRatioToGallery(gallery,imgRatio)};if(img.complete){loadAndSetRatio()}else{img.addEventListener('load',loadAndSetRatio,{once:!0})}})}
+#applyFixedAspectRatio(){if(!this.#imageRatioSetting)return;const aspectRatio=this.#getAspectRatioValue(this.#imageRatioSetting);if(!aspectRatio)return;const newCardGalleries=this.#getUnprocessedGalleries();if(!newCardGalleries.length)return;requestAnimationFrame(()=>{newCardGalleries.forEach((gallery)=>{if(!(gallery instanceof HTMLElement))return;this.#applyAspectRatioToGallery(gallery,aspectRatio)})})}
+#getSafeImageAspectRatio(width,height){const rawRatio=width/height;return Math.max(0.1,Math.min(10,rawRatio)).toFixed(3)}
+#getAspectRatioValue(ratioSetting){return this.#ASPECT_RATIOS[ratioSetting]||null}
+#applyAspectRatioToGallery(gallery,aspectRatio){if(!(gallery instanceof HTMLElement))return;gallery.style.setProperty('--gallery-aspect-ratio',aspectRatio);const mediaContainers=gallery.querySelectorAll('.product-media-container');mediaContainers.forEach((container)=>{if(container instanceof HTMLElement){container.style.aspectRatio=aspectRatio}});this.#markAsProcessed(gallery)}
+#getUnprocessedGalleries(){return document.querySelectorAll('.card-gallery:not([data-aspect-ratio-applied])')}
+#markAsProcessed(gallery){if(!(gallery instanceof HTMLElement))return;gallery.setAttribute('data-aspect-ratio-applied','true')}}

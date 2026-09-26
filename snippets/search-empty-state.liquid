@@ -1,0 +1,37 @@
+<div class="am-search-empty">
+  <p class="am-search-empty__hint">
+    O que você está procurando?
+  </p>
+
+  <p class="am-search-empty__title">
+    Mais populares
+  </p>
+
+  <div class="am-search-empty__grid">
+    {% assign populares = collections['populares'].products | slice: 0, 4 %}
+    {% for product in populares %}
+      {% assign img = product.featured_image %}
+
+      <a href="{{ product.url }}" class="am-search-empty__card">
+        {% if img %}
+          <img
+            src="{{ img | image_url: width: 360 }}"
+            srcset="
+              {{ img | image_url: width: 180 }} 180w,
+              {{ img | image_url: width: 360 }} 360w,
+              {{ img | image_url: width: 540 }} 540w
+            "
+            sizes="(max-width: 749px) 100vw, 50vw"
+            width="{{ img.width }}"
+            height="{{ img.height }}"
+            alt="{{ img.alt | escape }}"
+            loading="lazy"
+            decoding="async"
+          >
+        {% endif %}
+
+        <span>{{ product.title }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</div>

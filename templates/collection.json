@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "seo_collection": {
+      "type": "seo-collection",
+      "settings": {
+        "products_per_page": 24,
+        "enable_hover_image": true,
+        "show_installments": true,
+        "background": "#ffffff",
+        "padding_top": 32,
+        "padding_bottom": 64
+      }
+    }
+  },
+  "order": ["seo_collection"]
+}

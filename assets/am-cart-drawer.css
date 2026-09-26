@@ -1,0 +1,83 @@
+.am-cart-backdrop{position:fixed;inset:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4) !important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:2147483640 !important;opacity:0;pointer-events:none;visibility:hidden;transition:opacity 0.3s ease;cursor:pointer}
+.am-cart-backdrop.is-visible{opacity:1;pointer-events:auto;visibility:visible}
+.am-cart-backdrop[hidden]{opacity:0;pointer-events:none;visibility:hidden}
+cart-drawer-component dialog.cart-drawer__dialog[open]::backdrop{position:fixed;inset:0;width:100vw;height:100vh;background:rgba(0,0,0,0.4) !important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:2147483640 !important;opacity:1;pointer-events:auto;transition:opacity 0.3s ease}
+html.am-cart-lock,html.am-cart-lock body{overflow:hidden !important}cart-drawer-component{display:contents}cart-drawer-component dialog.cart-drawer__dialog{all:unset;box-sizing:border-box;position:fixed;z-index:2147483647 !important;background:#ffffff;color:#000000;box-shadow:-10px 0 40px rgba(0,0,0,0.2);display:none;flex-direction:column;overflow:hidden;border:none;outline:none;top:10px;bottom:10px;right:10px;width:450px;height:calc(100vh - 20px);border-radius:20px}cart-drawer-component dialog.cart-drawer__dialog[open]{display:flex !important;animation:amCartSlideIn 0.4s cubic-bezier(0.2,0.8,0.2,1) forwards}cart-drawer-component dialog.cart-drawer__dialog.dialog-closing{animation:amCartSlideOut 0.3s cubic-bezier(0.2,0.8,0.2,1) forwards}@keyframes amCartSlideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes amCartSlideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}.cart-drawer__header{display:flex;align-items:center;justify-content:space-between;padding:24px 30px 15px;background:#ffffff;flex-shrink:0}.cart-drawer__title{font-family:inherit;font-weight:500;font-size:18px;letter-spacing:0.05em;text-transform:uppercase;margin:0}.cart-drawer__close{width:36px;height:36px;border-radius:50%;background:#f4f4f4;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s ease;color:#000}.cart-drawer__close:hover{background:#e0e0e0;transform:rotate(90deg)}.cart-drawer__close .svg-wrapper{width:14px;height:14px;display:flex}.cart-drawer__close svg{width:100%;height:100%}.cart-drawer__content{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 30px;-webkit-overflow-scrolling:touch}.cart-drawer__content::-webkit-scrollbar{width:4px}.cart-drawer__content::-webkit-scrollbar-thumb{background:#e0e0e0;border-radius:10px}.cart-drawer__items{display:flex;flex-direction:column}.cart-drawer__item{display:grid;grid-template-columns:80px 1fr;gap:16px;padding:20px 0;border-bottom:1px solid #f0f0f0;align-items:start}.cart-drawer__thumb{width:80px;height:105px;border-radius:6px;overflow:hidden;background:#f9f9f9;position:relative;display:block}.cart-drawer__thumb img{width:100%;height:100%;object-fit:cover}.cart-drawer__meta{display:flex;flex-direction:column;justify-content:space-between;min-height:105px}.cart-drawer__name{font-size:14px;font-weight:500;line-height:1.4;color:#000;text-decoration:none;display:block;margin-bottom:4px}.cart-drawer__variant{font-size:12px;color:#777}.cart-drawer__row{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:10px}.cart-drawer__price{font-weight:600;font-size:14px}.cart-drawer__qty .quantity-selector,.cart-drawer__qty cart-quantity-selector-component,.cart-drawer__qty quantity-selector-component{display:flex;align-items:center;border:1px solid #ddd;border-radius:100px;height:30px;background:#fff;width:fit-content;overflow:hidden}.cart-drawer__qty button{width:28px;height:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333}.cart-drawer__qty button:hover{background:#f5f5f5}.cart-drawer__qty input{width:32px;height:100%;border:0;text-align:center;font-size:12px;font-weight:600;background:transparent;color:#000;padding:0;-moz-appearance:textfield}.cart-drawer__remove{background:transparent;border:0;padding:0;font-size:11px;color:#999;text-decoration:underline;cursor:pointer;margin-left:10px}.cart-drawer__remove:hover{color:#d00}.cart-drawer__remove .svg-wrapper{display:none}.cart-drawer__footer{padding:20px 30px 30px;background:#ffffff;border-top:1px solid #f0f0f0}.cart-drawer__subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.cart-drawer__subtotal span{font-size:13px;color:#666;text-transform:uppercase}.cart-drawer__subtotal strong{font-size:18px;color:#000}.cart-drawer__primary{display:flex;justify-content:center;align-items:center;width:100%;padding:16px;background:#000;color:#fff;border:1px solid #000;border-radius:100px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;text-decoration:none;transition:transform 0.2s}.cart-drawer__primary:hover{transform:scale(1.02);background:#222}.cart-drawer__secondary{display:block;text-align:center;margin-top:15px;font-size:12px;text-decoration:underline;color:#666;background:transparent;border:0;cursor:pointer}.cart-drawer__note{display:none}.cart-drawer__empty{padding:60px 20px;text-align:center;color:#888;font-size:15px}@media (max-width:600px){cart-drawer-component dialog.cart-drawer__dialog{top:0 !important;bottom:0 !important;right:0 !important;left:auto !important;width:85vw !important;max-width:none !important;height:100% !important;height:100dvh !important;border-radius:0 !important;border-top-left-radius:20px !important;border-bottom-left-radius:20px !important;box-shadow:-5px 0 30px rgba(0,0,0,0.2) !important}.cart-drawer__header{padding:20px 20px 10px}.cart-drawer__content{padding:0 20px}.cart-drawer__footer{padding:20px 20px 25px}.cart-drawer__item{grid-template-columns:70px 1fr;gap:14px}.cart-drawer__thumb{width:70px;height:95px}}.am-cart-backdrop{opacity:0;visibility:hidden;pointer-events:none}.am-cart-backdrop.is-visible{opacity:1;visibility:visible;pointer-events:auto}html.am-cart-restoring cart-drawer-component dialog.cart-drawer__dialog,html.am-cart-restoring cart-drawer-component dialog.cart-drawer__dialog[open]{display:none !important;animation:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important}html.am-cart-restoring .am-cart-backdrop{opacity:0 !important;visibility:hidden !important;pointer-events:none !important;transition:none !important}@media (prefers-reduced-motion:reduce){cart-drawer-component dialog.cart-drawer__dialog[open],cart-drawer-component dialog.cart-drawer__dialog.dialog-closing{animation:none !important}.am-cart-backdrop{transition:none !important}}
+/* v6.0 — Cart Drawer UX Enhancements */
+.cart-drawer__item{position:relative}.cart-drawer__meta{position:relative}.cart-drawer__item .cart-drawer__name{padding-right:28px}
+.cart-drawer__remove-x{position:absolute;top:0;right:0;width:24px;height:24px;border:none;background:transparent;font-size:20px;line-height:1;color:#999;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;transition:color 0.2s ease,background 0.2s ease;z-index:1}
+.cart-drawer__remove-x:hover,.cart-drawer__remove-x:focus-visible{color:#d00;background:rgba(221,0,0,0.08)}
+.cart-drawer__remove-x:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.cart-drawer__item.is-loading{opacity:0.45;pointer-events:none;transition:opacity 0.2s ease}
+.cart-drawer__item.is-loading::after{content:'';position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border:2px solid rgba(0,0,0,0.15);border-top-color:#000;border-radius:50%;animation:amCartSpin 0.6s linear infinite;z-index:2}
+@keyframes amCartSpin{to{transform:rotate(360deg)}}
+.cart-drawer__item.is-loading button,.cart-drawer__item.is-loading input{pointer-events:none}
+.cart-drawer--updating .cart-drawer__content{opacity:0.5;pointer-events:none;transition:opacity 0.2s ease}
+.cart-drawer__global-error{padding:10px 16px;margin-bottom:12px;background:#fef2f2;color:#b91c1c;font-size:13px;border-radius:8px;text-align:center;animation:amCartFadeIn 0.3s ease}
+.cart-drawer__global-error[hidden]{display:none}
+@keyframes amCartFadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.cart-drawer__item.is-loading::after{animation:none}.cart-drawer__global-error{animation:none}}
+
+/* PERF: keep the same drawer state/shape, but make mobile motion feel immediate. */
+cart-drawer-component dialog.cart-drawer__dialog{
+will-change:transform,opacity;
+transform:translate3d(110%,0,0);
+backface-visibility:hidden;
+contain:layout paint;
+}
+cart-drawer-component dialog.cart-drawer__dialog[open]{
+animation-duration:220ms!important;
+animation-timing-function:cubic-bezier(.2,.8,.2,1)!important;
+}
+cart-drawer-component dialog.cart-drawer__dialog.dialog-closing{
+animation-duration:180ms!important;
+animation-timing-function:cubic-bezier(.2,.8,.2,1)!important;
+}
+.am-cart-backdrop,
+cart-drawer-component dialog.cart-drawer__dialog[open]::backdrop{
+will-change:opacity;
+transition-duration:160ms!important;
+}
+@keyframes amCartSlideIn{
+from{transform:translate3d(110%,0,0);opacity:0}
+to{transform:translate3d(0,0,0);opacity:1}
+}
+@keyframes amCartSlideOut{
+from{transform:translate3d(0,0,0);opacity:1}
+to{transform:translate3d(110%,0,0);opacity:0}
+}
+@media (max-width:600px){
+cart-drawer-component dialog.cart-drawer__dialog[open]{animation-duration:190ms!important}
+cart-drawer-component dialog.cart-drawer__dialog.dialog-closing{animation-duration:160ms!important}
+}
+
+/* PERF: one lightweight backdrop; the native dialog backdrop stays transparent. */
+.am-cart-backdrop{
+background:rgba(0,0,0,.38)!important;
+backdrop-filter:none!important;
+-webkit-backdrop-filter:none!important;
+transition-duration:120ms!important;
+}
+cart-drawer-component dialog.cart-drawer__dialog[open]::backdrop{
+  background:transparent!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  transition:none!important;
+}
+
+cart-drawer-component dialog.cart-drawer__dialog{
+  opacity:0;
+}
+
+cart-drawer-component dialog.cart-drawer__dialog.am-cart-no-motion[open]:not(.dialog-closing){
+  animation:none!important;
+  transform:translate3d(0,0,0)!important;
+  opacity:1!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  cart-drawer-component dialog.cart-drawer__dialog[open]{
+    transform:translate3d(0,0,0)!important;
+    opacity:1!important;
+  }
+}

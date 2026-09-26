@@ -1,0 +1,569 @@
+{%- style -%}
+  .ab {
+    --ab-bg: {{ section.settings.bg_color }};
+    --ab-text: {{ section.settings.text_color }};
+    --ab-accent: {{ section.settings.accent_color }};
+    --ab-size: {{ section.settings.font_size }}px;
+    --ab-size-m: {{ section.settings.font_size_mobile }}px;
+    --ab-h: {{ section.settings.bar_height }}px;
+    --ab-h-m: {{ section.settings.bar_height_mobile }}px;
+    --ab-speed: {{ section.settings.marquee_speed }}s;
+    --ab-gap: {{ section.settings.item_gap }}px;
+    --ab-ls: {{ section.settings.letter_spacing | times: 0.01 }}em;
+
+    position: relative;
+    width: 100%;
+    background: var(--ab-bg);
+    color: var(--ab-text);
+    height: var(--ab-h);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    z-index: var(--layer-base);
+    font-size: var(--ab-size);
+    font-weight: {{ section.settings.font_weight }};
+    letter-spacing: var(--ab-ls);
+    line-height: 1;
+    {% if section.settings.text_transform != 'none' %}
+      text-transform: {{ section.settings.text_transform }};
+    {% endif %}
+    {% if section.settings.show_border %}
+      border-bottom: 1px solid {{ section.settings.border_color }};
+    {% endif %}
+  }
+
+  /* ——— Entrance ——— */
+  {% if section.settings.entrance == 'fade' %}
+    .ab { animation: abFade .8s ease both; }
+    @keyframes abFade { from { opacity: 0 } }
+  {% elsif section.settings.entrance == 'slide' %}
+    .ab { animation: abSlide .5s cubic-bezier(.4,0,.2,1) both; }
+    @keyframes abSlide { from { transform: translateY(-100%) } }
+  {% endif %}
+
+  /* ——— Static mode ——— */
+  .ab__static {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35em;
+    padding: 0 40px;
+    text-align: center;
+  }
+
+  .ab__static a,
+  .ab__item a {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    transition: opacity .4s ease;
+  }
+
+  .ab__static a:hover,
+  .ab__item a:hover { opacity: .55; }
+
+  /* ——— Marquee mode ——— */
+  .ab__track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    gap: var(--ab-gap);
+    animation: abScroll var(--ab-speed) linear infinite;
+    will-change: transform;
+  }
+
+  {% if section.settings.direction == 'right' %}
+    .ab__track { animation-direction: reverse; }
+  {% endif %}
+
+  {% if section.settings.pause_on_hover %}
+    .ab:hover .ab__track { animation-play-state: paused; }
+  {% endif %}
+
+  @keyframes abScroll {
+    to { transform: translateX(-50%); }
+  }
+
+  .ab__item {
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    white-space: nowrap;
+  }
+
+  /* ——— Coupon ——— */
+  .ab__code {
+    color: var(--ab-accent);
+    {% case section.settings.coupon_style %}
+      {% when 'medium' %}
+        font-weight: 500;
+      {% when 'underline' %}
+        font-weight: 500;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 1px;
+      {% when 'spaced' %}
+        font-weight: 500;
+        letter-spacing: .12em;
+      {% when 'border' %}
+        font-weight: 400;
+        border: 1px solid var(--ab-accent);
+        padding: 3px 10px;
+        margin: 0 2px;
+        line-height: 1;
+      {% when 'italic' %}
+        font-weight: 400;
+        font-style: italic;
+    {% endcase %}
+  }
+
+  /* ——— Separator ——— */
+  .ab__sep {
+    flex-shrink: 0;
+    opacity: {{ section.settings.separator_opacity | times: 0.01 }};
+    display: inline-flex;
+    align-items: center;
+    color: var(--ab-text);
+  }
+
+  .ab__sep svg {
+    width: {{ section.settings.separator_size }}px;
+    height: {{ section.settings.separator_size }}px;
+    fill: currentColor;
+  }
+
+  {% if section.settings.separator_animation == 'spin' %}
+    .ab__sep svg { animation: abSpin 6s linear infinite; }
+    @keyframes abSpin { to { transform: rotate(360deg) } }
+  {% elsif section.settings.separator_animation == 'pulse' %}
+    .ab__sep svg { animation: abPulse 3s ease-in-out infinite; }
+    @keyframes abPulse { 0%,100% { opacity: {{ section.settings.separator_opacity | times: 0.01 }} } 50% { opacity: 1 } }
+  {% endif %}
+
+  /* ——— Close ——— */
+  .ab__close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: none;
+    border: none;
+    color: var(--ab-text);
+    cursor: pointer;
+    padding: 4px;
+    opacity: .35;
+    transition: opacity .4s ease;
+    display: {% if section.settings.show_close %}flex{% else %}none{% endif %};
+  }
+  .ab__close:hover { opacity: .8; }
+  .ab__close svg { width: 12px; height: 12px; }
+
+  .ab.is-out { animation: abOut .35s ease forwards; }
+  @keyframes abOut { to { height: 0; opacity: 0; overflow: hidden } }
+
+  /* ——— Responsive ——— */
+  @media (max-width: 749px) {
+    .ab {
+      height: var(--ab-h-m);
+      font-size: var(--ab-size-m);
+    }
+    .ab__sep svg {
+      width: calc({{ section.settings.separator_size }}px * .7);
+      height: calc({{ section.settings.separator_size }}px * .7);
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign before = section.settings.text_before
+  assign coupon = section.settings.coupon_code
+  assign after  = section.settings.text_after
+  assign link   = section.settings.link
+  assign mode   = section.settings.display_mode
+  assign reps   = section.settings.repetitions
+-%}
+
+{%- capture sep_icon -%}
+  {%- case section.settings.separator_icon -%}
+    {%- when 'dot' -%}<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/></svg>
+    {%- when 'line' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    {%- when 'diamond' -%}<svg viewBox="0 0 24 24"><rect x="12" y="5" width="10" height="10" rx=".5" transform="rotate(45 12 12)"/></svg>
+    {%- when 'star' -%}<svg viewBox="0 0 24 24"><polygon points="12,4 14,10 20,10 15,14 17,20 12,16 7,20 9,14 4,10 10,10"/></svg>
+    {%- when 'slash' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><line x1="14" y1="6" x2="10" y2="18"/></svg>
+    {%- when 'circle' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="4"/></svg>
+  {%- endcase -%}
+{%- endcapture -%}
+
+{%- capture content -%}
+  {%- if before != blank %}<span>{{ before }}</span>{% endif -%}
+  {%- if coupon != blank %}<span class="ab__code">{{ coupon }}</span>{% endif -%}
+  {%- if after != blank %}<span>{{ after }}</span>{% endif -%}
+{%- endcapture -%}
+
+<div class="ab" id="ab-{{ section.id }}" role="region" aria-label="{{ section.settings.aria_label | default: 'Anúncio' }}">
+
+  {% if mode == 'static' %}
+    <div class="ab__static">
+      {% if link != blank %}<a href="{{ link }}" {% if section.settings.open_new_tab %}target="_blank" rel="noopener"{% endif %}>{% endif %}
+        {{ content }}
+      {% if link != blank %}</a>{% endif %}
+    </div>
+
+  {% else %}
+    <div class="ab__track">
+      {% for i in (1..2) %}
+        {% for j in (1..reps) %}
+          <div class="ab__item">
+            {% if link != blank %}<a href="{{ link }}" {% if section.settings.open_new_tab %}target="_blank" rel="noopener"{% endif %}>{% endif %}
+              {{ content }}
+            {% if link != blank %}</a>{% endif %}
+          </div>
+          <span class="ab__sep">{{ sep_icon }}</span>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if section.settings.show_close %}
+    <button class="ab__close" aria-label="Fechar" onclick="this.closest('.ab').classList.add('is-out');setTimeout(()=>this.closest('.ab').style.display='none',350)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  {% endif %}
+
+</div>
+
+{% schema %}
+{
+  "name": "✦ Announcement Bar",
+  "tag": "section",
+  "class": "ab-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Conteúdo"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text_before",
+      "label": "Texto antes do cupom",
+      "default": "Use o cupom"
+    },
+    {
+      "type": "text",
+      "id": "coupon_code",
+      "label": "Código do cupom",
+      "default": "SOUMARCADO"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text_after",
+      "label": "Texto depois do cupom",
+      "default": "e ganhe 10% off na primeira compra"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_new_tab",
+      "label": "Abrir em nova aba",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Cores"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fundo",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Texto",
+      "default": "#e8e8e8"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Destaque do cupom",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Borda inferior",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Cor da borda",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Tipografia"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamanho — Desktop",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "label": "Tamanho — Mobile",
+      "min": 9,
+      "max": 14,
+      "step": 1,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Peso",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" }
+      ],
+      "default": "300"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaçamento",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 8,
+      "info": "÷ 100 — ex: 8 = 0.08em"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Caixa",
+      "options": [
+        { "value": "uppercase", "label": "Maiúsculas" },
+        { "value": "none", "label": "Normal" },
+        { "value": "lowercase", "label": "Minúsculas" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "Estilo do cupom"
+    },
+    {
+      "type": "select",
+      "id": "coupon_style",
+      "label": "Destaque",
+      "options": [
+        { "value": "medium", "label": "Medium weight" },
+        { "value": "underline", "label": "Underline" },
+        { "value": "spaced", "label": "Espaçado" },
+        { "value": "border", "label": "Borda fina" },
+        { "value": "italic", "label": "Itálico" }
+      ],
+      "default": "spaced"
+    },
+    {
+      "type": "header",
+      "content": "Exibição"
+    },
+    {
+      "type": "select",
+      "id": "display_mode",
+      "label": "Modo",
+      "options": [
+        { "value": "static", "label": "Estático" },
+        { "value": "marquee", "label": "Marquee" }
+      ],
+      "default": "marquee"
+    },
+    {
+      "type": "range",
+      "id": "marquee_speed",
+      "label": "Velocidade",
+      "min": 15,
+      "max": 120,
+      "step": 5,
+      "default": 90,
+      "unit": "s"
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Direção",
+      "options": [
+        { "value": "left", "label": "← Esquerda" },
+        { "value": "right", "label": "→ Direita" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pausar no hover",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "repetitions",
+      "label": "Repetições",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "entrance",
+      "label": "Animação de entrada",
+      "options": [
+        { "value": "none", "label": "Nenhuma" },
+        { "value": "fade", "label": "Fade" },
+        { "value": "slide", "label": "Slide" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Separador"
+    },
+    {
+      "type": "select",
+      "id": "separator_icon",
+      "label": "Ícone",
+      "options": [
+        { "value": "dot", "label": "·" },
+        { "value": "line", "label": "—" },
+        { "value": "slash", "label": "/" },
+        { "value": "diamond", "label": "◇" },
+        { "value": "circle", "label": "○" },
+        { "value": "star", "label": "☆" }
+      ],
+      "default": "dot"
+    },
+    {
+      "type": "range",
+      "id": "separator_size",
+      "label": "Tamanho",
+      "min": 4,
+      "max": 14,
+      "step": 1,
+      "default": 6,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Espaço entre itens",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "default": 50,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "separator_opacity",
+      "label": "Opacidade",
+      "min": 10,
+      "max": 100,
+      "step": 10,
+      "default": 30,
+      "unit": "%"
+    },
+    {
+      "type": "select",
+      "id": "separator_animation",
+      "label": "Animação",
+      "options": [
+        { "value": "none", "label": "Nenhuma" },
+        { "value": "spin", "label": "Girar (lento)" },
+        { "value": "pulse", "label": "Pulsar (sutil)" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "label": "Altura — Desktop",
+      "min": 30,
+      "max": 52,
+      "step": 2,
+      "default": 38,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "bar_height_mobile",
+      "label": "Altura — Mobile",
+      "min": 26,
+      "max": 44,
+      "step": 2,
+      "default": 32,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close",
+      "label": "Botão fechar",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Aria label",
+      "default": "Anúncio"
+    }
+  ],
+  "presets": [
+    {
+      "name": "✦ Announcement Bar",
+      "settings": {
+        "text_before": "Use o cupom",
+        "coupon_code": "SOUMARCADO",
+        "text_after": "e ganhe 10% off na primeira compra",
+        "bg_color": "#000000",
+        "text_color": "#e8e8e8",
+        "accent_color": "#ffffff",
+        "font_size": 12,
+        "font_size_mobile": 10,
+        "font_weight": "300",
+        "letter_spacing": 8,
+        "text_transform": "uppercase",
+        "coupon_style": "spaced",
+        "display_mode": "marquee",
+        "marquee_speed": 35,
+        "separator_icon": "dot",
+        "separator_size": 6,
+        "separator_opacity": 30,
+        "separator_animation": "none",
+        "item_gap": 50,
+        "bar_height": 38,
+        "bar_height_mobile": 32
+      }
+    }
+  ]
+}
+{% endschema %}

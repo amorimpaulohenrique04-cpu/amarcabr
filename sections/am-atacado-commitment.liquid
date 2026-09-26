@@ -1,0 +1,36 @@
+{% comment %}
+  A MARCA — Atacado: Compromisso / Escassez real
+{% endcomment %}
+
+<link rel="stylesheet" href="{{ 'am-atacado.css' | asset_url }}" media="print" onload="this.media='all'">
+<noscript>{{ 'am-atacado.css' | asset_url | stylesheet_tag }}</noscript>
+
+<section class="am-atacado am-atacado-commitment color-{{ section.settings.color_scheme }}">
+  <div class="am-atacado__container--narrow">
+    <div class="am-card am-card--soft am-atacado-commitment__box">
+      {% if section.settings.eyebrow != blank %}
+        <p class="am-eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+
+      <h2 class="am-title am-title--lg">{{ section.settings.title }}</h2>
+
+      {% if section.settings.text != blank %}
+        <div class="am-divider"></div>
+        <div class="am-text">{{ section.settings.text | newline_to_br }}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "AM — Atacado: Compromisso",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Esquema de cores", "default": "scheme-1" },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "COMPROMISSO" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Poucos parceiros por região." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Trabalhamos com um número reduzido de parceiros por região, preservando o valor da marca e evitando saturação.\n\nIsso garante consistência de posicionamento e uma relação saudável entre produção, distribuição e desejo." }
+  ],
+  "presets": [{ "name": "AM — Atacado: Compromisso" }]
+}
+{% endschema %}

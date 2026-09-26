@@ -1,0 +1,679 @@
+{%- comment -%}
+  Editorial Product Grid - V9 (Header-aligned on ALL breakpoints)
+  Fix v2:
+  - Some themes set --am-header-x / --am-header-max with breakpoint-specific styles inside header.
+  - The Theme Editor "tablet" preview can change viewport AFTER DOMContentLoaded.
+  - Solution: sync these vars on load + on resize/orientation + on Shopify editor section events.
+{%- endcomment -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }}{
+    /* Grid Layout */
+    --grid-desktop: {{ section.settings.columns_desktop }};
+    --grid-tablet: {{ section.settings.columns_tablet }};
+    --grid-mobile: {{ section.settings.columns_mobile }};
+    --gap: {{ section.settings.grid_gap }}px;
+
+    /* Colors */
+    --card-bg: {{ section.settings.card_bg }};
+    --heading-color: {{ section.settings.heading_color }};
+    --price-color: {{ section.settings.price_color }};
+
+    /* Card Shape */
+    --radius: {{ section.settings.card_radius }}px;
+    --aspect-ratio: {{ section.settings.image_ratio }};
+
+    /* Badges */
+    --badge-bg: {{ section.settings.badge_bg }};
+    --badge-text: {{ section.settings.badge_text }};
+
+    /* Fonts */
+    --font-body: 'Inter', sans-serif;
+
+    /* CTA BUTTON SETTINGS */
+    --cta-desktop-min-width: {{ section.settings.cta_desktop_width }}px;
+    --cta-desktop-font-size: {{ section.settings.cta_desktop_font_size }}px;
+    --cta-desktop-padding: {{ section.settings.cta_desktop_padding }}px;
+
+    --cta-mobile-size: {{ section.settings.cta_mobile_size }}px;
+    --cta-mobile-icon-size: {{ section.settings.cta_mobile_size | divided_by: 2.2 }}px;
+
+    --hover-cta-speed: 240ms;
+  }
+
+  .eurus-grid{
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    width: 100%;
+    max-width: 100%;
+    display: block;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .eurus-grid__wrapper.am-page-width{
+    max-width: var(--am-header-max, var(--page-width, {{ section.settings.section_max_width }}px));
+    margin-inline: auto;
+    padding-inline: var(--am-header-x, var(--page-margin, 16px));
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Header da Seção */
+  .eurus-grid__header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin: 0 0 32px 0;
+    row-gap: 12px;
+  }
+  @media (max-width: 767px){
+    .eurus-grid__header{ margin: 0 0 24px 0; gap: 16px; }
+  }
+
+  .eurus-grid__icon{ display:inline-flex; width: {{ section.settings.title_icon_size }}px; height: {{ section.settings.title_icon_size }}px; flex: 0 0 auto; }
+  .eurus-grid__icon img{ width:100%; height:100%; object-fit:contain; display:block; }
+  .eurus-grid__header-left{ display: flex; align-items: center; gap: {{ section.settings.title_gap }}px; }
+  
+  /* --- Link Premium: View All --- */
+  .eurus-grid__view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 11px; /* Tamanho editorial pequeno */
+    text-transform: uppercase;
+    letter-spacing: 0.2em; /* Espaçamento chique */
+    font-weight: 500;
+    color: {{ section.settings.title_color }};
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    position: relative;
+    padding-bottom: 2px;
+  }
+
+  .eurus-grid__view-all:hover {
+    opacity: 1;
+  }
+
+  /* A Linha Fina Animada */
+  .eurus-grid__view-all::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px; /* Linha ultra fina */
+    bottom: -2px; /* Distância do texto */
+    left: 0;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .eurus-grid__view-all:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+  }
+
+  /* A Seta (ícone) */
+  .eurus-view-arrow {
+    width: 10px;
+    height: 10px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    transition: transform 0.4s ease;
+  }
+
+  .eurus-grid__view-all:hover .eurus-view-arrow {
+    transform: translateX(4px); /* Seta anda para direita */
+  }
+
+  /* --- Ajuste Mobile: Ultra Compacto --- */
+  @media (max-width: 767px) {
+    .eurus-grid__view-all {
+      font-size: 9px; /* Bem menor */
+      letter-spacing: 0.1em; /* Um pouco mais junto para economizar espaço */
+      opacity: 0.8; /* Levemente mais visível por ser pequeno */
+      gap: 4px; /* Seta mais perto do texto */
+      align-self: flex-end; /* Alinha na base do título */
+      margin-bottom: 3px; /* Ajuste fino de alinhamento */
+    }
+
+    .eurus-view-arrow {
+      width: 8px; /* Seta minúscula */
+      height: 8px;
+    }
+    
+    /* Remove a animação de deslocamento no mobile para economizar processamento/espaço */
+    .eurus-grid__view-all:hover .eurus-view-arrow {
+       transform: none;
+    }
+  }
+
+  .eurus-grid__title{
+    font-family: var(--font-body);
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: {{ section.settings.title_weight }};
+    line-height: 1.1;
+    color: {{ section.settings.title_color }};
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* Grid Container - min-width:0 evita overflow em mobile */
+  .eurus-grid__container{
+    display: grid;
+    grid-template-columns: repeat(var(--grid-mobile), minmax(0, 1fr));
+    gap: var(--gap);
+    width: 100%;
+    min-width: 0;
+  }
+  @media (min-width: 768px){ .eurus-grid__container{ grid-template-columns: repeat(var(--grid-tablet), minmax(0, 1fr)); } }
+  @media (min-width: 1024px){ .eurus-grid__container{ grid-template-columns: repeat(var(--grid-desktop), minmax(0, 1fr)); } }
+
+  /* Card Base - min-width:0 permite cards encolherem no grid */
+  .eurus-card{
+    position: relative;
+    background-color: var(--card-bg);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .eurus-card.is-visible{ opacity: 1; transform: translateY(0); }
+
+  /* Media Wrapper */
+  .eurus-card__media-wrap{
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--aspect-ratio);
+    overflow: hidden;
+    background-color: #f4f4f4;
+    border-radius: var(--radius);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .eurus-card__media{ position:absolute; inset:0; display:block; z-index:1; }
+  .eurus-card__media img{
+    width:100%; height:100%; object-fit:cover;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 300ms ease;
+    transform: scale(1);
+  }
+  @media(hover:hover){ .eurus-card:hover .eurus-card__media img{ transform: scale(1.04); } }
+
+  .eurus-card__img--secondary{ position:absolute; inset:0; opacity:0; z-index:1; }
+  {% if section.settings.enable_hover_image %}
+    @media (hover:hover){
+      .eurus-card:hover .eurus-card__img--secondary{ opacity:1; }
+      .eurus-card:hover .eurus-card__img--primary{ opacity:0; }
+    }
+    @media (hover:none){
+      .eurus-card__img--secondary{ opacity:0 !important; }
+      .eurus-card__img--primary{ opacity:1 !important; }
+    }
+  {% endif %}
+
+  /* CTA Forms */
+  .eurus-card__form{ position:absolute; inset:0; z-index:4; margin:0; pointer-events:none; }
+
+  .eurus-hover-cta{
+    position:absolute;
+    left:50%;
+    bottom:24px;
+    min-width: var(--cta-desktop-min-width);
+    padding: var(--cta-desktop-padding) 0;
+
+    background:#fff;
+    color:#000;
+    border:1px solid transparent;
+    border-radius:999px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: var(--cta-desktop-font-size);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+
+    transform: translate(-50%, 15px);
+    opacity:0;
+    transition: transform .4s cubic-bezier(.2,.8,.2,1), opacity .3s ease, background .2s ease, box-shadow .2s ease;
+    pointer-events:auto;
+  }
+
+  @media (hover:hover) and (min-width: 1024px){
+    .eurus-card:hover .eurus-hover-cta{ transform: translate(-50%, 0); opacity:1; }
+    .eurus-hover-cta:hover{ background:#fff; box-shadow: 0 6px 24px rgba(0,0,0,0.12); transform: translate(-50%, -1px); }
+  }
+
+  .eurus-btn-mobile{
+    display:flex; align-items:center; justify-content:center;
+    position:absolute; bottom:12px; right:12px;
+    width: var(--cta-mobile-size);
+    height: var(--cta-mobile-size);
+    border-radius:50%;
+    background:#fff; color:#000; border:none;
+    z-index:5;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+    cursor:pointer;
+    pointer-events:auto;
+  }
+  /* Altera de preenchimento (fill) para traço fino (stroke) */
+  .eurus-btn-mobile svg { 
+    width: var(--cta-mobile-icon-size); 
+    height: var(--cta-mobile-icon-size); 
+    fill: none; /* Remove o preenchimento preto */
+    stroke: currentColor; /* Usa a cor do texto para a linha */
+    stroke-width: 1.3px; /* Espessura fina e elegante */
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s ease;
+  }
+  
+  /* Efeito sutil ao tocar no mobile */
+  .eurus-btn-mobile:active svg {
+    transform: scale(0.9);
+  }
+  @media (min-width: 1024px){ .eurus-btn-mobile{ display:none; } }
+
+  /* Content */
+  .eurus-card__content{
+    padding: 14px 0 24px 0;
+    display:flex; flex-direction:column; align-items:flex-start;
+    text-align:left;
+  }
+
+  .eurus-card__title{
+    font-family: var(--font-body);
+    color:#000;
+    font-weight:700;
+    font-size:14px;
+    line-height:1.2;
+    margin:0 0 4px 0;
+    text-decoration:none;
+    width:100%;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .eurus-card__price{
+    font-family: var(--font-body);
+    color:#1a1a1a;
+    font-weight:500;
+    font-size:15px;
+    line-height:1.2;
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:2px;
+  }
+  .eurus-card__price--compare{ text-decoration: line-through; opacity:.5; font-size:13px; font-weight:400; }
+
+
+  .eurus-card__sale-tag{
+    display:inline-flex; align-items:center;
+    padding: 3px 7px;
+    border-radius:2px;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    font-family: var(--font-body);
+    font-size:10px; font-weight:600;
+    letter-spacing:.08em; text-transform:uppercase;
+    line-height:1;
+  }
+
+  .eurus-card__installments{ font-family: var(--font-body); color:#666; font-size:12px; font-weight:400; line-height:1.2; }
+  .eurus-card__installments .installment-3x{ display:block; }
+{%- endstyle -%}
+{%- liquid
+  case section.settings.columns_desktop
+    when 1
+      assign am_sizes_desktop = '100vw'
+    when 2
+      assign am_sizes_desktop = '50vw'
+    when 3
+      assign am_sizes_desktop = '33vw'
+    else
+      assign am_sizes_desktop = '25vw'
+  endcase
+
+  case section.settings.columns_tablet
+    when 1
+      assign am_sizes_tablet = '100vw'
+    when 2
+      assign am_sizes_tablet = '50vw'
+    else
+      assign am_sizes_tablet = '33vw'
+  endcase
+
+  case section.settings.columns_mobile
+    when 1
+      assign am_sizes_mobile = '100vw'
+    else
+      assign am_sizes_mobile = '50vw'
+  endcase
+
+  assign am_card_sizes = '(min-width: 1200px) ' | append: am_sizes_desktop | append: ', (min-width: 750px) ' | append: am_sizes_tablet | append: ', ' | append: am_sizes_mobile
+-%}
+
+
+<div class="eurus-grid" id="editorial-grid-{{ section.id }}">
+  <div class="eurus-grid__wrapper am-page-width">
+    {%- assign view_all_url = section.settings.view_all_link | default: section.settings.collection.url -%}
+    {%- assign has_view_all = false -%}
+    {%- if section.settings.show_view_all_link and view_all_url != blank -%}
+      {%- assign has_view_all = true -%}
+    {%- endif -%}
+    {%- if section.settings.show_title or has_view_all -%}
+      <div class="eurus-grid__header">
+        {%- if section.settings.show_title -%}
+          <div class="eurus-grid__header-left">
+            {%- if section.settings.title_icon != blank -%}
+              <span class="eurus-grid__icon" aria-hidden="true">
+                {{ section.settings.title_icon | image_url: width: 120 | image_tag: loading: 'lazy' }}
+              </span>
+            {%- endif -%}
+            <h2 class="eurus-grid__title">{{ section.settings.title_text }}</h2>
+          </div>
+        {%- endif -%}
+        {%- if has_view_all -%}
+          <a href="{{ view_all_url }}" class="eurus-grid__view-all" aria-label="{{ section.settings.view_all_text | escape }}">
+            <span>{{ section.settings.view_all_text }}</span>
+            <svg class="eurus-view-arrow" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 6H11" stroke-linecap="round"/>
+              <path d="M6 1L11 6L6 11" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="eurus-grid__container">
+      {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
+        <div class="eurus-card js-reveal-card">
+          <div class="eurus-card__media-wrap" data-product-url="{{ product.url }}">
+            <a href="{{ product.url }}" class="eurus-card__media" aria-label="{{ product.title | escape }}">
+              {%- if product.featured_media -%}
+                {%- assign primary_image = product.featured_media.preview_image -%}
+                {%- if primary_image != blank -%}
+                  <img
+                    class="eurus-card__img--primary"
+                    src="{{ primary_image | image_url: width: 400 }}"
+                    srcset="
+                      {{ primary_image | image_url: width: 165 }} 165w,
+                      {{ primary_image | image_url: width: 240 }} 240w,
+                      {{ primary_image | image_url: width: 320 }} 320w,
+                      {{ primary_image | image_url: width: 400 }} 400w,
+                      {{ primary_image | image_url: width: 550 }} 550w,
+                      {{ primary_image | image_url: width: 750 }} 750w,
+                      {{ primary_image | image_url: width: 1000 }} 1000w"
+                    sizes="{{ am_card_sizes }}"
+                    loading="lazy"
+                    decoding="async"
+                    width="{{ primary_image.width }}"
+                    height="{{ primary_image.height }}"
+                    alt="{{ primary_image.alt | default: product.title | escape }}"
+                  >
+                {%- endif -%}
+
+                {%- if product.media[1] != nil and section.settings.enable_hover_image -%}
+                  {%- assign secondary_image = product.media[1].preview_image -%}
+                  {%- if secondary_image != blank -%}
+                    <img
+                      class="eurus-card__img--secondary"
+                      src="{{ secondary_image | image_url: width: 400 }}"
+                      srcset="
+                        {{ secondary_image | image_url: width: 165 }} 165w,
+                        {{ secondary_image | image_url: width: 240 }} 240w,
+                        {{ secondary_image | image_url: width: 320 }} 320w,
+                        {{ secondary_image | image_url: width: 400 }} 400w,
+                        {{ secondary_image | image_url: width: 550 }} 550w,
+                        {{ secondary_image | image_url: width: 750 }} 750w,
+                        {{ secondary_image | image_url: width: 1000 }} 1000w"
+                      sizes="{{ am_card_sizes }}"
+                      loading="lazy"
+                      decoding="async"
+                      width="{{ secondary_image.width }}"
+                      height="{{ secondary_image.height }}"
+                      alt="{{ secondary_image.alt | default: product.title | escape }}"
+                    >
+                  {%- endif -%}
+                {%- endif -%}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag }}
+              {%- endif -%}
+            </a>
+
+            <div class="eurus-card__form">
+              <a href="{{ product.url }}" class="eurus-hover-cta">{{ section.settings.hover_cta_label }}</a>
+            </div>
+
+            <a href="{{ product.url }}" class="eurus-btn-mobile" aria-label="{{ section.settings.hover_cta_label }}">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                <rect x="5" y="8" width="14" height="13" rx="1"></rect>
+              </svg>
+            </a>
+          </div>
+
+          <div class="eurus-card__content">
+            <a href="{{ product.url }}" class="eurus-card__title">{{ product.title }}</a>
+
+            <div class="eurus-card__price">
+              {%- assign sale_price = blank -%}
+              {%- if section.settings.sale_metafield_namespace != blank and section.settings.sale_metafield_key != blank -%}
+                {%- assign sale_price = product.metafields[section.settings.sale_metafield_namespace][section.settings.sale_metafield_key].value -%}
+              {%- endif -%}
+
+              {%- if sale_price != blank -%}
+                <span class="eurus-card__price--compare">{{ product.price | money_without_trailing_zeros }}</span>
+                <span class="eurus-card__price--sale">{{ sale_price | money_without_trailing_zeros }}</span>
+                <span class="eurus-card__sale-tag">{{ section.settings.sale_label }}</span>
+              {%- else -%}
+                <span>{{ product.price | money_without_trailing_zeros }}</span>
+                {%- if product.compare_at_price > product.price -%}
+                  <span class="eurus-card__price--compare">{{ product.compare_at_price | money_without_trailing_zeros }}</span>
+                {%- endif -%}
+              {%- endif -%}
+            </div>
+
+
+            {%- if section.settings.show_installments -%}
+              <div class="eurus-card__installments">
+                {%- render 'installment-3x', product: product -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+<script defer>
+(function(){
+  const SECTION_ID = '{{ section.id }}';
+
+  function findHeaderSource(){
+    // Try a few likely header containers, from most specific to generic.
+    return document.querySelector(
+      '[data-section-type*="header"] .page-width, header .page-width,' +
+      '[data-section-type*="header"], .shopify-section--header, header'
+    ) || document.documentElement;
+  }
+
+  function syncHeaderVars(){
+    const root = document.querySelector('#editorial-grid-' + SECTION_ID);
+    if (!root) return;
+
+    const fromEl = findHeaderSource();
+    const cs = window.getComputedStyle(fromEl);
+
+    const x = (cs.getPropertyValue('--am-header-x') || '').trim();
+    const max = (cs.getPropertyValue('--am-header-max') || '').trim();
+
+    if (x) root.style.setProperty('--am-header-x', x);
+    if (max) root.style.setProperty('--am-header-max', max);
+  }
+
+  function rafSync(){
+    // Run after layout settles (Theme Editor breakpoints often resize after load)
+    requestAnimationFrame(() => requestAnimationFrame(syncHeaderVars));
+  }
+
+  // Initial sync (and one extra after layout)
+  document.addEventListener('DOMContentLoaded', rafSync);
+  window.addEventListener('load', rafSync);
+
+  // Re-sync on breakpoint changes / editor viewport changes
+  let t;
+  window.addEventListener('resize', () => {
+    clearTimeout(t);
+    t = setTimeout(rafSync, 80);
+  }, { passive: true });
+
+  window.addEventListener('orientationchange', () => setTimeout(rafSync, 120));
+
+  // Shopify Theme Editor events
+  document.addEventListener('shopify:section:load', (e) => {
+    if (e && e.detail && e.detail.sectionId === SECTION_ID) rafSync();
+  });
+  document.addEventListener('shopify:section:select', (e) => {
+    if (e && e.detail && e.detail.sectionId === SECTION_ID) rafSync();
+  });
+  document.addEventListener('shopify:section:deselect', (e) => {
+    if (e && e.detail && e.detail.sectionId === SECTION_ID) rafSync();
+  });
+
+  // Reveal + click behavior
+  document.addEventListener('DOMContentLoaded', () => {
+    const root = document.querySelector('#editorial-grid-' + SECTION_ID);
+    if (!root) return;
+
+    const cards = root.querySelectorAll('.js-reveal-card');
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      cards.forEach(card => observer.observe(card));
+    } else {
+      cards.forEach(c => c.classList.add('is-visible'));
+    }
+
+    root.addEventListener('click', (e) => {
+      const wrap = e.target.closest('.eurus-card__media-wrap');
+      if (!wrap || e.target.closest('a') || e.target.closest('.eurus-hover-cta') || e.target.closest('.eurus-btn-mobile')) return;
+      const url = wrap.getAttribute('data-product-url');
+      if (url) window.location.href = url;
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Grid Editorial V9",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Coleção" },
+    { "type": "range", "id": "products_to_show", "min": 4, "max": 24, "step": 4, "default": 8, "label": "Qtd. Produtos" },
+
+    { "type": "header", "content": "Título & Container" },
+    { "type": "checkbox", "id": "show_title", "label": "Mostrar título", "default": true },
+    { "type": "text", "id": "title_text", "label": "Texto do título", "default": "Novidades" },
+    { "type": "image_picker", "id": "title_icon", "label": "Ícone antes do título" },
+    { "type": "range", "id": "title_icon_size", "min": 12, "max": 40, "step": 1, "default": 18, "label": "Tamanho do ícone (px)" },
+    { "type": "color", "id": "title_color", "label": "Cor do título", "default": "#52201b" },
+    { "type": "range", "id": "title_size", "min": 14, "max": 40, "step": 1, "default": 26, "label": "Tamanho do título (px)" },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "Peso do título",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "SemiBold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    { "type": "range", "id": "title_gap", "min": 6, "max": 24, "step": 1, "default": 10, "label": "Espaço ícone/título" },
+    { "type": "checkbox", "id": "show_view_all_link", "label": "Mostrar link \"Ver todos os produtos\"", "default": false },
+    { "type": "text", "id": "view_all_text", "label": "Texto do link", "default": "Ver todos os produtos" },
+    { "type": "url", "id": "view_all_link", "label": "URL do link (vazio = usa coleção)" },
+    { "type": "paragraph", "content": "Ajuste a largura para alinhar com seu menu se o automático falhar." },
+    { "type": "range", "id": "section_max_width", "min": 1000, "max": 1800, "step": 50, "default": 1200, "label": "Largura Máx. do Container (px)" },
+
+    { "type": "header", "content": "Configuração do Botão (Desktop Pill)" },
+    { "type": "text", "id": "hover_cta_label", "label": "Texto do botão", "default": "CHOOSE OPTIONS" },
+    { "type": "range", "id": "cta_desktop_width", "min": 100, "max": 300, "step": 5, "default": 160, "label": "Largura Mínima (px)" },
+    { "type": "range", "id": "cta_desktop_font_size", "min": 10, "max": 16, "step": 1, "default": 11, "label": "Tamanho da Fonte (px)" },
+    { "type": "range", "id": "cta_desktop_padding", "min": 0, "max": 20, "step": 1, "default": 12, "label": "Padding Vertical (Altura)" },
+
+    { "type": "header", "content": "Configuração do Botão (Mobile)" },
+    { "type": "range", "id": "cta_mobile_size", "min": 30, "max": 60, "step": 2, "default": 40, "label": "Tamanho do Botão (px)" },
+
+    { "type": "header", "content": "Layout Grid" },
+    { "type": "range", "id": "columns_desktop", "min": 2, "max": 5, "default": 4, "label": "Colunas PC" },
+    { "type": "range", "id": "columns_tablet", "min": 2, "max": 4, "default": 3, "label": "Colunas Tablet" },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Colunas Mobile",
+      "options": [
+        { "value": "1", "label": "1 Coluna" },
+        { "value": "2", "label": "2 Colunas" }
+      ],
+      "default": "2"
+    },
+    { "type": "range", "id": "grid_gap", "min": 0, "max": 40, "default": 20, "label": "Gap (px)" },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Formato da Foto",
+      "options": [
+        { "value": "1/1", "label": "Quadrado" },
+        { "value": "4/5", "label": "Retrato (4:5)" },
+        { "value": "3/4", "label": "Retrato Alto (3:4)" }
+      ],
+      "default": "4/5"
+    },
+    { "type": "range", "id": "card_radius", "min": 0, "max": 20, "default": 0, "label": "Arredondamento" },
+    { "type": "color", "id": "card_bg", "label": "Fundo Card", "default": "#ffffff" },
+
+    { "type": "header", "content": "Cores & Texto" },
+    { "type": "color", "id": "heading_color", "label": "Cor Título Produto", "default": "#000000" },
+    { "type": "color", "id": "price_color", "label": "Cor Preço", "default": "#1a1a1a" },
+    { "type": "text", "id": "sale_label", "label": "Texto Sale", "default": "Sale" },
+    { "type": "paragraph", "content": "SALE via metafield do produto. Crie um metafield do tipo Money e preencha apenas quando quiser promoção." },
+    { "type": "text", "id": "sale_metafield_namespace", "label": "SALE metafield namespace", "default": "custom" },
+    { "type": "text", "id": "sale_metafield_key", "label": "SALE metafield key", "default": "sale" },
+    { "type": "color", "id": "badge_bg", "label": "Fundo Sale", "default": "#000000" },
+    { "type": "color", "id": "badge_text", "label": "Texto Sale", "default": "#ffffff" },
+
+    { "type": "header", "content": "Extras" },
+    { "type": "checkbox", "id": "enable_hover_image", "label": "Trocar foto no hover", "default": true },
+    { "type": "checkbox", "id": "show_installments", "label": "Mostrar Parcelamento", "default": true },
+    { "type": "text", "id": "installments_text", "label": "Texto Parcelas", "default": "[count]x de [price]" },
+
+    { "type": "header", "content": "Espaçamento" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 1, "default": 20, "label": "Topo" },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 1, "default": 60, "label": "Base" }
+  ],
+  "presets": [{ "name": "Grid Editorial V9" }]
+}
+{% endschema %}

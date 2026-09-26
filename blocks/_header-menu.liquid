@@ -1,0 +1,726 @@
+{%- doc -%}
+  Renders a header menu block.
+
+  @param {string} [variant] - What version of the menu to render. Defaults to header menu.
+  @param {string} [transparent] - Show a transparent menu
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign animation_speed = 200
+%}
+
+{% case variant %}
+  {% when 'mobile' %}
+    <div
+      class="header__drawer large:hidden"
+      ref="headerDrawerContainer"
+      {{ block.shopify_attributes }}
+    >
+      {% render 'header-drawer',
+        class: 'header__drawer--mobile',
+        linklist: block_settings.menu,
+        data_header_drawer_type: 'mobile-drawer'
+      %}
+    </div>
+
+  {% when 'navigation_bar' %}
+    {% if block_settings.navigation_bar %}
+      <div class="fashion-mobile-bar large:hidden">
+        <div class="mobile-scroll-track" role="list">
+          {% for link in block_settings.menu.links %}
+            <a href="{{ link.url }}" class="mobile-track-link" role="listitem">
+              {{ link.title }}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% else %}
+    <nav class="fashion-desktop-nav small-hide medium-hide" {{ block.shopify_attributes }}>
+      <ul class="editorial-list" role="list">
+        {% for link in block_settings.menu.links %}
+          <li class="editorial-item">
+            <a href="{{ link.url }}" class="editorial-link{% if link.active %} is-active{% endif %}">
+              <span class="link-text">{{ link.title }}</span>
+              <span class="link-underline" aria-hidden="true"></span>
+            </a>
+
+            {% if link.links != blank %}
+              <div class="editorial-dropdown-wrapper">
+                <div class="dropdown-card">
+                  <div class="dropdown-grid">
+                    {% for child in link.links %}
+                      <div class="dropdown-column">
+                        <a href="{{ child.url }}" class="column-title">{{ child.title }}</a>
+
+                        {% for grandchild in child.links %}
+                          <a href="{{ grandchild.url }}" class="column-link">{{ grandchild.title }}</a>
+                        {% endfor %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+{% endcase %}
+
+{% stylesheet %}
+/* ==========================================================================
+   PREMIUM EDITORIAL REFINEMENT (SAFE OVERRIDES)
+   - No Liquid logic touched
+   - No IDs/loops changed
+   - CSS scoped to existing classes/elements to avoid global collisions
+   ========================================================================== */
+
+/* -------- Mobile navigation bar refinement (existing variant: navigation_bar) -------- */
+.menu-list--mobile {
+  &.menu-list {
+    display: grid;
+  }
+
+  & .menu-list__list {
+    width: max-content;
+    margin-inline: auto;
+    gap: var(--menu-horizontal-gap);
+  }
+
+  & li {
+    width: max-content;
+    padding-block: var(--padding-sm);
+  }
+
+  & li:first-of-type {
+    padding-inline-start: var(--menu-horizontal-gap);
+  }
+
+  & li:last-of-type {
+    padding-inline-end: var(--menu-horizontal-gap);
+  }
+
+  & a {
+    color: var(--color-foreground);
+  }
+}
+
+/* Existing scroll container kept; only smoothing spacing */
+.menu-list__scroll-container {
+  position: relative;
+  overflow-x: auto;
+  mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+  padding-block: var(--padding-2xs);
+}
+
+/* Keep base behavior */
+header-menu {
+  width: 100%;
+}
+
+/* Drawer menu featured content */
+.menu-drawer__featured-content {
+  z-index: var(--layer-base);
+  container-type: inline-size;
+}
+
+.menu-drawer__featured-content--childlist {
+  z-index: var(--layer-flat);
+}
+
+.menu-drawer__featured-content-list {
+  display: flex;
+  gap: 1em;
+  overflow-x: auto;
+  padding-block-end: var(--padding-lg);
+}
+
+.menu-drawer__featured-content-list-item {
+  flex: 0 0 auto;
+}
+
+.menu-drawer__featured-content-list-item--product {
+  width: 35cqi;
+}
+
+.menu-drawer__featured-content-list-item--collection img.resource-card__image {
+  width: 80cqi;
+}
+
+.menu-drawer__featured-content-list-item:first-child {
+  margin-inline-start: var(--margin-xl);
+}
+
+.menu-drawer__featured-content-list-item:last-child {
+  margin-inline-end: var(--margin-xl);
+}
+
+/* =========================
+   DESKTOP MENU: editorial + premium
+   ========================= */
+
+/* (1) Editorial backdrop + calmer spacing, scoped to the component */
+.header-menu {
+  /* Visual height target 72–80px (safe: padding-driven, doesn’t fight theme height vars) */
+  --am-header-pad-y: 14px;
+  --am-header-pad-x: 0px;
+
+  /* Typography targets */
+  --am-menu-font: "Canela", "Regiba", ui-serif, Georgia, "Times New Roman", Times, serif;
+  --am-menu-size-desktop: 14px;
+  --am-menu-tracking: 0.12em;
+  --am-menu-weight: 400;
+  --am-menu-color: #1A1A1A;
+
+  background: #FAFAF8; /* off-white */
+}
+
+.header-menu .header-menu__inner {
+  padding-block: var(--am-header-pad-y);
+  padding-inline: var(--am-header-pad-x);
+}
+
+/* (2) Refine top-level menu layout */
+.menu-list {
+  --menu-horizontal-gap: clamp(16px, 2.2vw, 30px);
+  --menu-vertical-gap: var(--gap-xl);
+
+  display: flex;
+}
+
+.menu-list__list {
+  display: flex;
+  justify-content: var(--grid-area-alignment);
+}
+
+.menu-list__list-item {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.menu-list__list-item[aria-hidden='true'] {
+  visibility: hidden;
+}
+
+/* (3) Premium type + microinteraction (no underline, subtle lift, 180ms easing) */
+.menu-list__link {
+  /* Override theme font vars without touching their Liquid-generated inline styles */
+  font-family: var(--am-menu-font);
+  font-weight: var(--am-menu-weight);
+  letter-spacing: var(--am-menu-tracking);
+  text-transform: uppercase;
+
+  color: var(--am-menu-color);
+
+  text-decoration: none;
+  display: flex;
+  min-height: var(--minimum-touch-target);
+  align-items: center;
+  position: relative;
+
+  transition:
+    opacity 180ms cubic-bezier(.4,0,.2,1),
+    transform 180ms cubic-bezier(.4,0,.2,1),
+    color 180ms cubic-bezier(.4,0,.2,1);
+}
+
+.menu-list__link::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 26px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+/* Desktop size control (14–15px) */
+@media screen and (min-width: 990px) {
+  .menu-list__link {
+    font-size: var(--am-menu-size-desktop);
+    line-height: 1.2;
+  }
+}
+
+.menu-list__link:hover,
+.menu-list__link:focus {
+  /* Brand color with ~75% opacity (safe fallback: keep same hue via currentColor if vars missing) */
+  opacity: 0.75;
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.menu-list__link:hover::after,
+.menu-list__link:focus::after,
+.menu-list__link--active::after {
+  transform: translateX(-50%) scaleX(1);
+  opacity: 0.6;
+}
+
+/* Keep active link crisp */
+.menu-list__link--active {
+  opacity: 1;
+}
+
+/*
+  High specificity selectors to subdue non-hovered links without javascript.
+  Kept from original, but tuned so it doesn’t “gray out” too aggressively for premium.
+*/
+.menu-list:where(:has(.menu-list__list-item:hover)),
+.menu-list:where(:has(.menu-list__list-item:focus-within)),
+.menu-list:where(:has(.menu-list__list-item:not([aria-hidden='true']) .menu-list__link--active)) {
+  .menu-list__link {
+    color: rgb(26 26 26 / 0.62); /* calmer subdued */
+  }
+}
+
+/* stylelint-disable-next-line selector-max-specificity */
+.menu-list:not(:has(.menu-list__list-item:hover)) .menu-list__link--active,
+.menu-list .menu-list__list-item:where(:hover, :focus-within) .menu-list__link,
+.menu-list .menu-list__list-item[slot='overflow'] .menu-list__link[aria-expanded='true'] {
+  color: var(--am-menu-color);
+  opacity: 1;
+}
+
+/* (4) Overflow list spacing remains, with calmer surface */
+.overflow-menu::part(list) {
+  --focus-outline-size: calc(var(--focus-outline-offset) + var(--focus-outline-width));
+  gap: 0 var(--menu-horizontal-gap);
+}
+
+.overflow-menu {
+  background-color: transparent;
+  padding: var(--focus-outline-size);
+  margin: calc(-1 * var(--focus-outline-size));
+}
+
+/* (5) Submenu surface: remove heavy shadow, keep editorial separation */
+.overflow-menu::after {
+  content: '';
+  position: absolute;
+  top: calc(100% - 1px + var(--border-bottom-width));
+  left: 0;
+  width: 100%;
+  height: var(--submenu-height);
+  background-color: #FAFAF8; /* match header */
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04); /* minimal */
+  clip-path: inset(0.5px 0 -100px 0);
+  opacity: var(--submenu-opacity, 1);
+  transition: height var(--submenu-animation-speed) var(--ease-out-cubic),
+    opacity var(--animation-speed-slow) var(--ease-out-cubic) var(--animation-speed-fast);
+  z-index: calc(var(--layer-header-menu) - 1);
+}
+
+/** mega menu **/
+.menu-list__submenu,
+.overflow-menu::part(overflow) {
+  --submenu-padding-block-start: var(--padding-3xl);
+  --submenu-padding-block-end: var(--padding-3xl);
+
+  background-color: transparent;
+}
+
+/* keep theme behavior; only a small padding tweak */
+.header__row[style*='--border-bottom-width: 0px'] {
+  .menu-list__submenu.color-scheme-matches-parent,
+  .overflow-menu.color-scheme-matches-parent::part(overflow) {
+    --submenu-padding-block-start: 0px;
+  }
+}
+
+.menu-list__list-item:where(:not([slot='overflow'])) > .menu-list__submenu,
+.overflow-menu::part(overflow) {
+  --submenu-content-opacity: 0;
+  --submenu-content-animation: opacity calc(var(--submenu-animation-speed) * 0.75) var(--animation-easing);
+
+  visibility: hidden;
+  background-color: rgba(250, 250, 248, 0.98); /* editorial off-white */
+  backdrop-filter: blur(6px);
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: calc(100% - 1px + var(--border-bottom-width));
+  z-index: var(--layer-header-menu);
+  padding-inline: var(--padding-inline);
+  clip-path: rect(0 100% var(--submenu-height) 0);
+  transition: clip-path var(--submenu-animation-speed) var(--ease-out-cubic);
+}
+
+/* Show the submenus on hover */
+.menu-list__list-item:has([aria-expanded='true']) > .menu-list__submenu,
+.overflow-menu:has([slot="overflow"] [aria-expanded='true'])::part(overflow),
+.menu-list__submenu:is(:hover),
+.overflow-menu::part(overflow):hover {
+  --submenu-content-opacity: 1;
+  visibility: visible;
+}
+
+.menu-list__list-item:has([data-animating]) > .menu-list__submenu {
+  --submenu-content-opacity: 0;
+
+  visibility: visible;
+
+  &::before {
+    height: 0;
+  }
+}
+
+.menu-list__submenu-inner,
+.overflow-menu::part(overflow-list) {
+  grid-column: 2;
+  padding-block-start: var(--submenu-padding-block-start);
+  padding-block-end: var(--submenu-padding-block-end);
+  padding-inline: var(--section-padding-inline);
+}
+
+{% stylesheet %}
+/* ==========================================================================
+   THE INVISIBLE LUXURY MENU (Editorial)
+   ========================================================================== */
+
+.fashion-desktop-nav {
+  --font-stack: "Inter", "Helvetica Neue", Helvetica, sans-serif;
+  --text-size: 12px;
+  --text-weight: 400;
+  --text-tracking: 0.12em;
+  --text-color: #1a1a1a;
+  --active-color: #000000;
+  --dropdown-bg: #ffffff;
+  --dropdown-shadow: 0 20px 60px rgba(0,0,0,0.08);
+
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+.editorial-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.editorial-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.editorial-link {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  text-decoration: none;
+  color: var(--text-color);
+  font-family: var(--font-stack);
+  font-size: var(--text-size);
+  font-weight: var(--text-weight);
+  letter-spacing: var(--text-tracking);
+  text-transform: uppercase;
+  padding-block: 15px;
+  z-index: 20;
+  transition: opacity 0.3s;
+}
+
+.editorial-link:hover { opacity: 0.6; }
+
+.link-underline {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--active-color);
+  transform: scaleX(0);
+  transform-origin: center right;
+  transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  opacity: 0.8;
+}
+
+.editorial-link:hover .link-underline,
+.editorial-link.is-active .link-underline {
+  transform: scaleX(1);
+  transform-origin: center left;
+}
+
+.editorial-dropdown-wrapper {
+  position: absolute;
+  top: 100%;
+  left: -20px;
+  padding-top: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 100;
+  min-width: 220px;
+}
+
+.editorial-item:hover .editorial-dropdown-wrapper,
+.editorial-dropdown-wrapper:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-card {
+  background: var(--dropdown-bg);
+  padding: 35px;
+  box-shadow: var(--dropdown-shadow);
+  border: 1px solid rgba(0,0,0,0.02);
+  pointer-events: auto;
+}
+
+.dropdown-grid {
+  display: flex;
+  gap: 50px;
+  white-space: nowrap;
+}
+
+.dropdown-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.column-title {
+  font-family: var(--font-stack);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #000;
+  margin-bottom: 5px;
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.column-title:hover {
+  opacity: 0.6;
+}
+
+.column-link {
+  font-family: var(--font-stack);
+  font-size: 12px;
+  color: #555;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s, transform 0.2s;
+  display: block;
+}
+
+.column-link:hover {
+  color: #000;
+  transform: translateX(4px);
+}
+
+/* --- Mobile Bar --- */
+.fashion-mobile-bar {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.mobile-scroll-track {
+  display: flex;
+  overflow-x: auto;
+  gap: 24px;
+  padding-inline: 20px;
+  scrollbar-width: none;
+}
+.mobile-scroll-track::-webkit-scrollbar { display: none; }
+.mobile-track-link {
+  flex-shrink: 0;
+  text-decoration: none;
+  color: #222;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+}
+
+@media screen and (min-width: 990px) {
+  .large\:hidden { display: none !important; }
+}
+@media screen and (max-width: 989px) {
+  .small-hide { display: none !important; }
+  .medium-hide { display: none !important; }
+}
+
+/* Remove toda a área "featured" do menu mobile (produtos + coleções) */
+@media screen and (max-width: 989px) {
+  .header__drawer--mobile .menu-drawer__featured-content {
+    display: none !important;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:names.menu",
+  "tag": null,
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:settings.menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "primary"
+    },
+    {
+      "type": "header",
+      "content": "t:content.typography"
+    },
+    {
+      "type": "select",
+      "id": "type_font_primary_size",
+      "label": "t:settings.top_level_size",
+      "options": [
+        { "value": "0.625rem", "label": "10px" },
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "0.875rem", "label": "14px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.125rem", "label": "18px" }
+      ],
+      "default": "1rem"
+    },
+    {
+      "type": "select",
+      "id": "menu_font_style",
+      "label": "t:settings.submenu_size",
+      "options": [
+        { "value": "regular", "label": "t:options.small" },
+        { "value": "inverse", "label": "t:options.medium" },
+        { "value": "inverse_large", "label": "t:options.large" }
+      ],
+      "default": "inverse"
+    },
+    {
+      "type": "select",
+      "id": "type_font_primary_link",
+      "label": "t:settings.font",
+      "options": [
+        { "value": "body", "label": "t:options.body" },
+        { "value": "subheading", "label": "t:options.subheading" },
+        { "value": "heading", "label": "t:options.heading" },
+        { "value": "accent", "label": "t:options.accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "select",
+      "id": "type_case_primary_link",
+      "label": "t:settings.text_case",
+      "options": [
+        { "value": "none", "label": "t:options.default" },
+        { "value": "uppercase", "label": "t:options.uppercase" }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "t:content.submenu_feature"
+    },
+    {
+      "type": "select",
+      "id": "menu_style",
+      "label": "t:settings.media_type",
+      "info": "t:info.media_type_info",
+      "options": [
+        { "value": "text", "label": "t:options.none" },
+        { "value": "collection_images", "label": "t:options.collection_images" },
+        { "value": "featured_products", "label": "t:options.featured_products" },
+        { "value": "featured_collections", "label": "t:options.featured_collections" }
+      ],
+      "default": "collection_images"
+    },
+    {
+      "type": "select",
+      "id": "featured_products_aspect_ratio",
+      "label": "t:settings.image_ratio",
+      "options": [
+        { "value": "adapt", "label": "t:options.auto" },
+        { "value": "4 / 5", "label": "t:options.portrait" },
+        { "value": "1 / 1", "label": "t:options.square" }
+      ],
+      "default": "4 / 5",
+      "visible_if": "{{ block.settings.menu_style == 'featured_products' }}"
+    },
+    {
+      "type": "select",
+      "id": "featured_collections_aspect_ratio",
+      "label": "t:settings.image_ratio",
+      "options": [
+        { "value": "adapt", "label": "t:options.auto" },
+        { "value": "16 / 9", "label": "t:options.landscape" },
+        { "value": "1 / 1", "label": "t:options.square" }
+      ],
+      "default": "16 / 9",
+      "visible_if": "{{ block.settings.menu_style == 'featured_collections' }}"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "t:settings.image_border_radius",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.menu_style != 'text' }}"
+    },
+    {
+      "type": "header",
+      "content": "t:content.mobile_layout"
+    },
+    {
+      "type": "checkbox",
+      "id": "navigation_bar",
+      "label": "t:settings.navigation_bar"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme_navigation_bar",
+      "label": "t:settings.navigation_bar_color_scheme",
+      "default": "primary",
+      "visible_if": "{{ block.settings.navigation_bar }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "drawer_accordion",
+      "label": "t:settings.accordion",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "drawer_accordion_expand_first",
+      "label": "t:settings.expand_first_group",
+      "default": false,
+      "visible_if": "{{ block.settings.drawer_accordion == true }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "drawer_dividers",
+      "label": "t:settings.dividers",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

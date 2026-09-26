@@ -1,0 +1,62 @@
+{% doc %}
+  Renders the predictive search empty state
+
+  @param {number} shadow_opacity - shadow opacity for the empty state container shadow
+  @param {string} products_test_id - a playwright test id, used to differentiate empty state from 'real' search results
+  @param {boolean} [load_empty_state] - Load the empty state or not
+
+  @example
+  {% render 'predictive-search-empty-state', shadow_opacity: 0.1, products_test_id: 'empty-state' %}
+{% enddoc %}
+
+<div
+  id="predictive-search-results"
+  class="predictive-search-dropdown"
+  role="listbox"
+  aria-expanded="true"
+  style="--color-shadow: rgb(var(--color-foreground-rgb) / {{ shadow_opacity }});"
+>
+  {% if load_empty_state %}
+    <div class="predictive-search-results__inner">
+      {% liquid
+        comment
+          A MARCA — Empty state editorial
+          Goal:
+          - Show a curated set of 4 products (collection: POPULARES) before typing
+          - Use a fixed heading "Mais populares" (matching premium UX reference)
+          
+          Fallback order:
+          1) Collection handle 'populares' (recommended)
+          2) Theme setting 'empty_state_collection'
+          3) collections.all
+        endcomment
+
+        assign collection = collections['populares']
+        if collection == blank
+          assign collection = settings.empty_state_collection
+        endif
+        if collection == blank
+          assign collection = collections.all
+        endif
+
+        assign title = 'Mais populares'
+      %}
+      {% paginate collection.products by 4 %}
+        {% assign products = collection.products %}
+        {% comment %} Only show products section if there are products to display {% endcomment %}
+        {% if products.size > 0 %}
+          {% render 'predictive-search-products-list',
+            products_test_id: products_test_id,
+            title: title,
+            products: products,
+            limit: 4
+          %}
+        {% else %}
+          <div class="predictive-search-results__no-results">
+            <p>{{ 'content.no_products_found' | t }}</p>
+          </div>
+        {% endif %}
+      {% endpaginate %}
+    </div>
+  {% endif %}
+</div>

@@ -1,0 +1,2380 @@
+{% liquid
+  assign essential_product = section.settings.essential_product
+  assign shared_product = section.settings.shared_product
+  assign extra_kids_product = section.settings.extra_kids_product
+
+  assign essential_variant = essential_product.selected_or_first_available_variant
+  assign shared_variant = shared_product.selected_or_first_available_variant
+  assign extra_kids_variant = extra_kids_product.selected_or_first_available_variant
+
+  assign extra_max_quantity = section.settings.extra_kids_max_quantity | default: 4
+
+  assign essential_image = section.settings.essential_image
+  if essential_image == blank and essential_product != blank
+    assign essential_image = essential_product.featured_image
+  endif
+
+  assign shared_image = section.settings.shared_image
+  if shared_image == blank and shared_product != blank
+    assign shared_image = shared_product.featured_image
+  endif
+
+  assign hero_alt = section.settings.hero_image.alt | default: section.settings.hero_title
+  assign essential_alt = essential_image.alt | default: section.settings.essential_title
+  assign shared_alt = shared_image.alt | default: section.settings.shared_title
+  assign story_alt = section.settings.story_image.alt | default: section.settings.story_title
+  assign detail_alt_1 = section.settings.detail_image_1.alt | default: section.settings.detail_caption_1
+  assign detail_alt_2 = section.settings.detail_image_2.alt | default: section.settings.detail_caption_2
+  assign detail_alt_3 = section.settings.detail_image_3.alt | default: section.settings.detail_caption_3
+  assign closing_alt = section.settings.closing_image.alt | default: section.settings.closing_title
+
+  assign kl_font = section.settings.type_font
+  assign kl_font_medium = kl_font | font_modify: 'weight', '500'
+  assign kl_font_semibold = kl_font | font_modify: 'weight', '600'
+  assign kl_font_bold = kl_font | font_modify: 'weight', '700'
+
+  assign hero_link = section.settings.hero_button_link
+  if hero_link == blank
+    assign hero_link = '#KitSelector-' | append: section.id
+  endif
+
+  assign closing_link = section.settings.closing_button_link
+  if closing_link == blank
+    assign closing_link = '#KitSelector-' | append: section.id
+  endif
+%}
+
+{% style %}
+  {{ kl_font | font_face: font_display: 'swap' }}
+  {% if kl_font_medium != blank %}{{ kl_font_medium | font_face: font_display: 'swap' }}{% endif %}
+  {% if kl_font_semibold != blank %}{{ kl_font_semibold | font_face: font_display: 'swap' }}{% endif %}
+  {% if kl_font_bold != blank %}{{ kl_font_bold | font_face: font_display: 'swap' }}{% endif %}
+
+  #KitLegado-{{ section.id }} {
+    --kl-ink: {{ section.settings.color_ink }};
+    --kl-navy-dark: {{ section.settings.color_navy_dark }};
+    --kl-paper: {{ section.settings.color_paper }};
+    --kl-sky: {{ section.settings.color_sky }};
+    --kl-muted: {{ section.settings.color_muted }};
+    --kl-line: {{ section.settings.color_line }};
+    --kl-white: #ffffff;
+    --kl-font: {{ kl_font.family }}, {{ kl_font.fallback_families }};
+    --kl-page: min(100%, 1440px);
+    --kl-pad: clamp(24px, 4.5vw, 80px);
+    --kl-section-y: clamp(56px, 6vw, 92px);
+
+    width: 100%;
+    color: var(--kl-ink);
+    background: var(--kl-paper);
+    font-family: var(--kl-font);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow: clip;
+  }
+
+  #KitLegado-{{ section.id }} *,
+  #KitLegado-{{ section.id }} *::before,
+  #KitLegado-{{ section.id }} *::after {
+    box-sizing: border-box;
+  }
+
+  #KitLegado-{{ section.id }} img,
+  #KitLegado-{{ section.id }} svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  #KitLegado-{{ section.id }} a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  #KitLegado-{{ section.id }} button,
+  #KitLegado-{{ section.id }} input {
+    font: inherit;
+  }
+
+  #KitLegado-{{ section.id }} .kl-container {
+    width: var(--kl-page);
+    margin-inline: auto;
+    padding-inline: var(--kl-pad);
+  }
+
+  #KitLegado-{{ section.id }} .kl-eyebrow {
+    margin: 0 0 14px;
+    color: var(--kl-ink);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  #KitLegado-{{ section.id }} .kl-h1,
+  #KitLegado-{{ section.id }} .kl-h2,
+  #KitLegado-{{ section.id }} .kl-h3,
+  #KitLegado-{{ section.id }} p {
+    margin-top: 0;
+  }
+
+  #KitLegado-{{ section.id }} .kl-h1 {
+    max-width: 520px;
+    margin-bottom: 22px;
+    font-size: clamp(38px, 3.3vw, 52px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.08;
+    text-transform: uppercase;
+  }
+
+  #KitLegado-{{ section.id }} .kl-h2 {
+    margin-bottom: 28px;
+    font-size: clamp(25px, 1.9vw, 30px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.22;
+  }
+
+  #KitLegado-{{ section.id }} .kl-h3 {
+    margin-bottom: 10px;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+
+  #KitLegado-{{ section.id }} .kl-body {
+    max-width: 58ch;
+    color: var(--kl-ink);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.68;
+  }
+
+  #KitLegado-{{ section.id }} .kl-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  #KitLegado-{{ section.id }} .kl-muted {
+    color: var(--kl-muted);
+  }
+
+  #KitLegado-{{ section.id }} .kl-button {
+    min-height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 26px;
+    border: 1px solid var(--kl-ink);
+    border-radius: 0;
+    background: var(--kl-ink);
+    color: var(--kl-white);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: uppercase;
+    transition: background-color 180ms ease, color 180ms ease, opacity 180ms ease;
+  }
+
+  #KitLegado-{{ section.id }} .kl-button:hover {
+    background: var(--kl-navy-dark);
+  }
+
+  #KitLegado-{{ section.id }} .kl-button:focus-visible,
+  #KitLegado-{{ section.id }} .kl-chip:focus-visible,
+  #KitLegado-{{ section.id }} .kl-qty__button:focus-visible,
+  #KitLegado-{{ section.id }} .kl-qty__input:focus-visible,
+  #KitLegado-{{ section.id }} a:focus-visible {
+    outline: 2px solid var(--kl-ink);
+    outline-offset: 3px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.42;
+  }
+
+  #KitLegado-{{ section.id }} .kl-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    background: #e8edf3;
+    color: var(--kl-muted);
+  }
+
+  /* HERO */
+  #KitLegado-{{ section.id }} .kl-hero {
+    min-height: min(640px, calc(100vh - 72px));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    background: var(--kl-paper);
+    border-bottom: 1px solid var(--kl-line);
+  }
+
+  #KitLegado-{{ section.id }} .kl-hero__media {
+    min-height: 560px;
+    background: var(--kl-sky);
+  }
+
+  #KitLegado-{{ section.id }} .kl-hero__media img,
+  #KitLegado-{{ section.id }} .kl-hero__media .kl-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: {{ section.settings.hero_image_position }};
+  }
+
+  #KitLegado-{{ section.id }} .kl-hero__content {
+    display: flex;
+    align-items: center;
+    padding: clamp(56px, 5.5vw, 96px) clamp(32px, 5vw, 84px);
+  }
+
+  #KitLegado-{{ section.id }} .kl-hero__inner {
+    width: min(100%, 540px);
+  }
+
+  #KitLegado-{{ section.id }} .kl-hero__copy {
+    max-width: 46ch;
+    margin-bottom: 30px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-hero__subline {
+    margin: 16px 0 0;
+    color: var(--kl-muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  /* KIT SELECTOR */
+  #KitLegado-{{ section.id }} .kl-kits {
+    padding-block: var(--kl-section-y);
+    background: var(--kl-sky);
+  }
+
+  #KitLegado-{{ section.id }} .kl-kits__heading {
+    max-width: 700px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(22px, 2vw, 30px);
+    border: 1px solid var(--kl-line);
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card--primary {
+    border-color: var(--kl-ink);
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__badge {
+    position: absolute;
+    z-index: 2;
+    top: 16px;
+    right: 16px;
+    padding: 7px 13px;
+    border-radius: 100px;
+    background: var(--kl-ink);
+    color: var(--kl-white);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__media {
+    aspect-ratio: 1 / 0.72;
+    margin-block: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__media img,
+  #KitLegado-{{ section.id }} .kl-kit-card__media .kl-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__contents {
+    min-height: 58px;
+    margin-bottom: 22px;
+    color: var(--kl-ink);
+    font-size: 14px;
+    line-height: 1.48;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__price {
+    margin: 0;
+    font-size: 25px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__installments {
+    margin: 5px 0 22px;
+    color: var(--kl-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  #KitLegado-{{ section.id }} .kl-option {
+    min-width: 0;
+    margin: 0 0 18px;
+    padding: 0;
+    border: 0;
+  }
+
+  #KitLegado-{{ section.id }} .kl-option legend {
+    margin-bottom: 9px;
+    padding: 0;
+    color: var(--kl-ink);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  #KitLegado-{{ section.id }} .kl-option__values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-chip {
+    min-width: 48px;
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #b9c1cc;
+    border-radius: 0;
+    background: transparent;
+    color: var(--kl-ink);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease, opacity 160ms ease;
+  }
+
+  #KitLegado-{{ section.id }} .kl-chip:hover:not([disabled]) {
+    border-color: var(--kl-ink);
+  }
+
+  #KitLegado-{{ section.id }} .kl-chip.is-selected,
+  #KitLegado-{{ section.id }} .kl-chip[aria-pressed='true'] {
+    border-color: var(--kl-ink);
+    background: var(--kl-ink);
+    color: var(--kl-white);
+  }
+
+  #KitLegado-{{ section.id }} .kl-chip[disabled] {
+    cursor: not-allowed;
+    opacity: 0.3;
+    text-decoration: line-through;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__form {
+    margin-top: auto;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon {
+    margin: 4px 0 18px;
+    padding: 16px;
+    border: 1px solid var(--kl-line);
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__toggle input {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    margin: 2px 0 0;
+    accent-color: var(--kl-ink);
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__copy {
+    min-width: 0;
+    display: flex;
+    flex: 1;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__title {
+    color: var(--kl-ink);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__price {
+    flex: 0 0 auto;
+    color: var(--kl-ink);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__options {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--kl-line);
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__options[hidden] {
+    display: none;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__options .kl-option:last-of-type {
+    margin-bottom: 0;
+  }
+
+  /* Quantidade da camiseta extra */
+  #KitLegado-{{ section.id }} .kl-addon__quantity {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__options > .kl-addon__quantity:first-child {
+    margin-top: 0;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__quantity-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__quantity-label {
+    color: var(--kl-ink);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  #KitLegado-{{ section.id }} .kl-qty {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    border: 1px solid #b9c1cc;
+    background: var(--kl-white);
+  }
+
+  #KitLegado-{{ section.id }} .kl-qty__button {
+    width: 38px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--kl-ink);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    transition: opacity 160ms ease;
+  }
+
+  #KitLegado-{{ section.id }} .kl-qty__button[disabled] {
+    cursor: not-allowed;
+    opacity: 0.28;
+  }
+
+  #KitLegado-{{ section.id }} .kl-qty__input {
+    width: 46px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-inline: 1px solid #b9c1cc;
+    border-radius: 0;
+    background: transparent;
+    color: var(--kl-ink);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: center;
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+
+  #KitLegado-{{ section.id }} .kl-qty__input::-webkit-outer-spin-button,
+  #KitLegado-{{ section.id }} .kl-qty__input::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+  }
+
+  #KitLegado-{{ section.id }} .kl-qty__input[disabled] {
+    opacity: 0.4;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__unit {
+    margin: 0;
+    color: var(--kl-muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__unit[hidden] {
+    display: none;
+  }
+
+  #KitLegado-{{ section.id }} .kl-addon__hint {
+    min-height: 18px;
+    margin: 8px 0 0;
+    color: var(--kl-muted);
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-kit-card__status {
+    min-height: 20px;
+    margin: 8px 0 0;
+    color: var(--kl-muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  #KitLegado-{{ section.id }} .kl-spec-strip {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border: 1px solid var(--kl-line);
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  #KitLegado-{{ section.id }} .kl-spec-strip__item {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 22px;
+    color: var(--kl-ink);
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  #KitLegado-{{ section.id }} .kl-spec-strip__item + .kl-spec-strip__item {
+    border-left: 1px solid var(--kl-line);
+  }
+
+  /* STORY */
+  #KitLegado-{{ section.id }} .kl-story {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(0, 1.04fr);
+    background: var(--kl-paper);
+  }
+
+  #KitLegado-{{ section.id }} .kl-story__content {
+    display: flex;
+    align-items: center;
+    padding: var(--kl-section-y) clamp(32px, 4.2vw, 72px) var(--kl-section-y) var(--kl-pad);
+  }
+
+  #KitLegado-{{ section.id }} .kl-story__inner {
+    width: min(100%, 470px);
+  }
+
+  #KitLegado-{{ section.id }} .kl-story__media {
+    min-height: 500px;
+    max-height: 640px;
+    background: var(--kl-sky);
+  }
+
+  #KitLegado-{{ section.id }} .kl-story__media img,
+  #KitLegado-{{ section.id }} .kl-story__media .kl-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: {{ section.settings.story_image_position }};
+  }
+
+  /* DETAILS */
+  #KitLegado-{{ section.id }} .kl-details {
+    padding: 26px var(--kl-pad) 48px;
+    background: var(--kl-paper);
+  }
+
+  #KitLegado-{{ section.id }} .kl-details__grid {
+    width: var(--kl-page);
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: 1.02fr 1.12fr 0.94fr;
+    gap: 12px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-detail-card {
+    min-width: 0;
+    margin: 0;
+  }
+
+  #KitLegado-{{ section.id }} .kl-detail-card__media {
+    aspect-ratio: 1.24 / 1;
+    overflow: hidden;
+    background: var(--kl-sky);
+  }
+
+  #KitLegado-{{ section.id }} .kl-detail-card__media img,
+  #KitLegado-{{ section.id }} .kl-detail-card__media .kl-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #KitLegado-{{ section.id }} .kl-detail-card figcaption {
+    padding: 12px 8px 0;
+    color: var(--kl-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* CLOSING */
+  #KitLegado-{{ section.id }} .kl-closing__media {
+    height: clamp(300px, 34vw, 500px);
+    background: var(--kl-sky);
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__media img,
+  #KitLegado-{{ section.id }} .kl-closing__media .kl-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: {{ section.settings.closing_image_position }};
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__band {
+    background: var(--kl-navy-dark);
+    color: var(--kl-white);
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__band-inner {
+    min-height: 104px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) auto minmax(240px, 0.9fr);
+    align-items: center;
+    gap: 40px;
+    padding-block: 22px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__title {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__prices,
+  #KitLegado-{{ section.id }} .kl-closing__meta {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__button {
+    min-width: 190px;
+    border-color: rgba(255, 255, 255, 0.58);
+    background: transparent;
+  }
+
+  #KitLegado-{{ section.id }} .kl-closing__button:hover {
+    background: var(--kl-white);
+    color: var(--kl-navy-dark);
+  }
+
+  /* OPTIONAL INTERNAL FOOTER */
+  #KitLegado-{{ section.id }} .kl-footer {
+    padding: 48px 0 28px;
+    border-top: 1px solid var(--kl-line);
+    background: var(--kl-paper);
+  }
+
+  #KitLegado-{{ section.id }} .kl-footer__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 44px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-footer__heading {
+    margin: 0 0 16px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  #KitLegado-{{ section.id }} .kl-footer__links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  #KitLegado-{{ section.id }} .kl-footer__links li + li {
+    margin-top: 5px;
+  }
+
+  #KitLegado-{{ section.id }} .kl-footer__links a,
+  #KitLegado-{{ section.id }} .kl-footer__text {
+    color: var(--kl-muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  #KitLegado-{{ section.id }} .kl-footer__bottom {
+    margin-top: 40px;
+    padding-top: 22px;
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    border-top: 1px solid var(--kl-line);
+  }
+
+  #KitLegado-{{ section.id }} .kl-wordmark {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  #KitLegado-{{ section.id }} .kl-copyright {
+    margin: 0;
+    color: var(--kl-muted);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* MOBILE STICKY */
+  #KitLegado-{{ section.id }} .kl-mobile-sticky {
+    display: none;
+  }
+
+  @media (max-width: 989px) {
+    #KitLegado-{{ section.id }} .kl-hero {
+      min-height: 0;
+      grid-template-columns: 1fr;
+    }
+
+    #KitLegado-{{ section.id }} .kl-hero__media {
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+
+    #KitLegado-{{ section.id }} .kl-hero__content {
+      padding: 64px var(--kl-pad) 72px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-kit-grid {
+      gap: 24px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-story {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    #KitLegado-{{ section.id }} .kl-story__content {
+      padding-right: 36px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-story__media {
+      min-height: 440px;
+      max-height: 560px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-closing__band-inner {
+      grid-template-columns: 1fr auto;
+    }
+
+    #KitLegado-{{ section.id }} .kl-closing__meta {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 749px) {
+    #KitLegado-{{ section.id }} {
+      --kl-pad: 20px;
+      --kl-section-y: 56px;
+      padding-bottom: {% if section.settings.enable_mobile_sticky %}74px{% else %}0{% endif %};
+    }
+
+    #KitLegado-{{ section.id }} .kl-h1 {
+      margin-bottom: 20px;
+      font-size: clamp(34px, 10.5vw, 44px);
+      line-height: 1.06;
+    }
+
+    #KitLegado-{{ section.id }} .kl-h2 {
+      margin-bottom: 24px;
+      font-size: 25px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-body {
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    #KitLegado-{{ section.id }} .kl-hero__media {
+      aspect-ratio: 4 / 4.3;
+    }
+
+    #KitLegado-{{ section.id }} .kl-hero__content {
+      padding: 52px var(--kl-pad) 58px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-hero__subline {
+      font-size: 11px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-button {
+      width: 100%;
+    }
+
+    #KitLegado-{{ section.id }} .kl-kit-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #KitLegado-{{ section.id }} .kl-kit-card {
+      padding: 20px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-kit-card__badge {
+      position: static;
+      display: inline-flex;
+      align-self: flex-start;
+      margin: 0 0 14px;
+      max-width: 100%;
+    }
+
+    #KitLegado-{{ section.id }} .kl-kit-card__media {
+      aspect-ratio: 1 / 0.78;
+    }
+
+    #KitLegado-{{ section.id }} .kl-chip {
+      min-width: 45px;
+      min-height: 41px;
+      flex: 0 0 auto;
+    }
+
+    #KitLegado-{{ section.id }} .kl-addon {
+      padding: 14px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-addon__quantity {
+      margin-top: 14px;
+      gap: 12px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-qty__button {
+      width: 42px;
+      height: 44px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-qty__input {
+      width: 48px;
+      height: 44px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-spec-strip {
+      grid-template-columns: 1fr;
+    }
+
+    #KitLegado-{{ section.id }} .kl-spec-strip__item {
+      justify-content: flex-start;
+      min-height: 52px;
+      text-align: left;
+    }
+
+    #KitLegado-{{ section.id }} .kl-spec-strip__item + .kl-spec-strip__item {
+      border-top: 1px solid var(--kl-line);
+      border-left: 0;
+    }
+
+    #KitLegado-{{ section.id }} .kl-story {
+      grid-template-columns: 1fr;
+    }
+
+    #KitLegado-{{ section.id }} .kl-story__content {
+      padding: var(--kl-section-y) var(--kl-pad);
+    }
+
+    #KitLegado-{{ section.id }} .kl-story__media {
+      min-height: 0;
+      max-height: none;
+      aspect-ratio: 4 / 4.2;
+    }
+
+    #KitLegado-{{ section.id }} .kl-details {
+      padding: 14px var(--kl-pad) 44px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-details__grid {
+      grid-template-columns: 1fr;
+      gap: 26px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-detail-card__media {
+      aspect-ratio: 4 / 3;
+    }
+
+    #KitLegado-{{ section.id }} .kl-closing__media {
+      height: auto;
+      aspect-ratio: 4 / 3;
+    }
+
+    #KitLegado-{{ section.id }} .kl-closing__band-inner {
+      min-height: 0;
+      grid-template-columns: 1fr;
+      gap: 22px;
+      padding-block: 26px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-closing__button {
+      width: 100%;
+    }
+
+    #KitLegado-{{ section.id }} .kl-footer__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 32px 24px;
+    }
+
+    #KitLegado-{{ section.id }} .kl-footer__bottom {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    {% if section.settings.enable_mobile_sticky %}
+      #KitLegado-{{ section.id }} .kl-mobile-sticky {
+        position: fixed;
+        z-index: 40;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        min-height: 72px;
+        display: grid;
+        grid-template-columns: minmax(0, 0.8fr) minmax(170px, 1.2fr);
+        align-items: center;
+        gap: 14px;
+        padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--kl-line);
+        background: rgba(244, 241, 234, 0.96);
+        backdrop-filter: blur(12px);
+      }
+
+      #KitLegado-{{ section.id }} .kl-mobile-sticky__price {
+        min-width: 0;
+        margin: 0;
+        color: var(--kl-ink);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+
+      #KitLegado-{{ section.id }} .kl-mobile-sticky .kl-button {
+        min-height: 48px;
+        padding-inline: 14px;
+      }
+    {% endif %}
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #KitLegado-{{ section.id }} *,
+    #KitLegado-{{ section.id }} *::before,
+    #KitLegado-{{ section.id }} *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+{% endstyle %}
+
+<section
+  id="KitLegado-{{ section.id }}"
+  class="kl"
+  data-kit-legado-section
+  data-currency="{{ cart.currency.iso_code | default: shop.currency }}"
+  data-locale="{{ request.locale.iso_code | default: 'pt-BR' }}"
+>
+  <div class="kl-hero">
+    <div class="kl-hero__media">
+      {% if section.settings.hero_image != blank %}
+        {{ section.settings.hero_image
+          | image_url: width: 2200
+          | image_tag:
+            loading: 'eager',
+            fetchpriority: 'high',
+            widths: '640, 900, 1200, 1600, 2200',
+            sizes: '(min-width: 990px) 50vw, 100vw',
+            alt: hero_alt
+        }}
+      {% else %}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'kl-placeholder' }}
+      {% endif %}
+    </div>
+
+    <div class="kl-hero__content">
+      <div class="kl-hero__inner">
+        {% if section.settings.hero_eyebrow != blank %}
+          <p class="kl-eyebrow">{{ section.settings.hero_eyebrow | escape }}</p>
+        {% endif %}
+
+        <h1 class="kl-h1">{{ section.settings.hero_title | escape }}</h1>
+
+        {% if section.settings.hero_text != blank %}
+          <div class="kl-body kl-hero__copy">{{ section.settings.hero_text }}</div>
+        {% endif %}
+
+        <a class="kl-button" href="{{ hero_link }}">
+          {{ section.settings.hero_button_label | escape }}
+        </a>
+
+        {% if section.settings.hero_subline != blank %}
+          <p class="kl-hero__subline">{{ section.settings.hero_subline | escape }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div id="KitSelector-{{ section.id }}" class="kl-kits">
+    <div class="kl-container">
+      <header class="kl-kits__heading">
+        {% if section.settings.kits_eyebrow != blank %}
+          <p class="kl-eyebrow">{{ section.settings.kits_eyebrow | escape }}</p>
+        {% endif %}
+        <h2 class="kl-h2">{{ section.settings.kits_title | escape }}</h2>
+      </header>
+
+      <div class="kl-kit-grid">
+        <article class="kl-kit-card" data-kit-card>
+          <h3 class="kl-h3">{{ section.settings.essential_title | escape }}</h3>
+
+          <div class="kl-kit-card__media">
+            {% if essential_image != blank %}
+              {{ essential_image
+                | image_url: width: 1500
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '420, 640, 900, 1200, 1500',
+                  sizes: '(min-width: 750px) 43vw, 100vw',
+                  alt: essential_alt
+              }}
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'kl-placeholder' }}
+            {% endif %}
+          </div>
+
+          <div class="kl-kit-card__contents">{{ section.settings.essential_contents | escape | newline_to_br }}</div>
+
+          <p class="kl-kit-card__price" data-product-price>
+            {% if essential_variant != blank %}
+              {{ essential_variant.price | money }}
+            {% else %}
+              {{ section.settings.essential_fallback_price | escape }}
+            {% endif %}
+          </p>
+          <p class="kl-kit-card__installments">{{ section.settings.essential_installments | escape }}</p>
+
+          {% if essential_product != blank %}
+            {% form 'product', essential_product, class: 'kl-kit-card__form', novalidate: 'novalidate' %}
+              <input type="hidden" name="id" value="{{ essential_variant.id }}" data-variant-input>
+              <input type="hidden" name="quantity" value="1">
+
+              {% for option in essential_product.options_with_values %}
+                {% assign essential_option_index = forloop.index0 %}
+                {% assign essential_selected_value = essential_variant.options[essential_option_index] %}
+                <fieldset class="kl-option" data-option-index="{{ essential_option_index }}">
+                  <legend>{{ option.name | escape }}</legend>
+                  <div class="kl-option__values">
+                    {% for value in option.values %}
+                      {% assign option_value_label = value.name | default: value %}
+                      <button
+                        class="kl-chip{% if option_value_label == essential_selected_value %} is-selected{% endif %}"
+                        type="button"
+                        data-option-value="{{ option_value_label | escape }}"
+                        aria-pressed="{% if option_value_label == essential_selected_value %}true{% else %}false{% endif %}"
+                      >
+                        {{ option_value_label | escape }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                </fieldset>
+              {% endfor %}
+
+              <button
+                class="kl-button kl-kit-card__button"
+                type="submit"
+                data-add-button
+                {% unless essential_variant.available %}disabled{% endunless %}
+              >
+                <span data-add-button-text>
+                  {% if essential_variant.available %}
+                    {{ section.settings.card_button_label | escape }}
+                  {% else %}
+                    {{ section.settings.sold_out_label | escape }}
+                  {% endif %}
+                </span>
+              </button>
+              <p class="kl-kit-card__status" aria-live="polite" data-variant-status></p>
+            {% endform %}
+
+            <script type="application/json" data-variants-json>{{ essential_product.variants | json }}</script>
+          {% else %}
+            <div class="kl-kit-card__form">
+              <fieldset class="kl-option">
+                <legend>{{ section.settings.adult_size_label | escape }}</legend>
+                <div class="kl-option__values" aria-hidden="true">
+                  <button class="kl-chip" type="button">P</button>
+                  <button class="kl-chip is-selected" type="button">G</button>
+                  <button class="kl-chip" type="button">GG</button>
+                  <button class="kl-chip" type="button">XG</button>
+                </div>
+              </fieldset>
+              <button class="kl-button kl-kit-card__button" type="button" disabled>{{ section.settings.card_button_label | escape }}</button>
+              <p class="kl-kit-card__status">Selecione o produto “Kit Essencial” no editor do tema.</p>
+            </div>
+          {% endif %}
+        </article>
+
+        <article class="kl-kit-card kl-kit-card--primary" data-kit-card data-shared-kit>
+          {% if section.settings.shared_badge != blank %}
+            <span class="kl-kit-card__badge">{{ section.settings.shared_badge | escape }}</span>
+          {% endif %}
+
+          <h3 class="kl-h3">{{ section.settings.shared_title | escape }}</h3>
+
+          <div class="kl-kit-card__media">
+            {% if shared_image != blank %}
+              {{ shared_image
+                | image_url: width: 1500
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '420, 640, 900, 1200, 1500',
+                  sizes: '(min-width: 750px) 43vw, 100vw',
+                  alt: shared_alt
+              }}
+            {% else %}
+              {{ 'product-2' | placeholder_svg_tag: 'kl-placeholder' }}
+            {% endif %}
+          </div>
+
+          <div class="kl-kit-card__contents">{{ section.settings.shared_contents | escape | newline_to_br }}</div>
+
+          <p class="kl-kit-card__price" data-product-price>
+            {% if shared_variant != blank %}
+              {{ shared_variant.price | money }}
+            {% else %}
+              {{ section.settings.shared_fallback_price | escape }}
+            {% endif %}
+          </p>
+          <p class="kl-kit-card__installments">{{ section.settings.shared_installments | escape }}</p>
+
+          {% if shared_product != blank %}
+            {% form 'product', shared_product, class: 'kl-kit-card__form', novalidate: 'novalidate' %}
+              <input type="hidden" name="id" value="{{ shared_variant.id }}" data-variant-input>
+              <input type="hidden" name="quantity" value="1">
+
+              {% for option in shared_product.options_with_values %}
+                {% assign shared_option_index = forloop.index0 %}
+                {% assign shared_selected_value = shared_variant.options[shared_option_index] %}
+                <fieldset class="kl-option" data-option-index="{{ shared_option_index }}">
+                  <legend>{{ option.name | escape }}</legend>
+                  <div class="kl-option__values">
+                    {% for value in option.values %}
+                      {% assign option_value_label = value.name | default: value %}
+                      <button
+                        class="kl-chip{% if option_value_label == shared_selected_value %} is-selected{% endif %}"
+                        type="button"
+                        data-option-value="{{ option_value_label | escape }}"
+                        aria-pressed="{% if option_value_label == shared_selected_value %}true{% else %}false{% endif %}"
+                      >
+                        {{ option_value_label | escape }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                </fieldset>
+              {% endfor %}
+
+              {% if extra_kids_product != blank and extra_kids_variant != blank %}
+                <div class="kl-addon" data-extra-addon data-extra-max="{{ extra_max_quantity }}">
+                  <label class="kl-addon__toggle">
+                    <input type="checkbox" data-extra-toggle>
+                    <span class="kl-addon__copy">
+                      <span class="kl-addon__title">{{ section.settings.extra_kids_label | escape }}</span>
+                      <span class="kl-addon__price" data-extra-price>+ {{ extra_kids_variant.price | money }}</span>
+                    </span>
+                  </label>
+
+                  <div class="kl-addon__options" data-extra-options hidden>
+                    {% unless extra_kids_product.has_only_default_variant %}
+                      {% for option in extra_kids_product.options_with_values %}
+                        {% assign extra_option_index = forloop.index0 %}
+                        {% assign extra_selected_value = extra_kids_variant.options[extra_option_index] %}
+                        <fieldset class="kl-option" data-extra-option-index="{{ extra_option_index }}">
+                          <legend>
+                            {% if extra_kids_product.options.size == 1 %}
+                              {{ section.settings.extra_kids_size_label | escape }}
+                            {% else %}
+                              {{ option.name | escape }}
+                            {% endif %}
+                          </legend>
+                          <div class="kl-option__values">
+                            {% for value in option.values %}
+                              {% assign extra_option_value_label = value.name | default: value %}
+                              <button
+                                class="kl-chip{% if extra_option_value_label == extra_selected_value %} is-selected{% endif %}"
+                                type="button"
+                                data-extra-option-value="{{ extra_option_value_label | escape }}"
+                                aria-pressed="{% if extra_option_value_label == extra_selected_value %}true{% else %}false{% endif %}"
+                              >
+                                {{ extra_option_value_label | escape }}
+                              </button>
+                            {% endfor %}
+                          </div>
+                        </fieldset>
+                      {% endfor %}
+                    {% endunless %}
+
+                    <div class="kl-addon__quantity">
+                      <span class="kl-addon__quantity-text">
+                        <span class="kl-addon__quantity-label" id="ExtraQtyLabel-{{ section.id }}">
+                          {{ section.settings.extra_kids_quantity_label | escape }}
+                        </span>
+                        <span class="kl-addon__unit" data-extra-unit hidden></span>
+                      </span>
+                      <div class="kl-qty">
+                        <button
+                          class="kl-qty__button"
+                          type="button"
+                          data-extra-quantity-step="-1"
+                          aria-label="Diminuir quantidade"
+                        >
+                          &minus;
+                        </button>
+                        <input
+                          class="kl-qty__input"
+                          type="number"
+                          inputmode="numeric"
+                          min="1"
+                          max="{{ extra_max_quantity }}"
+                          step="1"
+                          value="1"
+                          data-extra-quantity-input
+                          aria-labelledby="ExtraQtyLabel-{{ section.id }}"
+                        >
+                        <button
+                          class="kl-qty__button"
+                          type="button"
+                          data-extra-quantity-step="1"
+                          aria-label="Aumentar quantidade"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <p class="kl-addon__hint" aria-live="polite" data-extra-status></p>
+                  </div>
+                </div>
+              {% endif %}
+
+              <button
+                class="kl-button kl-kit-card__button"
+                type="submit"
+                data-add-button
+                {% unless shared_variant.available %}disabled{% endunless %}
+              >
+                <span data-add-button-text>
+                  {% if shared_variant.available %}
+                    {{ section.settings.card_button_label | escape }}
+                  {% else %}
+                    {{ section.settings.sold_out_label | escape }}
+                  {% endif %}
+                </span>
+              </button>
+              <p class="kl-kit-card__status" aria-live="polite" data-variant-status></p>
+            {% endform %}
+
+            <script type="application/json" data-variants-json>{{ shared_product.variants | json }}</script>
+            {% if extra_kids_product != blank %}
+              <script type="application/json" data-extra-variants-json>{{ extra_kids_product.variants | json }}</script>
+            {% endif %}
+          {% else %}
+            <div class="kl-kit-card__form">
+              <fieldset class="kl-option">
+                <legend>{{ section.settings.adult_size_label | escape }}</legend>
+                <div class="kl-option__values" aria-hidden="true">
+                  <button class="kl-chip" type="button">P</button>
+                  <button class="kl-chip is-selected" type="button">G</button>
+                  <button class="kl-chip" type="button">GG</button>
+                  <button class="kl-chip" type="button">XG</button>
+                </div>
+              </fieldset>
+              <fieldset class="kl-option">
+                <legend>{{ section.settings.kids_size_label | escape }}</legend>
+                <div class="kl-option__values" aria-hidden="true">
+                  <button class="kl-chip" type="button">2</button>
+                  <button class="kl-chip is-selected" type="button">4</button>
+                  <button class="kl-chip" type="button">6</button>
+                  <button class="kl-chip" type="button">8</button>
+                  <button class="kl-chip" type="button">10</button>
+                </div>
+              </fieldset>
+              <button class="kl-button kl-kit-card__button" type="button" disabled>{{ section.settings.card_button_label | escape }}</button>
+              <p class="kl-kit-card__status">Selecione o produto “Kit Compartilhado” no editor do tema.</p>
+            </div>
+          {% endif %}
+        </article>
+      </div>
+
+      <div class="kl-spec-strip" aria-label="Especificações dos kits">
+        <div class="kl-spec-strip__item">{{ section.settings.spec_1 | escape }}</div>
+        <div class="kl-spec-strip__item">{{ section.settings.spec_2 | escape }}</div>
+        <div class="kl-spec-strip__item">{{ section.settings.spec_3 | escape }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="kl-story">
+    <div class="kl-story__content">
+      <div class="kl-story__inner">
+        {% if section.settings.story_eyebrow != blank %}
+          <p class="kl-eyebrow">{{ section.settings.story_eyebrow | escape }}</p>
+        {% endif %}
+        <h2 class="kl-h2">{{ section.settings.story_title | escape }}</h2>
+        {% if section.settings.story_text != blank %}
+          <div class="kl-body">{{ section.settings.story_text }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="kl-story__media">
+      {% if section.settings.story_image != blank %}
+        {{ section.settings.story_image
+          | image_url: width: 2000
+          | image_tag:
+            loading: 'lazy',
+            widths: '640, 900, 1200, 1600, 2000',
+            sizes: '(min-width: 990px) 50vw, 100vw',
+            alt: story_alt
+        }}
+      {% else %}
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'kl-placeholder' }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="kl-details">
+    <div class="kl-details__grid">
+      <figure class="kl-detail-card">
+        <div class="kl-detail-card__media">
+          {% if section.settings.detail_image_1 != blank %}
+            {{ section.settings.detail_image_1
+              | image_url: width: 1400
+              | image_tag:
+                loading: 'lazy',
+                widths: '420, 640, 900, 1200, 1400',
+                sizes: '(min-width: 750px) 34vw, 100vw',
+                alt: detail_alt_1
+            }}
+          {% else %}
+            {{ 'product-3' | placeholder_svg_tag: 'kl-placeholder' }}
+          {% endif %}
+        </div>
+        <figcaption>{{ section.settings.detail_caption_1 | escape }}</figcaption>
+      </figure>
+
+      <figure class="kl-detail-card">
+        <div class="kl-detail-card__media">
+          {% if section.settings.detail_image_2 != blank %}
+            {{ section.settings.detail_image_2
+              | image_url: width: 1400
+              | image_tag:
+                loading: 'lazy',
+                widths: '420, 640, 900, 1200, 1400',
+                sizes: '(min-width: 750px) 36vw, 100vw',
+                alt: detail_alt_2
+            }}
+          {% else %}
+            {{ 'product-4' | placeholder_svg_tag: 'kl-placeholder' }}
+          {% endif %}
+        </div>
+        <figcaption>{{ section.settings.detail_caption_2 | escape }}</figcaption>
+      </figure>
+
+      <figure class="kl-detail-card">
+        <div class="kl-detail-card__media">
+          {% if section.settings.detail_image_3 != blank %}
+            {{ section.settings.detail_image_3
+              | image_url: width: 1400
+              | image_tag:
+                loading: 'lazy',
+                widths: '420, 640, 900, 1200, 1400',
+                sizes: '(min-width: 750px) 30vw, 100vw',
+                alt: detail_alt_3
+            }}
+          {% else %}
+            {{ 'product-5' | placeholder_svg_tag: 'kl-placeholder' }}
+          {% endif %}
+        </div>
+        <figcaption>{{ section.settings.detail_caption_3 | escape }}</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <div class="kl-closing">
+    <div class="kl-closing__media">
+      {% if section.settings.closing_image != blank %}
+        {{ section.settings.closing_image
+          | image_url: width: 2800
+          | image_tag:
+            loading: 'lazy',
+            widths: '750, 1100, 1500, 2000, 2400, 2800',
+            sizes: '100vw',
+            alt: closing_alt
+        }}
+      {% else %}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'kl-placeholder' }}
+      {% endif %}
+    </div>
+
+    <div class="kl-closing__band">
+      <div class="kl-container kl-closing__band-inner">
+        <div>
+          <h2 class="kl-closing__title">{{ section.settings.closing_title | escape }}</h2>
+          <p class="kl-closing__prices">{{ section.settings.closing_prices | escape }}</p>
+        </div>
+
+        <a class="kl-button kl-closing__button" href="{{ closing_link }}">
+          {{ section.settings.closing_button_label | escape }}
+        </a>
+
+        <p class="kl-closing__meta">{{ section.settings.closing_meta | escape | newline_to_br }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% if section.settings.show_internal_footer %}
+    <footer class="kl-footer">
+      <div class="kl-container">
+        <div class="kl-footer__grid">
+          {% for block in section.blocks %}
+            {% if block.type == 'footer_column' %}
+              <div class="kl-footer__column" {{ block.shopify_attributes }}>
+                <h3 class="kl-footer__heading">{{ block.settings.heading | escape }}</h3>
+                {% if block.settings.menu != blank %}
+                  <ul class="kl-footer__links" role="list">
+                    {% for link in block.settings.menu.links %}
+                      <li><a href="{{ link.url }}">{{ link.title | escape }}</a></li>
+                    {% endfor %}
+                  </ul>
+                {% elsif block.settings.text != blank %}
+                  <div class="kl-footer__text">{{ block.settings.text }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <div class="kl-footer__bottom">
+          <p class="kl-wordmark">{{ section.settings.footer_wordmark | escape }}</p>
+          <p class="kl-copyright">{{ section.settings.footer_copyright | escape }}</p>
+        </div>
+      </div>
+    </footer>
+  {% endif %}
+
+  {% if section.settings.enable_mobile_sticky %}
+    <div class="kl-mobile-sticky" aria-label="Acesso rápido aos kits">
+      <p class="kl-mobile-sticky__price">{{ section.settings.mobile_sticky_price | escape }}</p>
+      <a class="kl-button" href="#KitSelector-{{ section.id }}">{{ section.settings.mobile_sticky_label | escape }}</a>
+    </div>
+  {% endif %}
+</section>
+
+<script>
+  (() => {
+    const section = document.getElementById('KitLegado-{{ section.id }}');
+    if (!section || section.dataset.initialized === 'true') return;
+    section.dataset.initialized = 'true';
+
+    const locale = section.dataset.locale || 'pt-BR';
+    const currency = section.dataset.currency || 'BRL';
+    const soldOutLabel = {{ section.settings.sold_out_label | json }};
+    const availableLabel = {{ section.settings.card_button_label | json }};
+    const checkoutLoadingLabel = {{ section.settings.checkout_loading_label | json }};
+    const shopRoot = window.Shopify?.routes?.root || '/';
+    const cartAddUrl = `${shopRoot}cart/add.js`;
+    const checkoutUrl = `${shopRoot}checkout`;
+
+    const formatMoney = (cents) => {
+      try {
+        return new Intl.NumberFormat(locale, {
+          style: 'currency',
+          currency,
+          minimumFractionDigits: 2
+        }).format(cents / 100);
+      } catch (error) {
+        return `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
+      }
+    };
+
+    const parseVariants = (node) => {
+      if (!node) return [];
+      try {
+        return JSON.parse(node.textContent);
+      } catch (error) {
+        return [];
+      }
+    };
+
+    const selectedOptions = (groups, attribute) => groups.map((group) => {
+      const selected = group.querySelector(`.kl-chip.is-selected[${attribute}]`);
+      return selected ? selected.getAttribute(attribute) : null;
+    });
+
+    const findVariant = (variants, options) => {
+      if (!variants.length) return null;
+      if (!options.length) return variants.find((variant) => variant.available) || variants[0];
+      return variants.find((variant) => {
+        return variant.options.every((value, index) => value === options[index]);
+      }) || null;
+    };
+
+    const updateChipAvailability = (groups, variants, attribute) => {
+      const currentOptions = selectedOptions(groups, attribute);
+
+      groups.forEach((group, groupIndex) => {
+        group.querySelectorAll(`[${attribute}]`).forEach((chip) => {
+          const testOptions = [...currentOptions];
+          testOptions[groupIndex] = chip.getAttribute(attribute);
+
+          const hasAvailableMatch = variants.some((variant) => {
+            if (!variant.available || variant.options[groupIndex] !== testOptions[groupIndex]) return false;
+            return variant.options.every((value, index) => {
+              if (index === groupIndex || testOptions[index] == null) return true;
+              return value === testOptions[index];
+            });
+          });
+
+          chip.disabled = !hasAvailableMatch;
+        });
+      });
+    };
+
+    const selectChip = (group, chip, attribute) => {
+      group.querySelectorAll(`[${attribute}]`).forEach((button) => {
+        const isSelected = button === chip;
+        button.classList.toggle('is-selected', isSelected);
+        button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      });
+    };
+
+    const submitResetters = [];
+
+    section.querySelectorAll('[data-kit-card]').forEach((card) => {
+      const form = card.querySelector('form');
+      const variants = parseVariants(card.querySelector('[data-variants-json]'));
+      if (!form || !variants.length) return;
+
+      const optionGroups = [...form.querySelectorAll('[data-option-index]')];
+      const variantInput = form.querySelector('[data-variant-input]');
+      const priceNode = card.querySelector('[data-product-price]');
+      const addButton = form.querySelector('[data-add-button]');
+      const addButtonText = form.querySelector('[data-add-button-text]');
+      const statusNode = form.querySelector('[data-variant-status]');
+
+      const extraAddon = form.querySelector('[data-extra-addon]');
+      const extraToggle = form.querySelector('[data-extra-toggle]');
+      const extraOptionsNode = form.querySelector('[data-extra-options]');
+      const extraStatusNode = form.querySelector('[data-extra-status]');
+      const extraPriceNode = form.querySelector('[data-extra-price]');
+      const extraUnitNode = form.querySelector('[data-extra-unit]');
+      const extraQuantityInput = form.querySelector('[data-extra-quantity-input]');
+      const extraQuantityButtons = [...form.querySelectorAll('[data-extra-quantity-step]')];
+      const extraOptionGroups = [...form.querySelectorAll('[data-extra-option-index]')];
+      const extraVariants = parseVariants(card.querySelector('[data-extra-variants-json]'));
+      const extraMaxSetting = Math.max(1, Number(extraAddon?.dataset.extraMax) || 4);
+
+      let activeVariant = null;
+      let activeExtraVariant = null;
+      let isSubmitting = false;
+      let submitTimeout = null;
+
+      // Teto de quantidade: respeita o estoque quando o produto é rastreado e não vende sem estoque.
+      const extraQuantityCap = (variant) => {
+        if (!variant) return extraMaxSetting;
+        const isTracked = variant.inventory_management === 'shopify';
+        const deniesOversell = variant.inventory_policy === 'deny';
+        const stock = Number(variant.inventory_quantity);
+        if (isTracked && deniesOversell && Number.isFinite(stock)) {
+          return Math.max(1, Math.min(extraMaxSetting, stock));
+        }
+        return extraMaxSetting;
+      };
+
+      const readExtraQuantity = (cap) => {
+        if (!extraQuantityInput) return 1;
+        const parsed = parseInt(extraQuantityInput.value, 10);
+        const next = Number.isFinite(parsed) ? Math.min(Math.max(parsed, 1), cap) : 1;
+        if (extraQuantityInput.value !== String(next)) extraQuantityInput.value = String(next);
+        if (extraQuantityInput.max !== String(cap)) extraQuantityInput.max = String(cap);
+        return next;
+      };
+
+      const updatePurchaseState = () => {
+        const extraIsSelected = Boolean(extraToggle?.checked);
+        const extraCap = extraQuantityCap(activeExtraVariant);
+        const extraQuantity = readExtraQuantity(extraCap);
+        const extraUnitPrice = Number(activeExtraVariant?.price) || 0;
+        const extraTotal = extraIsSelected && activeExtraVariant ? extraUnitPrice * extraQuantity : 0;
+
+        const mainAvailable = Boolean(activeVariant?.available);
+        const extraAvailable = !extraIsSelected || Boolean(activeExtraVariant?.available);
+        const canPurchase = mainAvailable && extraAvailable && !isSubmitting;
+
+        if (variantInput) variantInput.value = activeVariant?.id || '';
+
+        if (priceNode && activeVariant) {
+          priceNode.textContent = formatMoney(activeVariant.price + extraTotal);
+        }
+
+        if (extraPriceNode && activeExtraVariant) {
+          const shownQuantity = extraIsSelected ? extraQuantity : 1;
+          extraPriceNode.textContent = `+ ${formatMoney(extraUnitPrice * shownQuantity)}`;
+        }
+
+        if (extraUnitNode) {
+          const showUnit = extraIsSelected && Boolean(activeExtraVariant) && extraQuantity > 1;
+          extraUnitNode.hidden = !showUnit;
+          extraUnitNode.textContent = showUnit
+            ? `${extraQuantity} × ${formatMoney(extraUnitPrice)}`
+            : '';
+        }
+
+        if (extraQuantityInput) extraQuantityInput.disabled = !extraIsSelected;
+
+        extraQuantityButtons.forEach((button) => {
+          const step = Number(button.dataset.extraQuantityStep) || 0;
+          button.disabled = !extraIsSelected
+            || (step < 0 ? extraQuantity <= 1 : extraQuantity >= extraCap);
+        });
+
+        if (addButton) addButton.disabled = !canPurchase;
+
+        if (addButtonText) {
+          if (isSubmitting) {
+            addButtonText.textContent = checkoutLoadingLabel;
+          } else {
+            addButtonText.textContent = canPurchase ? availableLabel : soldOutLabel;
+          }
+        }
+
+        if (statusNode) {
+          if (!activeVariant) {
+            statusNode.textContent = 'Combinação indisponível.';
+          } else if (!activeVariant.available) {
+            statusNode.textContent = 'Esta combinação está esgotada.';
+          } else if (extraIsSelected && !activeExtraVariant) {
+            statusNode.textContent = 'Selecione uma opção disponível para a camiseta infantil extra.';
+          } else if (extraIsSelected && !activeExtraVariant.available) {
+            statusNode.textContent = 'A camiseta infantil extra selecionada está esgotada.';
+          } else {
+            statusNode.textContent = '';
+          }
+        }
+
+        if (extraStatusNode) {
+          if (extraIsSelected && !activeExtraVariant?.available) {
+            extraStatusNode.textContent = 'Escolha um tamanho disponível.';
+          } else if (extraIsSelected && extraQuantity >= extraCap && extraCap < extraMaxSetting) {
+            extraStatusNode.textContent = `Restam ${extraCap} unidade${extraCap === 1 ? '' : 's'} neste tamanho.`;
+          } else {
+            extraStatusNode.textContent = '';
+          }
+        }
+      };
+
+      // Devolve o botão ao estado normal. Necessário porque o navegador restaura
+      // a página do bfcache ao voltar do checkout com o estado do JS congelado —
+      // sem isso o rótulo fica preso em "abrindo checkout" até dar refresh.
+      const cancelSubmitting = () => {
+        if (submitTimeout) {
+          window.clearTimeout(submitTimeout);
+          submitTimeout = null;
+        }
+        if (!isSubmitting) return;
+        isSubmitting = false;
+        updatePurchaseState();
+      };
+
+      submitResetters.push(cancelSubmitting);
+
+      const updateExtraVariant = () => {
+        if (!extraAddon || !extraToggle || !extraVariants.length) {
+          activeExtraVariant = null;
+          updatePurchaseState();
+          return;
+        }
+
+        updateChipAvailability(extraOptionGroups, extraVariants, 'data-extra-option-value');
+        activeExtraVariant = findVariant(
+          extraVariants,
+          selectedOptions(extraOptionGroups, 'data-extra-option-value')
+        );
+
+        if (extraOptionsNode) extraOptionsNode.hidden = !extraToggle.checked;
+        updatePurchaseState();
+      };
+
+      const updateMainVariant = () => {
+        updateChipAvailability(optionGroups, variants, 'data-option-value');
+        activeVariant = findVariant(variants, selectedOptions(optionGroups, 'data-option-value'));
+        updateExtraVariant();
+      };
+
+      optionGroups.forEach((group) => {
+        group.addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-option-value]');
+          if (!chip || chip.disabled) return;
+          selectChip(group, chip, 'data-option-value');
+          updateMainVariant();
+        });
+      });
+
+      extraOptionGroups.forEach((group) => {
+        group.addEventListener('click', (event) => {
+          const chip = event.target.closest('[data-extra-option-value]');
+          if (!chip || chip.disabled) return;
+          selectChip(group, chip, 'data-extra-option-value');
+          updateExtraVariant();
+        });
+      });
+
+      extraQuantityButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          if (button.disabled || !extraQuantityInput) return;
+          const step = Number(button.dataset.extraQuantityStep) || 0;
+          const current = parseInt(extraQuantityInput.value, 10) || 1;
+          extraQuantityInput.value = String(current + step);
+          updatePurchaseState();
+        });
+      });
+
+      if (extraQuantityInput) {
+        extraQuantityInput.addEventListener('change', updatePurchaseState);
+        extraQuantityInput.addEventListener('blur', updatePurchaseState);
+      }
+
+      if (extraToggle) {
+        extraToggle.addEventListener('change', updateExtraVariant);
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (isSubmitting || !activeVariant?.available) return;
+
+        const extraIsSelected = Boolean(extraToggle?.checked);
+        if (extraIsSelected && !activeExtraVariant?.available) {
+          updatePurchaseState();
+          return;
+        }
+
+        const items = [{ id: Number(activeVariant.id), quantity: 1 }];
+        if (extraIsSelected && activeExtraVariant) {
+          items.push({
+            id: Number(activeExtraVariant.id),
+            quantity: readExtraQuantity(extraQuantityCap(activeExtraVariant))
+          });
+        }
+
+        isSubmitting = true;
+        updatePurchaseState();
+
+        try {
+          const response = await fetch(cartAddUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json'
+            },
+            body: JSON.stringify({ items })
+          });
+
+          if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.description || payload.message || 'Não foi possível adicionar os produtos.');
+          }
+
+          window.location.assign(checkoutUrl);
+
+          // Rede de segurança: se a navegação não acontecer (bloqueio, back
+          // instantâneo, aba em segundo plano), o botão se libera sozinho.
+          submitTimeout = window.setTimeout(cancelSubmitting, 10000);
+        } catch (error) {
+          cancelSubmitting();
+          if (statusNode) {
+            statusNode.textContent = error?.message || 'Não foi possível abrir o checkout. Tente novamente.';
+          }
+        }
+      }, true);
+
+      updateMainVariant();
+    });
+
+    const resetAllSubmitting = () => submitResetters.forEach((reset) => reset());
+
+    // Volta do checkout pelo botão "voltar": o Chrome e o Safari restauram a
+    // página do bfcache sem reexecutar este script, então o reset é manual.
+    window.addEventListener('pageshow', resetAllSubmitting);
+
+    // Cobre o caso do checkout aberto em outra aba ou do retorno sem bfcache.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') resetAllSubmitting();
+    });
+
+    section.querySelectorAll('a[href^="#KitSelector-"]').forEach((anchor) => {
+      anchor.addEventListener('click', (event) => {
+        const target = section.querySelector(anchor.getAttribute('href')) || document.querySelector(anchor.getAttribute('href'));
+        if (!target) return;
+        event.preventDefault();
+        target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Kit Legado editorial",
+  "tag": "section",
+  "class": "section-kit-legado-editorial",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Tipografia e cores"
+    },
+    {
+      "type": "font_picker",
+      "id": "type_font",
+      "label": "Fonte",
+      "default": "montserrat_n4"
+    },
+    {
+      "type": "color",
+      "id": "color_ink",
+      "label": "Azul principal",
+      "default": "#1B2A5B"
+    },
+    {
+      "type": "color",
+      "id": "color_navy_dark",
+      "label": "Azul da faixa final",
+      "default": "#16234A"
+    },
+    {
+      "type": "color",
+      "id": "color_paper",
+      "label": "Fundo off-white",
+      "default": "#F4F1EA"
+    },
+    {
+      "type": "color",
+      "id": "color_sky",
+      "label": "Fundo azul-claro",
+      "default": "#F0F5FA"
+    },
+    {
+      "type": "color",
+      "id": "color_muted",
+      "label": "Texto secundário",
+      "default": "#6E7585"
+    },
+    {
+      "type": "color",
+      "id": "color_line",
+      "label": "Divisórias",
+      "default": "#DDD8CE"
+    },
+    {
+      "type": "header",
+      "content": "Hero"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Imagem principal"
+    },
+    {
+      "type": "select",
+      "id": "hero_image_position",
+      "label": "Posição da imagem",
+      "default": "center center",
+      "options": [
+        { "value": "left center", "label": "Esquerda" },
+        { "value": "center center", "label": "Centro" },
+        { "value": "right center", "label": "Direita" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Sobretítulo",
+      "default": "KIT LEGADO"
+    },
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Título",
+      "default": "MARCAS DO LEGADO"
+    },
+    {
+      "type": "richtext",
+      "id": "hero_text",
+      "label": "Texto",
+      "default": "<p>Roupas que acompanham gerações, carregando mais do que estilo.</p><p>Para momentos que viram lembrança e valores que ficam.</p>"
+    },
+    {
+      "type": "text",
+      "id": "hero_button_label",
+      "label": "Botão",
+      "default": "VER OS KITS"
+    },
+    {
+      "type": "url",
+      "id": "hero_button_link",
+      "label": "Link do botão",
+      "info": "Deixe vazio para rolar até os kits."
+    },
+    {
+      "type": "text",
+      "id": "hero_subline",
+      "label": "Linha abaixo do botão",
+      "default": "Kit Essencial R$ 189 · Kit Compartilhado R$ 289 · Envio em 24h"
+    },
+    {
+      "type": "header",
+      "content": "Seletor de kits"
+    },
+    {
+      "type": "text",
+      "id": "kits_eyebrow",
+      "label": "Sobretítulo",
+      "default": "ESCOLHA SEU KIT"
+    },
+    {
+      "type": "text",
+      "id": "kits_title",
+      "label": "Título",
+      "default": "Dois kits, o mesmo propósito."
+    },
+    {
+      "type": "product",
+      "id": "essential_product",
+      "label": "Produto: Kit Essencial"
+    },
+    {
+      "type": "image_picker",
+      "id": "essential_image",
+      "label": "Imagem editorial do Kit Essencial",
+      "info": "Se vazia, usa a imagem principal do produto."
+    },
+    {
+      "type": "text",
+      "id": "essential_title",
+      "label": "Nome do Kit Essencial",
+      "default": "Kit Essencial"
+    },
+    {
+      "type": "textarea",
+      "id": "essential_contents",
+      "label": "Conteúdo do Kit Essencial",
+      "default": "01 Camiseta adulta\n01 Chaveiro"
+    },
+    {
+      "type": "text",
+      "id": "essential_fallback_price",
+      "label": "Preço de prévia",
+      "default": "R$ 189,00"
+    },
+    {
+      "type": "text",
+      "id": "essential_installments",
+      "label": "Parcelamento",
+      "default": "6x de R$ 31,50 sem juros"
+    },
+    {
+      "type": "product",
+      "id": "shared_product",
+      "label": "Produto: Kit Compartilhado"
+    },
+    {
+      "type": "image_picker",
+      "id": "shared_image",
+      "label": "Imagem editorial do Kit Compartilhado",
+      "info": "Se vazia, usa a imagem principal do produto."
+    },
+    {
+      "type": "text",
+      "id": "shared_title",
+      "label": "Nome do Kit Compartilhado",
+      "default": "Kit Compartilhado"
+    },
+    {
+      "type": "text",
+      "id": "shared_badge",
+      "label": "Selo",
+      "default": "MAIS VENDIDO"
+    },
+    {
+      "type": "textarea",
+      "id": "shared_contents",
+      "label": "Conteúdo do Kit Compartilhado",
+      "default": "01 Camiseta adulta\n01 Camiseta infantil\n01 Chaveiro"
+    },
+    {
+      "type": "text",
+      "id": "shared_fallback_price",
+      "label": "Preço de prévia",
+      "default": "R$ 289,00"
+    },
+    {
+      "type": "text",
+      "id": "shared_installments",
+      "label": "Parcelamento",
+      "default": "6x de R$ 48,16 sem juros"
+    },
+    {
+      "type": "header",
+      "content": "Camiseta infantil extra"
+    },
+    {
+      "type": "product",
+      "id": "extra_kids_product",
+      "label": "Produto não listado: camiseta infantil extra",
+      "info": "Cadastre este produto por R$ 69,90, mantenha-o disponível no canal Loja virtual e fora de coleções, menus e vitrines públicas."
+    },
+    {
+      "type": "text",
+      "id": "extra_kids_label",
+      "label": "Texto da opção adicional",
+      "default": "Adicionar camiseta infantil extra"
+    },
+    {
+      "type": "text",
+      "id": "extra_kids_size_label",
+      "label": "Rótulo do tamanho adicional",
+      "default": "Tamanho da camiseta extra"
+    },
+    {
+      "type": "text",
+      "id": "extra_kids_quantity_label",
+      "label": "Rótulo da quantidade adicional",
+      "default": "Quantidade"
+    },
+    {
+      "type": "range",
+      "id": "extra_kids_max_quantity",
+      "label": "Máximo de camisetas extras",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "info": "O limite cai automaticamente quando o estoque do tamanho é menor."
+    },
+    {
+      "type": "text",
+      "id": "adult_size_label",
+      "label": "Rótulo de tamanho adulto na prévia",
+      "default": "Tamanho adulto"
+    },
+    {
+      "type": "text",
+      "id": "kids_size_label",
+      "label": "Rótulo de tamanho infantil na prévia",
+      "default": "Tamanho infantil"
+    },
+    {
+      "type": "text",
+      "id": "card_button_label",
+      "label": "Texto do botão dos kits",
+      "default": "COMPRAR AGORA"
+    },
+    {
+      "type": "text",
+      "id": "checkout_loading_label",
+      "label": "Texto enquanto abre o checkout",
+      "default": "ABRINDO CHECKOUT..."
+    },
+    {
+      "type": "text",
+      "id": "sold_out_label",
+      "label": "Texto de esgotado",
+      "default": "ESGOTADO"
+    },
+    {
+      "type": "text",
+      "id": "spec_1",
+      "label": "Especificação 1",
+      "default": "100% algodão penteado 30.1 · 180 g/m²"
+    },
+    {
+      "type": "text",
+      "id": "spec_2",
+      "label": "Especificação 2",
+      "default": "Estampa em serigrafia à base d'água"
+    },
+    {
+      "type": "text",
+      "id": "spec_3",
+      "label": "Especificação 3",
+      "default": "Chaveiro em aço escovado, 45 mm"
+    },
+    {
+      "type": "header",
+      "content": "História"
+    },
+    {
+      "type": "text",
+      "id": "story_eyebrow",
+      "label": "Sobretítulo",
+      "default": "NOSSA HISTÓRIA"
+    },
+    {
+      "type": "text",
+      "id": "story_title",
+      "label": "Título",
+      "default": "Feito para durar, feito para lembrar."
+    },
+    {
+      "type": "richtext",
+      "id": "story_text",
+      "label": "Texto",
+      "default": "<p>Criamos o Kit Legado para celebrar o que realmente importa: a presença, o exemplo e os momentos que ficam.</p><p>Peças feitas com materiais de qualidade e acabamentos que resistem ao tempo. Para acompanhar o dia a dia e as histórias que vocês constroem juntos.</p><p>Mais do que vestir, é sobre marcar lembranças que passarão adiante.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "story_image",
+      "label": "Imagem da história"
+    },
+    {
+      "type": "select",
+      "id": "story_image_position",
+      "label": "Posição da imagem",
+      "default": "center center",
+      "options": [
+        { "value": "left center", "label": "Esquerda" },
+        { "value": "center center", "label": "Centro" },
+        { "value": "right center", "label": "Direita" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Detalhes"
+    },
+    {
+      "type": "image_picker",
+      "id": "detail_image_1",
+      "label": "Imagem 1"
+    },
+    {
+      "type": "text",
+      "id": "detail_caption_1",
+      "label": "Legenda 1",
+      "default": "Estampa em serigrafia à base d'água"
+    },
+    {
+      "type": "image_picker",
+      "id": "detail_image_2",
+      "label": "Imagem 2"
+    },
+    {
+      "type": "text",
+      "id": "detail_caption_2",
+      "label": "Legenda 2",
+      "default": "Chaveiro em aço escovado, 45 mm"
+    },
+    {
+      "type": "image_picker",
+      "id": "detail_image_3",
+      "label": "Imagem 3"
+    },
+    {
+      "type": "text",
+      "id": "detail_caption_3",
+      "label": "Legenda 3",
+      "default": "Malha 100% algodão penteado 30.1"
+    },
+    {
+      "type": "header",
+      "content": "Fechamento"
+    },
+    {
+      "type": "image_picker",
+      "id": "closing_image",
+      "label": "Imagem de fechamento"
+    },
+    {
+      "type": "select",
+      "id": "closing_image_position",
+      "label": "Posição da imagem",
+      "default": "center center",
+      "options": [
+        { "value": "left center", "label": "Esquerda" },
+        { "value": "center center", "label": "Centro" },
+        { "value": "right center", "label": "Direita" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "closing_title",
+      "label": "Título",
+      "default": "KIT LEGADO"
+    },
+    {
+      "type": "text",
+      "id": "closing_prices",
+      "label": "Preços",
+      "default": "Kit Essencial R$ 189 · Kit Compartilhado R$ 289"
+    },
+    {
+      "type": "text",
+      "id": "closing_button_label",
+      "label": "Botão",
+      "default": "VER OS KITS"
+    },
+    {
+      "type": "url",
+      "id": "closing_button_link",
+      "label": "Link do botão",
+      "info": "Deixe vazio para rolar até os kits."
+    },
+    {
+      "type": "textarea",
+      "id": "closing_meta",
+      "label": "Pagamento e envio",
+      "default": "6x sem juros · Cartão de crédito\nEnvio em até 24h"
+    },
+    {
+      "type": "header",
+      "content": "Mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_mobile_sticky",
+      "label": "Exibir barra de compra fixa no mobile",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "mobile_sticky_price",
+      "label": "Preço na barra mobile",
+      "default": "Kits a partir de R$ 189"
+    },
+    {
+      "type": "text",
+      "id": "mobile_sticky_label",
+      "label": "Botão da barra mobile",
+      "default": "VER OS KITS"
+    },
+    {
+      "type": "header",
+      "content": "Rodapé interno opcional"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_internal_footer",
+      "label": "Exibir rodapé dentro da seção",
+      "default": false,
+      "info": "Ative apenas se o template da página não usar o rodapé global do tema."
+    },
+    {
+      "type": "text",
+      "id": "footer_wordmark",
+      "label": "Marca no rodapé",
+      "default": "A MARCA"
+    },
+    {
+      "type": "text",
+      "id": "footer_copyright",
+      "label": "Copyright",
+      "default": "© A MARCA · Todos os direitos reservados."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "footer_column",
+      "name": "Coluna do rodapé",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Título",
+          "default": "Produto"
+        },
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Texto alternativo"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Kit Legado editorial",
+      "blocks": [
+        { "type": "footer_column", "settings": { "heading": "Produto" } },
+        { "type": "footer_column", "settings": { "heading": "Ajuda" } },
+        { "type": "footer_column", "settings": { "heading": "A Marca" } },
+        { "type": "footer_column", "settings": { "heading": "Contato" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

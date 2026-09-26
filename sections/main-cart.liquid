@@ -1,0 +1,451 @@
+{% comment %}
+  Fashion Premium Cart - Minimalist & Functional
+  Features: AJAX Updates, Sticky Summary, Mobile First
+{% endcomment %}
+
+{% schema %}
+{
+  "name": "Carrinho Premium Fashion",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Estilo"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Cor Primária (Botões)",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Cor de Fundo",
+      "default": "#FFFFFF"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  /* --- CSS SCOPED --- */
+  .f-cart-wrapper {
+    padding-block: 60px;
+    font-family: var(--font-body-family), "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    background-color: {{ section.settings.bg_color }};
+  }
+
+  /* Header & Title */
+  .f-cart-header {
+    margin-bottom: 50px;
+    text-align: center;
+  }
+  .f-cart-title {
+    font-size: 2.2rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+  }
+
+  /* Empty State */
+  .f-cart-empty {
+    text-align: center;
+    padding: 100px 0;
+  }
+  .f-btn-continue {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 15px 40px;
+    background: {{ section.settings.primary_color }};
+    color: #fff;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+    transition: opacity 0.3s;
+  }
+  .f-btn-continue:hover { opacity: 0.8; }
+
+  /* Grid System */
+  .f-cart-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 60px;
+    align-items: start;
+  }
+
+  /* Product List */
+  .f-cart-items {
+    width: 100%;
+  }
+  
+  /* Table Headers */
+  .f-cart-header-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 0.5fr;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+  }
+
+  .f-cart-item {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 25px;
+    padding: 25px 0;
+    border-bottom: 1px solid #f4f4f4;
+    position: relative;
+  }
+
+  .f-item-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    aspect-ratio: 3 / 4;
+  }
+
+  .f-item-details-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 0.5fr;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+  }
+
+  .f-item-info h3 {
+    font-size: 1rem;
+    margin: 0 0 8px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .f-item-info h3 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .f-item-variant {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Quantity Selector */
+  .f-qty-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e5e5e5;
+    width: fit-content;
+    height: 40px;
+  }
+  .f-qty-btn {
+    background: none;
+    border: none;
+    width: 35px;
+    height: 100%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .f-qty-btn:hover { background: #f9f9f9; }
+  
+  .f-qty-input {
+    width: 40px;
+    border: none;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #000;
+    background: transparent;
+    appearance: none;
+    -moz-appearance: textfield;
+  }
+  .f-qty-input::-webkit-outer-spin-button,
+  .f-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Price & Remove */
+  .f-item-price {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  .f-remove-btn {
+    color: #aaa;
+    text-decoration: none;
+    font-size: 1.4rem;
+    transition: color 0.2s;
+    justify-self: end;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  .f-remove-btn:hover { color: #000; }
+
+  /* Sidebar Summary */
+  .f-cart-summary {
+    background: #f9f9f9;
+    padding: 40px 30px;
+    position: sticky;
+    top: 40px;
+  }
+
+  .f-summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .f-summary-total {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 25px;
+    margin-top: 25px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+  }
+  
+  .f-tax-note {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 30px;
+    text-align: right;
+    font-style: italic;
+  }
+
+  /* Checkout Button */
+  .f-checkout-btn {
+    width: 100%;
+    background: {{ section.settings.primary_color }};
+    color: #fff;
+    border: none;
+    padding: 20px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: block;
+    text-align: center;
+    font-weight: 500;
+  }
+  .f-checkout-btn:hover { 
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  /* Loading State */
+  .f-cart-wrapper.loading {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: wait;
+  }
+
+  /* Mobile + Tablet Responsive - breakpoint alinhado ao tema (989px) */
+  @media (max-width: 989px) {
+    .f-cart-wrapper {
+      padding-block: 30px;
+    }
+    .f-cart-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .f-cart-header-row {
+      display: none;
+    }
+    .f-cart-item {
+      grid-template-columns: 80px 1fr;
+      gap: 20px;
+    }
+    .f-item-details-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      position: relative;
+    }
+    .f-item-info {
+      padding-right: 30px; /* Space for remove btn */
+    }
+    .f-item-price {
+      order: 2;
+    }
+    .f-qty-wrapper {
+      order: 3;
+    }
+    .f-remove-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+    .f-cart-summary {
+      position: static;
+      background: #fff;
+      border-top: 1px solid #eee;
+      padding: 30px 0 0;
+    }
+  }
+</style>
+
+<div class="f-cart-wrapper am-page-width" id="fashion-cart-section" data-section-id="{{ section.id }}">
+  
+  <header class="f-cart-header">
+    <h1 class="f-cart-title">Carrinho</h1>
+  </header>
+
+  {% if cart.item_count > 0 %}
+    <form action="{{ routes.cart_url }}" method="post" id="cart-form" class="f-cart-grid">
+      
+      <div class="f-cart-items">
+        <div class="f-cart-header-row">
+          <span>Produto</span>
+          <span>Quantidade</span>
+          <span>Total</span>
+          <span></span>
+        </div>
+
+        {% for item in cart.items %}
+          <div class="f-cart-item" data-key="{{ item.key }}">
+            <div class="f-item-image">
+              {% if item.image %}
+                <a href="{{ item.url }}">
+                  <img src="{{ item.image | image_url: width: 300 }}" alt="{{ item.title | escape }}" loading="lazy" width="150" height="200">
+                </a>
+              {% endif %}
+            </div>
+
+            <div class="f-item-details-grid">
+              <div class="f-item-info">
+                <h3><a href="{{ item.url }}">{{ item.product.title }}</a></h3>
+                {% unless item.product.has_only_default_variant %}
+                  <p class="f-item-variant">{{ item.variant.title }}</p>
+                {% endunless %}
+                
+                {% if item.selling_plan_allocation %}
+                  <p class="f-item-variant">{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                {% endif %}
+              </div>
+
+              <div class="f-qty-wrapper">
+                <button type="button" class="f-qty-btn" name="minus" onclick="FashionCart.updateQuantity(this, '{{ item.key }}', {{ item.quantity | minus: 1 }})">&minus;</button>
+                <input type="number" class="f-qty-input" value="{{ item.quantity }}" min="0" readonly>
+                <button type="button" class="f-qty-btn" name="plus" onclick="FashionCart.updateQuantity(this, '{{ item.key }}', {{ item.quantity | plus: 1 }})">&plus;</button>
+              </div>
+
+              <div class="f-item-price">
+                {% if item.original_line_price != item.final_line_price %}
+                  <s style="color: #999; font-size: 0.9em;">{{ item.original_line_price | money }}</s><br>
+                  {{ item.final_line_price | money }}
+                {% else %}
+                  {{ item.original_line_price | money }}
+                {% endif %}
+              </div>
+
+              <button type="button" class="f-remove-btn" onclick="FashionCart.updateQuantity(this, '{{ item.key }}', 0)" aria-label="Remover">&times;</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="f-cart-summary">
+        
+        <div class="f-summary-row">
+          <span>Subtotal</span>
+          <span>{{ cart.total_price | money }}</span>
+        </div>
+        
+        {% if cart.total_discounts > 0 %}
+          <div class="f-summary-row" style="color: #d12424;">
+            <span>Descontos</span>
+            <span>-{{ cart.total_discounts | money }}</span>
+          </div>
+        {% endif %}
+
+        <div class="f-summary-row f-summary-total">
+          <span>Total</span>
+          <span>{{ cart.total_price | money }}</span>
+        </div>
+
+        <p class="f-tax-note">Frete e taxas calculados na próxima etapa.</p>
+
+        <button type="submit" name="checkout" class="f-checkout-btn">
+          Finalizar Compra
+        </button>
+      </div>
+
+    </form>
+  {% else %}
+    <div class="f-cart-empty">
+      <p style="font-size: 1.1rem; color: #666; margin-bottom: 20px;">Sua sacola está vazia.</p>
+      <a href="{{ routes.all_products_collection_url }}" class="f-btn-continue">Continuar Comprando</a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+(() => {
+  const SECTION_ID = '{{ section.id }}';
+  const cartChangeUrl = (window.routes && window.routes.cart_change_url) ? window.routes.cart_change_url : '/cart/change.js';
+
+  const toggleLoading = (isLoading) => {
+    const wrapper = document.querySelector('.f-cart-wrapper');
+    if (!wrapper) return;
+    wrapper.classList.toggle('loading', !!isLoading);
+  };
+
+  window.FashionCart = window.FashionCart || {};
+  window.FashionCart.sectionId = SECTION_ID;
+
+  window.FashionCart.updateQuantity = (btn, key, newQuantity) => {
+    const qty = Number.parseInt(newQuantity, 10);
+    const safeQty = Number.isFinite(qty) && qty > 0 ? qty : 0;
+
+    toggleLoading(true);
+
+    fetch(cartChangeUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        id: key,
+        quantity: safeQty,
+        sections: [SECTION_ID]
+      })
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const sectionHtml = data && data.sections && data.sections[SECTION_ID];
+        if (!sectionHtml) throw new Error('Cart section HTML missing from response');
+
+        const html = new DOMParser().parseFromString(sectionHtml, 'text/html');
+        const newCartContainer = html.querySelector('.f-cart-wrapper');
+        const currentWrapper = document.querySelector('.f-cart-wrapper');
+
+        if (currentWrapper && newCartContainer) {
+          currentWrapper.replaceWith(newCartContainer);
+          // Loading class is removed because we replaced the wrapper
+          return;
+        }
+
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('Error updating cart:', error);
+        toggleLoading(false);
+      });
+  };
+})();
+</script>

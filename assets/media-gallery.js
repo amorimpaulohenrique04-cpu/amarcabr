@@ -1,0 +1,7 @@
+import{Component}from '@theme/component';import{ThemeEvents,VariantUpdateEvent,ZoomMediaSelectedEvent}from '@theme/events';export class MediaGallery extends Component{connectedCallback(){super.connectedCallback();const{signal}=this.#controller;const target=this.closest('.shopify-section, dialog');target?.addEventListener(ThemeEvents.variantUpdate,this.#handleVariantUpdate,{signal});this.refs.zoomDialogComponent?.addEventListener(ThemeEvents.zoomMediaSelected,this.#handleZoomMediaSelected,{signal,})}
+#controller=new AbortController();disconnectedCallback(){super.disconnectedCallback();this.#controller.abort()}
+#handleVariantUpdate=(event)=>{const source=event.detail.data.html;if(!source)return;const newMediaGallery=source.querySelector('media-gallery');if(!newMediaGallery)return;this.replaceWith(newMediaGallery)};#handleZoomMediaSelected=async(event)=>{this.slideshow?.select(event.detail.index,undefined,{animate:!1})};zoom(index,event){this.refs.zoomDialogComponent?.open(index,event)}
+get slideshow(){return this.refs.slideshow}
+get media(){return this.refs.media}
+get presentation(){return this.dataset.presentation}}
+if(!customElements.get('media-gallery')){customElements.define('media-gallery',MediaGallery)}

@@ -1,0 +1,450 @@
+{% comment %}
+  A MARCA — Estética + Carrossel
+  - Esquerda: título + texto (como referência)
+  - Direita: carrossel autoplay com imagens via blocks
+  - Respeita foco do Theme Editor (presentation.focal_point)
+  - Opção: cover (corta) / contain (sem corte)
+{% endcomment %}
+
+<section class="am-estetica section-{{ section.id }}">
+  <div class="am-estetica__bleed">
+    <div class="am-estetica__container">
+      <div class="am-estetica__grid">
+
+        <!-- LEFT: TEXTO -->
+        <div class="am-estetica__copy">
+          {% if section.settings.heading != blank %}
+            <h2 class="am-estetica__heading">{{ section.settings.heading | escape }}</h2>
+          {% endif %}
+
+          {% if section.settings.body != blank %}
+            <div class="am-estetica__body">
+              {{ section.settings.body }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- RIGHT: CAROUSEL -->
+        <div class="am-estetica__rail">
+          <div class="am-estetica__carousel" data-am-carousel>
+            <div class="am-estetica__track" data-am-track>
+              {%- assign has_images = false -%}
+
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'slide' and block.settings.image != blank -%}
+                  {%- assign has_images = true -%}
+                  {%- assign fp = block.settings.image.presentation.focal_point | default: '50% 50%' -%}
+
+                  <div class="am-estetica__slide" data-am-slide {{ block.shopify_attributes }}>
+                    <img
+                      src="{{ block.settings.image | image_url: width: 1400 }}"
+                      srcset="{{ block.settings.image | image_url: width: 480 }} 480w,
+                              {{ block.settings.image | image_url: width: 768 }} 768w,
+                              {{ block.settings.image | image_url: width: 1024 }} 1024w,
+                              {{ block.settings.image | image_url: width: 1400 }} 1400w,
+                              {{ block.settings.image | image_url: width: 1800 }} 1800w,
+                              {{ block.settings.image | image_url: width: 2200 }} 2200w,
+                              {{ block.settings.image | image_url: width: 2600 }} 2600w"
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                      alt="{{ block.settings.image.alt | escape }}"
+                      width="{{ block.settings.image.width }}"
+                      height="{{ block.settings.image.height }}"
+                      loading="lazy"
+                      decoding="async"
+                      style="object-position: {{ fp }};"
+                    >
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if has_images == false -%}
+                <div class="am-estetica__empty">
+                  Adicione imagens nos blocos da seção.
+                </div>
+              {%- endif -%}
+            </div>
+
+            {% if section.settings.show_arrows %}
+              <button type="button" class="am-estetica__arrow am-estetica__arrow--prev" data-am-prev aria-label="Anterior">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button type="button" class="am-estetica__arrow am-estetica__arrow--next" data-am-next aria-label="Próximo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            {% endif %}
+
+            {% if section.settings.show_dots %}
+              <div class="am-estetica__dots" data-am-dots aria-hidden="true"></div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Zerar espaços do wrapper Shopify */
+    #shopify-section-{{ section.id }},
+    #shopify-section-{{ section.id }} > *{
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .section-{{ section.id }}{
+      --bg: {{ section.settings.bg }};
+      --ink: {{ section.settings.text_color }};
+      --accent: {{ section.settings.accent_color }};
+
+      --container: {{ section.settings.container_max }}px;
+      --pad-y: {{ section.settings.pad_y }}px;
+      --pad-x: {{ section.settings.pad_x }}px;
+      --gap: {{ section.settings.gap }}px;
+
+      --h-size: {{ section.settings.heading_size }}px;
+
+      --body-size: {{ section.settings.body_size }}px;
+      --body-lh: 1.35;
+
+      --carousel-h: {{ section.settings.carousel_height }}px;
+      --carousel-h-m: {{ section.settings.carousel_height_mobile }}px;
+
+      --radius: {{ section.settings.radius }}px;
+
+      /* NOVO: controla se corta ou não */
+      --am-fit: {{ section.settings.image_fit }};
+      --ease: cubic-bezier(.2,.7,.2,1);
+    }
+
+    /* Full width real (fundo ocupando tela) */
+    .section-{{ section.id }} .am-estetica__bleed{
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+      background: var(--bg);
+    }
+
+    /* Container central */
+    .section-{{ section.id }} .am-estetica__container{
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: var(--pad-y) var(--pad-x);
+      box-sizing: border-box;
+    }
+
+    /* Grid */
+    .section-{{ section.id }} .am-estetica__grid{
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: var(--gap);
+      align-items: center;
+    }
+
+    /* Texto */
+    .section-{{ section.id }} .am-estetica__copy{
+      color: var(--ink);
+      max-width: 520px;
+    }
+
+    .section-{{ section.id }} .am-estetica__heading{
+      margin: 0 0 14px 0;
+      font-family: Canela, ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-weight: 400;
+      font-size: var(--h-size);
+      line-height: 1.02;
+      letter-spacing: .01em;
+      color: var(--accent);
+    }
+
+    .section-{{ section.id }} .am-estetica__body{
+      font-size: var(--body-size);
+      line-height: var(--body-lh);
+      color: rgba(0,0,0,.55);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", Helvetica;
+    }
+    .section-{{ section.id }} .am-estetica__body p{ margin: 0; }
+
+    /* Carrossel */
+    .section-{{ section.id }} .am-estetica__rail{
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .section-{{ section.id }} .am-estetica__carousel{
+      width: 100%;
+      max-width: 760px;
+      height: var(--carousel-h);
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.03);
+    }
+
+    .section-{{ section.id }} .am-estetica__track{
+      height: 100%;
+      display: flex;
+      will-change: transform;
+      transition: transform 650ms var(--ease);
+    }
+
+    .section-{{ section.id }} .am-estetica__slide{
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* NOVO: object-fit controlável + foco vem inline (object-position) */
+    .section-{{ section.id }} .am-estetica__slide img{
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: var(--am-fit);
+      background: rgba(0,0,0,.03);
+    }
+
+    /* Dots */
+    .section-{{ section.id }} .am-estetica__arrow{
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 5;
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--ink);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease, background .2s;
+    }
+    .section-{{ section.id }} .am-estetica__carousel:hover .am-estetica__arrow{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .section-{{ section.id }} .am-estetica__arrow:hover{
+      background: #fff;
+      transform: translateY(-50%) scale(1.1);
+    }
+    .section-{{ section.id }} .am-estetica__arrow--prev{ left: 16px; }
+    .section-{{ section.id }} .am-estetica__arrow--next{ right: 16px; }
+
+    @media (hover:none){
+      .section-{{ section.id }} .am-estetica__arrow{
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    .section-{{ section.id }} .am-estetica__dots{
+      position: absolute;
+      left: 16px;
+      bottom: 14px;
+      display: inline-flex;
+      gap: 8px;
+      z-index: 2;
+    }
+    .section-{{ section.id }} .am-estetica__dot{
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.20);
+      transition: transform 200ms var(--ease), background 200ms var(--ease);
+      cursor: pointer;
+    }
+    .section-{{ section.id }} .am-estetica__dot.is-active{
+      background: rgba(0,0,0,.55);
+      transform: scale(1.25);
+    }
+
+    .section-{{ section.id }} .am-estetica__empty{
+      width: 100%;
+      height: 100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color: rgba(0,0,0,.45);
+      font-size: 13px;
+      padding: 24px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px){
+      .section-{{ section.id }} .am-estetica__grid{
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+      .section-{{ section.id }} .am-estetica__carousel{
+        height: var(--carousel-h-m);
+        max-width: 100%;
+      }
+      .section-{{ section.id }} .am-estetica__copy{
+        max-width: 100%;
+      }
+    }
+  </style>
+
+  <script type="module">
+(function(){
+      const root = document.querySelector('#shopify-section-{{ section.id }}');
+      if (!root) return;
+
+      const carousel = root.querySelector('[data-am-carousel]');
+      const track = root.querySelector('[data-am-track]');
+      const slides = Array.from(root.querySelectorAll('[data-am-slide]'));
+      if (!carousel || !track || slides.length <= 1) return;
+
+      const autoplay = {{ section.settings.autoplay | json }};
+      const autoplayMs = Math.max(1800, parseInt({{ section.settings.autoplay_ms | json }}, 10) || 3200);
+      const showDots = {{ section.settings.show_dots | json }};
+      const dotsWrap = root.querySelector('[data-am-dots]');
+
+      let index = 0;
+      let timer = null;
+
+      function setX(i){
+        track.style.transform = 'translate3d(' + (-i * 100) + '%, 0, 0)';
+      }
+
+      function setActiveDot(i){
+        if (!dotsWrap) return;
+        const dots = Array.from(dotsWrap.children);
+        dots.forEach((d, n) => d.classList.toggle('is-active', n === i));
+      }
+
+      function go(i, user){
+        index = (i + slides.length) % slides.length;
+        setX(index);
+        setActiveDot(index);
+        if (user) restart();
+      }
+
+      function next(){ go(index + 1, false); }
+
+      function start(){
+        if (!autoplay) return;
+        stop();
+        timer = window.setInterval(next, autoplayMs);
+      }
+
+      function stop(){
+        if (timer){
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function restart(){
+        stop(); start();
+      }
+
+      if (showDots && dotsWrap){
+        dotsWrap.innerHTML = '';
+        slides.forEach((_, i) => {
+          const dot = document.createElement('span');
+          dot.className = 'am-estetica__dot' + (i === 0 ? ' is-active' : '');
+          dot.addEventListener('click', () => go(i, true));
+          dotsWrap.appendChild(dot);
+        });
+      }
+
+      // Arrows
+      const btnPrev = root.querySelector('[data-am-prev]');
+      const btnNext = root.querySelector('[data-am-next]');
+
+      if (btnPrev) {
+        btnPrev.addEventListener('click', (e) => {
+          e.preventDefault(); 
+          go(index - 1, true); 
+        });
+      }
+      if (btnNext) {
+        btnNext.addEventListener('click', (e) => {
+          e.preventDefault(); 
+          go(index + 1, true); 
+        });
+      }
+
+      setX(0);
+      start();
+
+      carousel.addEventListener('mouseenter', stop);
+      carousel.addEventListener('mouseleave', start);
+
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        stop();
+      }
+    })();
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "A MARCA Galeria",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "color", "id": "bg", "label": "Fundo", "default": "#f5f3ef" },
+    { "type": "color", "id": "text_color", "label": "Cor do texto", "default": "#2b2b2b" },
+    { "type": "color", "id": "accent_color", "label": "Cor do título", "default": "#7C2C26" },
+
+    { "type": "range", "id": "container_max", "label": "Largura do container (px)", "min": 960, "max": 1600, "step": 20, "default": 1240 },
+    { "type": "range", "id": "pad_y", "label": "Padding vertical (px)", "min": 40, "max": 200, "step": 10, "default": 120 },
+    { "type": "range", "id": "pad_x", "label": "Padding lateral (px)", "min": 16, "max": 80, "step": 2, "default": 40 },
+    { "type": "range", "id": "gap", "label": "Espaço entre colunas (px)", "min": 10, "max": 80, "step": 2, "default": 44 },
+
+    { "type": "text", "id": "heading", "label": "Título", "default": "estética" },
+    { "type": "range", "id": "heading_size", "label": "Tamanho do título (px)", "min": 36, "max": 120, "step": 2, "default": 72 },
+
+    { "type": "richtext", "id": "body", "label": "Texto", "default": "<p>use nosso material<br>para alimentar suas<br>misidas.</p>" },
+    { "type": "range", "id": "body_size", "label": "Tamanho do texto (px)", "min": 12, "max": 28, "step": 1, "default": 20 },
+
+    { "type": "header", "content": "Carrossel" },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Ajuste da imagem (respeita foco)",
+      "default": "cover",
+      "options": [
+        { "value": "cover", "label": "Preencher (corta, mas usa o foco)" },
+        { "value": "contain", "label": "Sem corte (pode sobrar espaço)" }
+      ]
+    },
+    { "type": "range", "id": "carousel_height", "label": "Altura do carrossel (desktop)", "min": 260, "max": 720, "step": 10, "default": 460 },
+    { "type": "range", "id": "carousel_height_mobile", "label": "Altura do carrossel (mobile)", "min": 220, "max": 640, "step": 10, "default": 360 },
+    { "type": "range", "id": "radius", "label": "Arredondamento (px)", "min": 0, "max": 28, "step": 2, "default": 14 },
+
+    { "type": "checkbox", "id": "autoplay", "label": "Autoplay", "default": true },
+    { "type": "range", "id": "autoplay_ms", "label": "Intervalo (ms)", "min": 1800, "max": 9000, "step": 100, "default": 3200 },
+    { "type": "checkbox", "id": "show_dots", "label": "Mostrar indicadores", "default": true },
+    { "type": "checkbox", "id": "show_arrows", "label": "Mostrar setas", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Imagem do carrossel",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Imagem" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "A MARCA — Estética + Carrossel",
+      "blocks": [
+        { "type": "slide" },
+        { "type": "slide" },
+        { "type": "slide" }
+      ]
+    }
+  ]
+}
+{% endschema %}

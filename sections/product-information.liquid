@@ -1,0 +1,870 @@
+{% comment %}
+  A MARCA — PDP High-Fashion (Shopify Horizon / OS 2.0)
+  Ajustes (high fashion + conversão):
+  - Buybox menos "bloco": menos padding e gaps mais próximos
+  - CTA protagonista: full width, mais alto, menos pill
+  - Caimento inline (sem card)
+  - Accordions compactos
+  - Correções Liquid (sem filter if / sem escape inline no image_tag)
+{% endcomment %}
+
+{% assign product = closest.product | default: product %}
+{% assign current_variant = product.selected_or_first_available_variant %}
+
+<script type="application/ld+json">
+  {{ product | structured_data }}
+</script>
+
+<section class="am-pdp color-{{ section.settings.color_scheme }}" data-am-pdp>
+  <div class="am-pdp__container am-pdp__container--{{ section.settings.content_width }}">
+    <div class="am-pdp__grid" style="--am-gap: {{ section.settings.gap }}px;">
+      <!-- MEDIA -->
+      <div class="am-pdp__media" data-am-gallery>
+        <div class="am-gallery">
+          <div class="am-gallery__main" data-am-gallery-main>
+            {% for media in product.media %}
+              <div class="am-gallery__slide" data-media-id="{{ media.id }}" {% if forloop.first %}data-active="true"{% endif %}>
+                {% case media.media_type %}
+                  {% when 'image' %}
+                    {% assign alt = media.alt | default: product.title | escape %}
+                    {% assign loading_mode = 'lazy' %}
+                    {% if forloop.first %}
+                      {% assign loading_mode = 'eager' %}
+                    {% endif %}
+
+                    {{
+                      media
+                      | image_url: width: 1800
+                      | image_tag:
+                        loading: loading_mode,
+                        widths: '375, 550, 750, 990, 1200, 1500, 1800',
+                        sizes: '(min-width: 990px) 55vw, 100vw',
+                        class: 'am-gallery__img',
+                        alt: alt
+                    }}
+
+                  {% when 'video' %}
+                    {{ media | media_tag: class: 'am-gallery__video', autoplay: false, loop: false, controls: true, preload: 'metadata' }}
+                  {% when 'external_video' %}
+                    {{ media | media_tag: class: 'am-gallery__video', autoplay: false, loop: false, controls: true }}
+                  {% when 'model' %}
+                    {{ media | media_tag: class: 'am-gallery__model', toggleable: true }}
+                  {% else %}
+                    {{ media | media_tag }}
+                {% endcase %}
+              </div>
+            {% endfor %}
+          </div>
+
+          {% if product.media.size > 1 %}
+            <div class="am-gallery__thumbs" data-am-gallery-thumbs aria-label="Miniaturas">
+              {% assign thumb_alt = product.title | escape %}
+              {% for media in product.media %}
+                <button
+                  type="button"
+                  class="am-thumb"
+                  data-target-media="{{ media.id }}"
+                  aria-label="Ver mídia {{ forloop.index }}"
+                  {% if forloop.first %}aria-current="true"{% endif %}
+                >
+                  {% if media.preview_image %}
+                    {{
+                      media.preview_image
+                      | image_url: width: 200
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '100, 150, 200',
+                        sizes: '80px',
+                        class: 'am-thumb__img',
+                        alt: thumb_alt
+                    }}
+                  {% else %}
+                    <span class="am-thumb__fallback"></span>
+                  {% endif %}
+                </button>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- BUYBOX -->
+      <div class="am-pdp__info" data-am-buybox>
+        <div class="am-buybox">
+          <header class="am-buybox__header">
+            <p class="am-buybox__eyebrow">
+              {% if product.vendor != blank %}{{ product.vendor | escape }}{% else %}A MARCA{% endif %}
+              <span class="am-dot">•</span>
+              {{ product.type | default: 'Coleção' | escape }}
+            </p>
+
+            <h1 class="am-buybox__title">{{ product.title | escape }}</h1>
+
+            {% if product.metafields.custom.subtitle.value != blank %}
+              <p class="am-buybox__subtitle">{{ product.metafields.custom.subtitle.value | escape }}</p>
+            {% endif %}
+
+            <div class="am-buybox__price" data-am-price>
+              {% render 'price', product_resource: product, show_sale_price_first: true %}
+            </div>
+
+            <div class="am-buybox__trust">
+              <span class="am-trust__item">Troca descomplicada</span>
+              <span class="am-trust__sep">/</span>
+              <span class="am-trust__item">Pagamento seguro</span>
+              <span class="am-trust__sep">/</span>
+              <span class="am-trust__item">Envio rápido</span>
+            </div>
+
+            {% assign shipping_note = product.metafields.custom.shipping_note.value | default: 'Chega rápido — veja prazos no checkout.' %}
+            <div class="am-buybox__shipnote" data-am-shipnote>
+              {{ shipping_note | escape }}
+            </div>
+          </header>
+
+          {% unless product.has_only_default_variant %}
+            <div class="am-options" data-am-options>
+              {% for option in product.options_with_values %}
+                {% assign opt_handle = option.name | handleize %}
+                {% assign is_size = false %}
+                {% assign name_down = option.name | downcase %}
+                {% if name_down contains 'tamanho' or name_down contains 'size' %}
+                  {% assign is_size = true %}
+                {% endif %}
+
+                <fieldset class="am-opt" data-option-position="{{ option.position }}">
+                  <legend class="am-opt__label">
+                    <span>{{ option.name | escape }}</span>
+                    <span class="am-opt__value" data-am-opt-value="{{ option.position }}">{{ option.selected_value | escape }}</span>
+
+                    {% if is_size %}
+                      <button type="button" class="am-opt__guide" data-am-open-sizeguide>
+                        Guia de medidas
+                      </button>
+                    {% endif %}
+                  </legend>
+
+                  <div class="am-opt__values" role="radiogroup" aria-label="{{ option.name | escape }}">
+                    {% for value in option.values %}
+                      {% assign id = 'am-opt-' | append: section.id | append: '-' | append: opt_handle | append: '-' | append: forloop.index %}
+                      <input
+                        class="am-opt__radio"
+                        type="radio"
+                        name="options[{{ option.name | escape }}]"
+                        id="{{ id }}"
+                        value="{{ value | escape }}"
+                        {% if option.selected_value == value %}checked{% endif %}
+                        data-am-option-input
+                      >
+                      <label class="am-opt__pill" for="{{ id }}">
+                        {{ value | escape }}
+                      </label>
+                    {% endfor %}
+                  </div>
+                </fieldset>
+              {% endfor %}
+            </div>
+          {% endunless %}
+
+          {% form 'product', product, class: 'am-form', data-am-form: '', novalidate: 'novalidate' %}
+            <input type="hidden" name="id" value="{{ current_variant.id }}" data-am-variant-id>
+            <input type="hidden" name="quantity" value="1" data-am-qty-hidden>
+
+            <div class="am-row">
+              <div class="am-qty" aria-label="Quantidade">
+                <button type="button" class="am-qty__btn" data-am-qty-minus aria-label="Diminuir">−</button>
+                <input
+                  class="am-qty__input"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value="1"
+                  inputmode="numeric"
+                  data-am-qty
+                  aria-label="Quantidade"
+                >
+                <button type="button" class="am-qty__btn" data-am-qty-plus aria-label="Aumentar">+</button>
+              </div>
+
+              <button
+                type="submit"
+                class="am-atc button button--primary"
+                data-am-atc
+                {% unless current_variant.available %}disabled{% endunless %}
+              >
+                <span data-am-atc-text>
+                  {% if current_variant.available %}
+                    Comprar
+                  {% else %}
+                    Esgotado
+                  {% endif %}
+                </span>
+              </button>
+            </div>
+
+            <div class="am-note" data-am-availability>
+              {% if current_variant.available %}
+                Em estoque
+              {% else %}
+                Indisponível no momento
+              {% endif %}
+            </div>
+          {% endform %}
+
+          {% comment %} Caimento inline (micro-selling point) {% endcomment %}
+          {% assign fit_text = product.metafields.custom.fit.value %}
+          {% if fit_text == blank %}
+            {% assign fit_text = 'Modelagem pensada para vestir bem — escolha seu tamanho habitual.' %}
+          {% endif %}
+          <div class="am-fitline">
+            <span class="am-fitline__k">CAIMENTO</span>
+            <span class="am-fitline__v">{{ fit_text | escape }}</span>
+          </div>
+
+          <div class="am-accordions">
+            <details class="am-acc" open>
+              <summary class="am-acc__sum">Descrição</summary>
+              <div class="am-acc__body rte">
+                {{ product.description }}
+              </div>
+            </details>
+
+            <details class="am-acc">
+              <summary class="am-acc__sum">Detalhes</summary>
+              <div class="am-acc__body">
+                <ul class="am-list">
+                  {% if current_variant.sku != blank %}
+                    <li><span>SKU</span><span>{{ current_variant.sku | escape }}</span></li>
+                  {% endif %}
+                  {% if product.vendor != blank %}
+                    <li><span>Marca</span><span>{{ product.vendor | escape }}</span></li>
+                  {% endif %}
+                  <li><span>Tipo</span><span>{{ product.type | default: '—' | escape }}</span></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="am-acc" data-am-sizeguide-target>
+              <summary class="am-acc__sum">Guia de medidas</summary>
+              <div class="am-acc__body">
+                {% if product.metafields.custom.size_guide_image.value != blank %}
+                  <div class="am-sizeguide">
+                    {{
+                      product.metafields.custom.size_guide_image.value
+                      | image_url: width: 1400
+                      | image_tag: loading: 'lazy', class: 'am-sizeguide__img', alt: 'Guia de medidas'
+                    }}
+                  </div>
+                {% else %}
+                  <p class="am-muted">
+                    Adicione um metafield <code>custom.size_guide_image</code> (imagem) para exibir aqui.
+                  </p>
+                {% endif %}
+              </div>
+            </details>
+
+            <details class="am-acc">
+              <summary class="am-acc__sum">Frete & trocas</summary>
+              <div class="am-acc__body">
+                <p class="am-muted">
+                  Prazos e valores aparecem no checkout. Troca facilitada conforme política da loja.
+                </p>
+              </div>
+            </details>
+          </div>
+
+          <!-- Sticky CTA sentinel -->
+          <div class="am-sentinel" data-am-sentinel aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Add to Cart Bar -->
+  <div class="am-sticky" data-am-sticky aria-hidden="true">
+    <div class="am-sticky__bar color-{{ settings.popover_color_scheme }}">
+      {% assign image_to_show = current_variant.featured_image | default: product.featured_image %}
+      {% if image_to_show %}
+        {% assign sticky_alt = product.title | escape %}
+        <div class="am-sticky__imgwrap">
+          {{
+            image_to_show
+            | image_url: width: 140
+            | image_tag:
+              loading: 'lazy',
+              alt: sticky_alt,
+              class: 'am-sticky__img'
+          }}
+        </div>
+      {% endif %}
+
+      <div class="am-sticky__meta">
+        <div class="am-sticky__title">{{ product.title | escape }}</div>
+        {% unless product.has_only_default_variant %}
+          <div class="am-sticky__variant" data-am-sticky-variant>{{ current_variant.title | escape }}</div>
+        {% endunless %}
+      </div>
+
+      <div class="am-sticky__price" data-am-sticky-price>
+        {% render 'price', product_resource: product, show_sale_price_first: true %}
+      </div>
+
+      <button type="button" class="am-sticky__btn button button--primary" data-am-sticky-atc
+        {% unless current_variant.available %}disabled{% endunless %}
+      >
+        Comprar
+      </button>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  (function () {
+    const root = document.querySelector('[data-am-pdp]');
+    if (!root) return;
+
+    const productData = {{ product | json }};
+    const form = root.querySelector('[data-am-form]');
+    const variantIdInput = root.querySelector('[data-am-variant-id]');
+    const atcBtn = root.querySelector('[data-am-atc]');
+    const atcText = root.querySelector('[data-am-atc-text]');
+    const availability = root.querySelector('[data-am-availability]');
+    const sticky = root.querySelector('[data-am-sticky]');
+    const stickyBtn = root.querySelector('[data-am-sticky-atc]');
+    const stickyVariant = root.querySelector('[data-am-sticky-variant]');
+
+    const slides = Array.from(root.querySelectorAll('.am-gallery__slide'));
+    const thumbs = Array.from(root.querySelectorAll('.am-thumb'));
+
+    function setActiveMediaById(id) {
+      slides.forEach(s => s.toggleAttribute('data-active', String(s.dataset.mediaId) === String(id)));
+      thumbs.forEach(t => t.setAttribute('aria-current', String(t.dataset.targetMedia) === String(id) ? 'true' : 'false'));
+    }
+
+    thumbs.forEach(btn => {
+      btn.addEventListener('click', () => setActiveMediaById(btn.dataset.targetMedia));
+    });
+
+    const qtyInput = root.querySelector('[data-am-qty]');
+    const qtyHidden = root.querySelector('[data-am-qty-hidden]');
+    const minus = root.querySelector('[data-am-qty-minus]');
+    const plus = root.querySelector('[data-am-qty-plus]');
+
+    function syncQty(val) {
+      const v = Math.max(1, parseInt(val || '1', 10) || 1);
+      qtyInput.value = String(v);
+      qtyHidden.value = String(v);
+    }
+
+    minus?.addEventListener('click', () => syncQty((parseInt(qtyInput.value, 10) || 1) - 1));
+    plus?.addEventListener('click', () => syncQty((parseInt(qtyInput.value, 10) || 1) + 1));
+    qtyInput?.addEventListener('change', () => syncQty(qtyInput.value));
+    syncQty(1);
+
+    const optionInputs = Array.from(root.querySelectorAll('[data-am-option-input]'));
+
+    function getSelectedOptions() {
+      const map = new Map();
+      optionInputs.forEach(i => { if (i.checked) map.set(i.name, i.value); });
+      return map;
+    }
+
+    function findVariantByOptions() {
+      if (!productData.variants?.length) return null;
+
+      const selected = getSelectedOptions();
+      const ordered = productData.options.map(optName => {
+        const key = `options[${optName}]`;
+        return selected.get(key) || null;
+      });
+
+      return productData.variants.find(v => ordered.every((val, idx) => (val ? v.options[idx] === val : true))) || null;
+    }
+
+    function updateOptionLabels() {
+      const fieldsets = Array.from(root.querySelectorAll('.am-opt'));
+      fieldsets.forEach(fs => {
+        const pos = fs.getAttribute('data-option-position');
+        const selected = fs.querySelector('input[type="radio"]:checked');
+        const label = root.querySelector(`[data-am-opt-value="${pos}"]`);
+        if (label && selected) label.textContent = selected.value;
+      });
+    }
+
+    function setAvailability(variant) {
+      const available = !!variant?.available;
+      if (available) {
+        atcBtn?.removeAttribute('disabled');
+        stickyBtn?.removeAttribute('disabled');
+        if (atcText) atcText.textContent = 'Comprar';
+        if (availability) availability.textContent = 'Em estoque';
+      } else {
+        atcBtn?.setAttribute('disabled', 'disabled');
+        stickyBtn?.setAttribute('disabled', 'disabled');
+        if (atcText) atcText.textContent = 'Esgotado';
+        if (availability) availability.textContent = 'Indisponível no momento';
+      }
+    }
+
+    function applyVariant(variant) {
+      if (!variant) return;
+
+      if (variantIdInput) variantIdInput.value = variant.id;
+      if (stickyVariant && variant.title) stickyVariant.textContent = variant.title;
+      if (variant.featured_media?.id) setActiveMediaById(variant.featured_media.id);
+
+      setAvailability(variant);
+      updateOptionLabels();
+
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('variant', variant.id);
+        window.history.replaceState({}, '', url.toString());
+      } catch (e) {}
+    }
+
+    optionInputs.forEach(i => {
+      i.addEventListener('change', () => applyVariant(findVariantByOptions()));
+    });
+
+    applyVariant(findVariantByOptions() || productData.variants?.find(v => v.id === {{ current_variant.id | json }}) );
+
+    const openGuideBtn = root.querySelector('[data-am-open-sizeguide]');
+    const sizeGuideDetails = root.querySelector('[data-am-sizeguide-target]');
+    openGuideBtn?.addEventListener('click', () => {
+      if (sizeGuideDetails) {
+        sizeGuideDetails.open = true;
+        sizeGuideDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    const sentinel = root.querySelector('[data-am-sentinel]');
+    if (sentinel && sticky) {
+      const io = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        const show = !entry.isIntersecting;
+        sticky.setAttribute('aria-hidden', show ? 'false' : 'true');
+        sticky.toggleAttribute('data-show', show);
+      }, { threshold: 0.01 });
+      io.observe(sentinel);
+    }
+
+    stickyBtn?.addEventListener('click', () => {
+      if (!form) return;
+      const submit = form.querySelector('button[type="submit"]');
+      submit?.click();
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  /* Container */
+  .am-pdp__container{ width:100%; margin:0 auto; }
+  .am-pdp__container--content-center-aligned{ max-width: 1200px; padding: 0 var(--padding-lg); }
+  .am-pdp__container--content-full-width{ max-width: none; padding: 0 var(--padding-lg); }
+
+  .am-pdp__grid{
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: var(--am-gap, 16px);
+    align-items:start;
+  }
+
+  /* Gallery */
+  .am-gallery{ position:relative; }
+  .am-gallery__main{ display:flex; flex-direction:column; gap: var(--gap-md); }
+  .am-gallery__slide{
+    display:none;
+    border-radius: var(--style-border-radius);
+    overflow:hidden;
+    background: var(--color-background-secondary);
+  }
+  .am-gallery__slide[data-active="true"]{ display:block; }
+
+  .am-gallery__img,
+  .am-gallery__video,
+  .am-gallery__model{ width:100%; height:auto; display:block; }
+
+  .am-gallery__thumbs{
+    margin-top: 12px;
+    display:flex;
+    gap: 10px;
+    flex-wrap:wrap;
+  }
+
+  .am-thumb{
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.12);
+    border-radius: 14px;
+    padding: 0;
+    overflow:hidden;
+    width: 74px;
+    height: 90px;
+    background: transparent;
+    cursor:pointer;
+    transition: transform .15s var(--ease-out-quad), border-color .15s var(--ease-out-quad);
+  }
+  .am-thumb[aria-current="true"]{
+    border-color: rgb(var(--color-foreground-rgb) / 0.34);
+    transform: translateY(-1px);
+  }
+  .am-thumb__img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .am-thumb__fallback{ display:block; width:100%; height:100%; background: rgb(var(--color-foreground-rgb) / 0.06); }
+
+  /* Buybox (mais leve) */
+  .am-buybox{
+    position: sticky;
+    top: calc(var(--header-height, 80px) + 18px);
+    border-radius: 20px;
+    padding: clamp(14px, 1.8vw, 20px); /* -~20% */
+    background: rgb(var(--color-background-rgb) / 0.92);
+    backdrop-filter: blur(12px) saturate(140%);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .am-buybox__eyebrow{
+    margin:0 0 8px;
+    font-size: var(--font-paragraph-small--size);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    opacity: .78;
+  }
+  .am-dot{ padding: 0 6px; opacity:.55; }
+
+  .am-buybox__title{
+    margin:0 0 6px;
+    font-size: clamp(24px, 2.2vw, 34px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+  .am-buybox__subtitle{ margin:0 0 10px; opacity:.78; }
+  .am-buybox__price{ margin: 6px 0 6px; }
+
+  .am-buybox__trust{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 8px;
+    align-items:center;
+    margin: 6px 0 10px;
+    font-size: var(--font-paragraph-small--size);
+    opacity:.82;
+  }
+  .am-trust__sep{ opacity:.35; }
+
+  .am-buybox__shipnote{
+    border-radius: 14px;
+    padding: 8px 10px;
+    background: rgb(var(--color-foreground-rgb) / 0.05);
+    font-size: var(--font-paragraph-small--size);
+    margin-bottom: 12px;
+  }
+
+  /* Options */
+  .am-opt{ border:0; padding:0; margin: 0 0 12px; }
+  .am-opt__label{
+    display:flex;
+    align-items:baseline;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: var(--font-paragraph-small--size);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity:.86;
+  }
+  .am-opt__value{
+    margin-left:auto;
+    letter-spacing: normal;
+    text-transform:none;
+    opacity:.9;
+  }
+  .am-opt__guide{
+    margin-left: 10px;
+    border:0;
+    background: transparent;
+    text-decoration: underline;
+    font-size: var(--font-paragraph-small--size);
+    opacity:.85;
+    cursor:pointer;
+  }
+
+  .am-opt__values{ display:flex; flex-wrap:wrap; gap: 10px; }
+  .am-opt__radio{ position:absolute; opacity:0; pointer-events:none; }
+  .am-opt__pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.16);
+    cursor:pointer;
+    transition: transform .15s var(--ease-out-quad), border-color .15s var(--ease-out-quad), background-color .15s var(--ease-out-quad);
+    user-select:none;
+    font-size: var(--font-paragraph--size);
+  }
+  .am-opt__radio:checked + .am-opt__pill{
+    border-color: rgb(var(--color-foreground-rgb) / 0.55);
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+    transform: translateY(-1px);
+  }
+
+  /* CTA protagonista */
+  .am-row{
+    display:grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    align-items:center;
+    margin-top: 8px;
+  }
+
+  .am-qty{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height: 56px;
+    border-radius: 18px; /* menos pill */
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.16);
+    padding: 0 10px;
+    background: transparent;
+  }
+  .am-qty__btn{
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 0;
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+    cursor:pointer;
+    font-size: 18px;
+    line-height: 1;
+  }
+  .am-qty__input{
+    width: 44px;
+    text-align:center;
+    border:0;
+    background: transparent;
+    outline:none;
+    font-size: var(--font-paragraph--size);
+  }
+
+  .am-atc{
+    width: 100%;
+    height: 56px;
+    border-radius: 18px; /* menos pill */
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: .02em;
+    font-size: calc(var(--font-paragraph--size) + 1px);
+  }
+
+  .am-note{
+    margin-top: 8px;
+    font-size: var(--font-paragraph-small--size);
+    opacity: .78;
+  }
+
+  /* Caimento inline */
+  .am-fitline{
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgb(var(--color-foreground-rgb) / 0.10);
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+  }
+  .am-fitline__k{
+    font-size: var(--font-paragraph-small--size);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    opacity:.78;
+    font-weight: var(--font-weight-semibold);
+  }
+  .am-fitline__v{ opacity:.88; }
+
+  /* Accordions compactos */
+  .am-accordions{ margin-top: 10px; }
+  .am-acc{
+    border-top: 1px solid rgb(var(--color-foreground-rgb) / 0.10);
+    padding: 10px 0;
+  }
+  .am-acc:last-child{ border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.10); }
+  .am-acc__sum{
+    list-style:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-weight: var(--font-weight-semibold);
+  }
+  .am-acc__sum::-webkit-details-marker{ display:none; }
+  .am-acc__sum::after{
+    content:"+";
+    opacity:.60;
+    font-weight: 600;
+    font-size: 14px;
+    transform: translateY(-1px);
+  }
+  details[open] > .am-acc__sum::after{ content:"–"; }
+  .am-acc__body{ margin-top: 8px; opacity:.9; }
+
+  .am-list{ list-style:none; padding:0; margin:0; }
+  .am-list li{
+    display:flex;
+    justify-content:space-between;
+    gap: 14px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgb(var(--color-foreground-rgb) / 0.08);
+  }
+  .am-list li:last-child{ border-bottom:0; }
+  .am-muted{ opacity:.78; }
+  .am-sizeguide__img{ width:100%; height:auto; border-radius: 16px; display:block; }
+
+  /* Sticky bar */
+  .am-sticky{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--layer-sticky, 50) + 1);
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform .22s var(--ease-out-quad), opacity .22s var(--ease-out-quad);
+    pointer-events:none;
+  }
+  .am-sticky[data-show]{ transform: translateY(0); opacity:1; pointer-events:auto; }
+
+  .am-sticky__bar{
+    margin: 10px auto;
+    width: min(720px, calc(100% - 18px));
+    border-radius: 999px;
+    padding: 10px;
+    display:flex;
+    gap: 12px;
+    align-items:center;
+    box-shadow: var(--shadow-popover);
+    position:relative;
+    overflow:hidden;
+  }
+  .am-sticky__bar::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background: rgb(var(--color-background-rgb) / 0.85);
+    backdrop-filter: blur(16px) saturate(160%);
+    z-index:-1;
+  }
+  .am-sticky__imgwrap{
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    overflow:hidden;
+    background: rgb(var(--color-foreground-rgb) / 0.06);
+    flex: 0 0 auto;
+  }
+  .am-sticky__img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .am-sticky__meta{ min-width: 0; flex: 1 1 auto; }
+  .am-sticky__title{
+    font-weight: var(--font-weight-semibold);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .am-sticky__variant{
+    font-size: var(--font-paragraph-small--size);
+    opacity:.78;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .am-sticky__price{
+    font-weight: var(--font-weight-semibold);
+    margin-left:auto;
+    padding-left: 8px;
+  }
+  .am-sticky__btn{
+    height: 44px;
+    border-radius: 999px;
+    padding: 0 16px;
+    white-space:nowrap;
+  }
+
+  .am-sentinel{ height: 1px; }
+
+  /* Responsive */
+  @media (max-width: 989px){
+    .am-pdp__grid{ grid-template-columns: 1fr; }
+    .am-buybox{ position: relative; top: auto; }
+    .am-gallery__thumbs{
+      overflow:auto;
+      flex-wrap:nowrap;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .am-thumb{ width: 68px; height: 84px; }
+  }
+
+  @media (max-width: 420px){
+    .am-row{ grid-template-columns: 1fr; }
+    .am-qty{ height: 54px; }
+    .am-atc{ height: 54px; }
+    .am-sticky__price{ display:none; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "A MARCA — PDP",
+  "blocks": [
+    { "type": "@app" }
+  ],
+  "disabled_on": { "groups": ["header", "footer"] },
+  "settings": [
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "select",
+      "id": "content_width",
+      "label": "Largura do conteúdo",
+      "options": [
+        { "value": "content-center-aligned", "label": "Página (centralizada)" },
+        { "value": "content-full-width", "label": "Full width" }
+      ],
+      "default": "content-center-aligned"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap (colunas)",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Esquema de cores",
+      "default": "scheme-1"
+    },
+    { "type": "header", "content": "Padding" },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Topo",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Base",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": []
+}
+{% endschema %}

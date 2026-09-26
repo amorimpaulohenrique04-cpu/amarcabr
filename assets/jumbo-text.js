@@ -1,0 +1,18 @@
+import{ResizeNotifier,prefersReducedMotion,yieldToMainThread}from '@theme/utilities';class JumboText extends HTMLElement{connectedCallback(){this.#setIntersectionObserver();window.addEventListener('resize',this.#windowResizeListener)}
+disconnectedCallback(){this.#resizeObserver.disconnect();this.#intersectionObserver?.disconnect();window.removeEventListener('resize',this.#windowResizeListener)}
+#firstResize=!0;#setIntersectionObserver(){this.#intersectionObserver=new IntersectionObserver((entries)=>{const entry=entries[entries.length-1];if(!entry){return}
+if(entry.isIntersecting&&this.#firstResize){this.#handleResize(entry.boundingClientRect.width)}
+if(this.dataset.textEffect&&this.dataset.textEffect!=='none'&&!prefersReducedMotion()){if(entry.intersectionRatio>=0.3){this.classList.add('ready');if(this.dataset.animationRepeat==='false'){this.#intersectionObserver?.unobserve(entry.target)}
+yieldToMainThread().then(()=>{this.classList.add('jumbo-text-visible')})}else{this.classList.remove('ready','jumbo-text-visible')}}},{threshold:[0,0.3]});this.#intersectionObserver?.observe(this)}
+#calculateOptimalFontSize=(containerWidth)=>{const{widestChild:firstPassWidestChild,widestChildWidth:firstPassWidestChildWidth}=this.#findWidestChild();if(!firstPassWidestChild||!firstPassWidestChildWidth){return}
+const currentFontSize=parseFloat(window.getComputedStyle(firstPassWidestChild).fontSize);const firstPassFontSize=Math.round(((currentFontSize*containerWidth)/firstPassWidestChildWidth)*100)/100;this.#resizeObserver.disconnect();this.style.fontSize=this.#clampFontSize(firstPassFontSize);const{widestChild:secondPassWidestChild,widestChildWidth:secondPassWidestChildWidth}=this.#findWidestChild();if(!secondPassWidestChild||!secondPassWidestChildWidth){return}
+const secondPassFontSize=Math.floor(((firstPassFontSize*containerWidth)/secondPassWidestChildWidth)*100)/100-0.15;if(secondPassFontSize!==firstPassFontSize){this.style.fontSize=this.#clampFontSize(secondPassFontSize)}
+this.classList.add('ready');this.#resizeObserver.observe(this)};#findWidestChild=()=>{let widestChild=null;let widestChildWidth=0;for(const child of this.children){if(!(child instanceof HTMLElement)){continue}
+const{width:childWidth}=child.getBoundingClientRect();if(!widestChild||childWidth>widestChildWidth){widestChildWidth=childWidth;widestChild=child}}
+return{widestChild,widestChildWidth}};#clampFontSize=(fontSize)=>{const minFontSize=1;const maxFontSize=500;return `${Math.min(Math.max(fontSize, minFontSize), maxFontSize)}px`};#handleResize=(containerWidth=undefined)=>{if(!this.textContent?.trim()){return}
+if(containerWidth===undefined){containerWidth=this.offsetWidth}
+if(containerWidth<=0)return;if(!this.#firstResize){this.classList.remove('ready');this.style.fontSize=''}
+this.#calculateOptimalFontSize(containerWidth);this.#firstResize=!1;if(this.dataset.capText==='true'){return}
+const allSections=Array.from(document.querySelectorAll('.shopify-section'));const lastSection=allSections[allSections.length-1];if(lastSection&&!lastSection.contains(this)){return}
+const rect=this.getBoundingClientRect();const bottom=rect.bottom+window.scrollY;const distanceFromBottom=document.documentElement.offsetHeight-bottom;this.dataset.capText=(distanceFromBottom<=100).toString()};#windowResizeListener=()=>this.#handleResize();#resizeObserver=new ResizeNotifier((entries)=>this.#handleResize(entries[0]?.borderBoxSize?.[0]?.inlineSize));#intersectionObserver=null}
+if(!customElements.get('jumbo-text')){customElements.define('jumbo-text',JumboText)}

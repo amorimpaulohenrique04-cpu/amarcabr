@@ -1,0 +1,2431 @@
+{% comment %}
+
+  -----------------------------------------------------------------------------
+
+  SHOPIFY ENTERPRISE HERO SECTION
+
+  Stable / Shopify-safe / Optimized
+
+  - Single image, carousel or video
+
+  - Mobile + tablet swipe support
+
+  - Per-slide link
+
+  - Editor-safe initialization
+
+  -----------------------------------------------------------------------------
+
+{% endcomment %}
+
+
+
+{%- style -%}
+
+  #shopify-section-{{ section.id }} {
+
+    --hero-height-desktop: {{ section.settings.height_desktop }}vh;
+
+    --hero-height-tablet: {{ section.settings.height_tablet }}vh;
+
+    --hero-height-tablet-stable: {{ section.settings.height_tablet }}svh;
+
+    --hero-height-mobile: {{ section.settings.height_mobile }}vh;
+
+    --hero-height-mobile-stable: {{ section.settings.height_mobile }}svh;
+
+
+
+    --overlay-color: {{ section.settings.overlay_color.red }}, {{ section.settings.overlay_color.green }}, {{ section.settings.overlay_color.blue }};
+
+    --overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+
+    --text-color: {{ section.settings.text_color }};
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-enterprise {
+
+    position: relative;
+
+    width: 100%;
+
+    height: var(--hero-height-mobile);
+
+    height: var(--hero-height-mobile-stable);
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background-color: var(--text-color);
+
+    contain: paint layout;
+
+  }
+
+
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+
+    #shopify-section-{{ section.id }} .hero-enterprise {
+
+      height: var(--hero-height-tablet);
+
+      height: var(--hero-height-tablet-stable);
+
+    }
+
+  }
+
+  @media screen and (min-width: 1200px) {
+
+    #shopify-section-{{ section.id }} .hero-enterprise {
+
+      height: var(--hero-height-desktop);
+
+    }
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-enterprise[data-media-mode="carousel"] {
+
+    touch-action: pan-y;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-media-wrapper {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 0;
+
+    pointer-events: none;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-media,
+
+  #shopify-section-{{ section.id }} .hero-carousel-image {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+    object-position: var(--hero-focus-mobile, 50% 50%) !important;
+
+  }
+
+
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+
+    #shopify-section-{{ section.id }} .hero-media,
+
+    #shopify-section-{{ section.id }} .hero-carousel-image {
+
+      object-position: var(--hero-focus-tablet, var(--hero-focus-desktop, 50% 50%)) !important;
+
+    }
+
+  }
+
+  @media screen and (min-width: 1200px) {
+
+    #shopify-section-{{ section.id }} .hero-media,
+
+    #shopify-section-{{ section.id }} .hero-carousel-image {
+
+      object-position: var(--hero-focus-desktop, 50% 50%) !important;
+
+    }
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-video-container {
+
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    z-index: 1;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-video {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+    opacity: 0;
+
+    transition: opacity 0.6s ease-out;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-video.is-playing {
+
+    opacity: 1;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .desktop-only { display: none; }
+
+  #shopify-section-{{ section.id }} .mobile-only { display: block; }
+
+
+
+  @media screen and (min-width: 750px) {
+
+    #shopify-section-{{ section.id }} .desktop-only { display: block; }
+
+    #shopify-section-{{ section.id }} .mobile-only { display: none; }
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel {
+
+    position: absolute;
+
+    inset: 0;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-slide {
+
+    position: absolute;
+
+    inset: 0;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.8s;
+
+    will-change: opacity;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-slide.is-active {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    transition-delay: 0s;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-overlay {
+
+    position: absolute;
+
+    inset: 0;
+
+    background-color: rgba(var(--overlay-color), var(--overlay-opacity));
+
+    z-index: 2;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-media-link {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 2;
+
+    display: block;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-content {
+
+    position: relative;
+
+    z-index: 3;
+
+    text-align: center;
+
+    max-width: 800px;
+
+    padding: 0 20px;
+
+    color: var(--text-color);
+
+    opacity: 0;
+
+    transform: translateY(20px);
+
+    animation: heroFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+    animation-delay: 0.2s;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-heading {
+
+    font-size: clamp(2rem, 5vw, 4.5rem);
+
+    line-height: 1.1;
+
+    font-weight: 400;
+
+    letter-spacing: -0.02em;
+
+    margin-bottom: 1rem;
+
+    color: currentColor;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-subheading {
+
+    font-size: clamp(1rem, 2vw, 1.25rem);
+
+    font-weight: 300;
+
+    margin-bottom: 2rem;
+
+    opacity: 0.9;
+
+    color: currentColor;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-btn {
+
+    display: inline-block;
+
+    padding: 14px 32px;
+
+    background-color: var(--text-color);
+
+    color: {{ section.settings.btn_text_color }};
+
+    text-decoration: none;
+
+    font-weight: 500;
+
+    font-size: 0.9rem;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.05em;
+
+    transition: transform 0.3s ease, opacity 0.3s ease;
+
+    border: 1px solid transparent;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-btn:hover {
+
+    transform: translateY(-2px);
+
+    opacity: 0.9;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-nav {
+
+    position: absolute;
+
+    inset: 50% 16px auto;
+
+    transform: translateY(-50%);
+
+    z-index: 4;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    pointer-events: none;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-btn {
+
+    pointer-events: auto;
+
+    width: 44px;
+
+    height: 44px;
+
+    border: 0;
+
+    border-radius: 999px;
+
+    background: rgba(255, 255, 255, 0.14);
+
+    color: var(--text-color);
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    backdrop-filter: blur(8px);
+
+    -webkit-backdrop-filter: blur(8px);
+
+    transition: transform 0.25s ease, background-color 0.25s ease, opacity 0.25s ease;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-btn:hover {
+
+    transform: scale(1.04);
+
+    background: rgba(255, 255, 255, 0.2);
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-btn:focus-visible,
+
+  #shopify-section-{{ section.id }} .hero-carousel-dot:focus-visible {
+
+    outline: 2px solid var(--text-color);
+
+    outline-offset: 2px;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-dots {
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 24px;
+
+    transform: translateX(-50%);
+
+    z-index: 4;
+
+    display: inline-flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-dot {
+
+    appearance: none;
+
+    border: 0;
+
+    width: 28px;
+
+    height: 2px;
+
+    padding: 0;
+
+    background: rgba(255, 255, 255, 0.35);
+
+    cursor: pointer;
+
+    transition: opacity 0.25s ease, transform 0.25s ease, background-color 0.25s ease;
+
+  }
+
+
+
+  #shopify-section-{{ section.id }} .hero-carousel-dot.is-active {
+
+    background: var(--text-color);
+
+    transform: scaleX(1.15);
+
+  }
+
+
+
+  @media screen and (min-width: 750px) and (max-width: 1199px) {
+
+    #shopify-section-{{ section.id }} .hero-content {
+
+      max-width: 620px;
+
+      padding-inline: 32px;
+
+    }
+
+    #shopify-section-{{ section.id }} .hero-heading {
+
+      font-size: clamp(2.5rem, 5vw, 3.75rem);
+
+    }
+
+  }
+
+
+
+  @media screen and (max-width: 749px) {
+
+    #shopify-section-{{ section.id }} .hero-carousel-nav {
+
+      inset-inline: 12px;
+
+    }
+
+
+
+    #shopify-section-{{ section.id }} .hero-carousel-btn {
+
+      width: 40px;
+
+      height: 40px;
+
+    }
+
+
+
+    #shopify-section-{{ section.id }} .hero-carousel-dots {
+
+      bottom: 18px;
+
+    }
+
+  }
+
+
+
+  @media (prefers-reduced-motion: reduce) {
+
+    #shopify-section-{{ section.id }} .hero-content {
+
+      opacity: 1;
+
+      transform: none;
+
+      animation: none;
+
+    }
+
+
+
+    #shopify-section-{{ section.id }} .hero-carousel-slide,
+
+    #shopify-section-{{ section.id }} .hero-video,
+
+    #shopify-section-{{ section.id }} .hero-btn,
+
+    #shopify-section-{{ section.id }} .hero-carousel-btn,
+
+    #shopify-section-{{ section.id }} .hero-carousel-dot {
+
+      transition: none;
+
+    }
+
+  }
+
+
+
+  @keyframes heroFadeUp {
+
+    to { opacity: 1; transform: translateY(0); }
+
+  }
+
+
+  /*
+    TABLET — HERO SEM CORTE E SEM SOBRAS
+    A arte original enviada mede 1448 × 1086 (4:3).
+    Em tablet, a seção acompanha exatamente essa proporção.
+    Desktop e mobile permanecem com o comportamento original.
+  */
+  @media screen and (min-width: 750px) and (max-width: 1199px),
+         screen and (min-width: 1200px) and (max-width: 1366px) and (hover: none) and (pointer: coarse) {
+
+    #shopify-section-{{ section.id }} .hero-enterprise[data-media-mode="image"],
+    #shopify-section-{{ section.id }} .hero-enterprise[data-media-mode="carousel"] {
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+
+    #shopify-section-{{ section.id }} .hero-media,
+    #shopify-section-{{ section.id }} .hero-carousel-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 50% !important;
+    }
+  }
+
+{%- endstyle -%}
+
+
+
+{%- liquid
+
+  assign desktop_img = section.settings.image_desktop
+
+  assign tablet_img = section.settings.image_tablet | default: desktop_img
+
+  assign mobile_img = section.settings.image_mobile | default: tablet_img
+
+  assign desktop_vid = section.settings.video_desktop
+
+  assign mobile_vid = section.settings.video_mobile
+
+  assign media_mode = section.settings.media_mode
+
+
+
+  assign default_media_link = section.settings.media_link | default: routes.all_products_collection_url
+
+
+
+  assign slides_count = 0
+
+  for block in section.blocks
+
+    if block.type == 'slide' and block.settings.image_desktop != blank
+
+      assign slides_count = slides_count | plus: 1
+
+    endif
+
+  endfor
+
+
+
+  assign has_video = false
+
+  if desktop_vid != blank or mobile_vid != blank
+
+    assign has_video = true
+
+  endif
+
+
+
+  assign use_carousel = false
+
+  assign use_video = false
+
+  assign use_single_image = false
+
+
+
+  if media_mode == 'carousel' and slides_count > 0
+
+    assign use_carousel = true
+
+  elsif media_mode == 'video' and has_video
+
+    assign use_video = true
+
+  else
+
+    assign use_single_image = true
+
+  endif
+
+
+
+  assign has_mobile_video = false
+
+  if mobile_vid != blank
+
+    assign has_mobile_video = true
+
+  elsif desktop_vid != blank
+
+    assign has_mobile_video = true
+
+  endif
+
+
+
+  assign initial_media_link = default_media_link
+
+  if use_carousel
+
+    for block in section.blocks
+
+      if block.type == 'slide' and block.settings.image_desktop != blank
+
+        assign initial_media_link = block.settings.slide_link | default: default_media_link
+
+        break
+
+      endif
+
+    endfor
+
+  endif
+
+
+
+  assign desktop_video_id = 'VideoDesktop-' | append: section.id
+
+  assign mobile_video_id = 'VideoMobile-' | append: section.id
+
+-%}
+
+
+
+<div
+
+  class="hero-enterprise js-hero-enterprise"
+
+  data-section-id="{{ section.id }}"
+
+  data-media-mode="{{ media_mode }}"
+
+  data-carousel-autoplay="{{ section.settings.carousel_autoplay | times: 1000 }}"
+
+  data-default-link="{{ default_media_link | escape }}"
+
+>
+
+  <div class="hero-media-wrapper">
+
+    {%- if use_carousel -%}
+
+      <div
+
+        class="hero-carousel"
+
+        role="region"
+
+        aria-roledescription="carousel"
+
+        aria-label="Hero carousel"
+
+      >
+
+        {%- assign rendered_slide_index = 0 -%}
+
+        {%- for block in section.blocks -%}
+
+          {%- if block.type == 'slide' and block.settings.image_desktop != blank -%}
+
+            {%- assign slide_img = block.settings.image_desktop -%}
+
+            {%- assign slide_tablet_img = block.settings.image_tablet | default: slide_img -%}
+
+            {%- assign slide_mobile_img = block.settings.image_mobile | default: slide_tablet_img -%}
+
+            {%- assign slide_link = block.settings.slide_link | default: default_media_link -%}
+
+
+
+            {%- if rendered_slide_index == 0 -%}
+
+              {%- assign slide_loading = 'eager' -%}
+
+              {%- assign slide_fetchpriority = 'high' -%}
+
+            {%- else -%}
+
+              {%- assign slide_loading = 'lazy' -%}
+
+              {%- assign slide_fetchpriority = 'low' -%}
+
+            {%- endif -%}
+
+
+
+            <div
+
+              class="hero-carousel-slide{% if rendered_slide_index == 0 %} is-active{% endif %}"
+
+              data-hero-slide
+
+              data-hero-block-id="{{ block.id }}"
+
+              data-slide-link="{{ slide_link | escape }}"
+
+              aria-hidden="{% if rendered_slide_index == 0 %}false{% else %}true{% endif %}"
+
+              role="group"
+
+              aria-roledescription="slide"
+
+              aria-label="{{ rendered_slide_index | plus: 1 }} de {{ slides_count }}"
+
+              style="--hero-focus-desktop: {{ slide_img.presentation.focal_point | default: '50% 50%' }}; --hero-focus-tablet: {{ slide_tablet_img.presentation.focal_point | default: slide_img.presentation.focal_point | default: '50% 50%' }}; --hero-focus-mobile: {{ slide_mobile_img.presentation.focal_point | default: slide_tablet_img.presentation.focal_point | default: slide_img.presentation.focal_point | default: '50% 50%' }};"
+
+              {{ block.shopify_attributes }}
+
+            >
+
+              <picture>
+
+                <source
+
+                  media="(max-width: 749px)"
+
+                  srcset="{{ slide_mobile_img | image_url: width: 375 }} 375w,
+
+                          {{ slide_mobile_img | image_url: width: 550 }} 550w,
+
+                          {{ slide_mobile_img | image_url: width: 750 }} 750w,
+
+                          {{ slide_mobile_img | image_url: width: 1000 }} 1000w,
+
+                          {{ slide_mobile_img | image_url: width: 1200 }} 1200w"
+
+                  sizes="100vw"
+
+                >
+
+                <source
+
+                  media="(min-width: 750px) and (max-width: 1199px)"
+
+                  srcset="{{ slide_tablet_img | image_url: width: 750 }} 750w,
+
+                          {{ slide_tablet_img | image_url: width: 1000 }} 1000w,
+
+                          {{ slide_tablet_img | image_url: width: 1200 }} 1200w,
+
+                          {{ slide_tablet_img | image_url: width: 1600 }} 1600w,
+
+                          {{ slide_tablet_img | image_url: width: 2000 }} 2000w,
+
+                          {{ slide_tablet_img | image_url: width: 2400 }} 2400w,
+
+                          {{ slide_tablet_img | image_url: width: 3000 }} 3000w"
+
+                  sizes="100vw"
+
+                >
+
+                {{ slide_img | image_url: width: 3000 | image_tag:
+
+                  class: 'hero-carousel-image',
+
+                  width: slide_img.width,
+
+                  height: slide_img.height,
+
+                  widths: '1200, 1600, 2000, 2400, 3000',
+
+                  sizes: '100vw',
+
+                  loading: slide_loading,
+
+                  fetchpriority: slide_fetchpriority,
+
+                  decoding: 'async',
+
+                  alt: slide_img.alt | escape
+
+                }}
+
+              </picture>
+
+            </div>
+
+            {%- assign rendered_slide_index = rendered_slide_index | plus: 1 -%}
+
+          {%- endif -%}
+
+        {%- endfor -%}
+
+      </div>
+
+    {%- elsif use_single_image and desktop_img != blank -%}
+
+      <picture
+
+        style="--hero-focus-desktop: {{ desktop_img.presentation.focal_point | default: '50% 50%' }}; --hero-focus-tablet: {{ tablet_img.presentation.focal_point | default: desktop_img.presentation.focal_point | default: '50% 50%' }}; --hero-focus-mobile: {{ mobile_img.presentation.focal_point | default: tablet_img.presentation.focal_point | default: desktop_img.presentation.focal_point | default: '50% 50%' }};"
+
+      >
+
+        <source
+
+          media="(max-width: 749px)"
+
+          srcset="{{ mobile_img | image_url: width: 375 }} 375w,
+
+                  {{ mobile_img | image_url: width: 550 }} 550w,
+
+                  {{ mobile_img | image_url: width: 750 }} 750w,
+
+                  {{ mobile_img | image_url: width: 1000 }} 1000w,
+
+                  {{ mobile_img | image_url: width: 1200 }} 1200w"
+
+          sizes="100vw"
+
+        >
+
+        <source
+
+          media="(min-width: 750px) and (max-width: 1199px)"
+
+          srcset="{{ tablet_img | image_url: width: 750 }} 750w,
+
+                  {{ tablet_img | image_url: width: 1000 }} 1000w,
+
+                  {{ tablet_img | image_url: width: 1200 }} 1200w,
+
+                  {{ tablet_img | image_url: width: 1600 }} 1600w,
+
+                  {{ tablet_img | image_url: width: 2000 }} 2000w,
+
+                  {{ tablet_img | image_url: width: 2400 }} 2400w,
+
+                  {{ tablet_img | image_url: width: 3000 }} 3000w"
+
+          sizes="100vw"
+
+        >
+
+        {{ desktop_img | image_url: width: 3000 | image_tag:
+
+          class: 'hero-media',
+
+          width: desktop_img.width,
+
+          height: desktop_img.height,
+
+          widths: '1200, 1600, 2000, 2400, 3000',
+
+          sizes: '100vw',
+
+          loading: 'eager',
+
+          fetchpriority: 'high',
+
+          decoding: 'async',
+
+          alt: desktop_img.alt | escape
+
+        }}
+
+      </picture>
+
+    {%- endif -%}
+
+  </div>
+
+
+
+  {%- if use_video -%}
+
+    <div class="hero-video-container">
+
+      {%- if desktop_vid != blank -%}
+
+        <div class="desktop-only" style="width:100%; height:100%;">
+
+          {{ desktop_vid | video_tag:
+
+            image_size: '2000x',
+
+            loop: true,
+
+            muted: true,
+
+            playsinline: true,
+
+            autoplay: false,
+
+            preload: 'none',
+
+            class: 'hero-media hero-video js-hero-video',
+
+            id: desktop_video_id
+
+          }}
+
+        </div>
+
+      {%- endif -%}
+
+
+
+      {%- if has_mobile_video -%}
+
+        {%- assign final_mobile_vid = mobile_vid | default: desktop_vid -%}
+
+        <div class="mobile-only" style="width:100%; height:100%;">
+
+          {{ final_mobile_vid | video_tag:
+
+            image_size: '800x',
+
+            loop: true,
+
+            muted: true,
+
+            playsinline: true,
+
+            autoplay: false,
+
+            preload: 'none',
+
+            class: 'hero-media hero-video js-hero-video',
+
+            id: mobile_video_id
+
+          }}
+
+        </div>
+
+      {%- endif -%}
+
+    </div>
+
+  {%- endif -%}
+
+
+
+  <div class="hero-overlay"></div>
+
+  <a
+
+    href="{{ initial_media_link }}"
+
+    class="hero-media-link"
+
+    aria-label="Abrir destino do hero"
+
+  ></a>
+
+
+
+  {%- if use_carousel and slides_count > 1 -%}
+
+    <div class="hero-carousel-nav" aria-label="Controles do hero">
+
+      <button type="button" class="hero-carousel-btn" data-hero-prev aria-label="Slide anterior">
+
+        <span aria-hidden="true">←</span>
+
+      </button>
+
+      <button type="button" class="hero-carousel-btn" data-hero-next aria-label="Próximo slide">
+
+        <span aria-hidden="true">→</span>
+
+      </button>
+
+    </div>
+
+
+
+    <div class="hero-carousel-dots" aria-label="Selecionar slide">
+
+      {%- assign dot_index = 0 -%}
+
+      {%- for block in section.blocks -%}
+
+        {%- if block.type == 'slide' and block.settings.image_desktop != blank -%}
+
+          <button
+
+            type="button"
+
+            class="hero-carousel-dot{% if dot_index == 0 %} is-active{% endif %}"
+
+            data-hero-dot
+
+            data-index="{{ dot_index }}"
+
+            aria-label="Ir para o slide {{ dot_index | plus: 1 }}"
+
+            aria-current="{% if dot_index == 0 %}true{% else %}false{% endif %}"
+
+          ></button>
+
+          {%- assign dot_index = dot_index | plus: 1 -%}
+
+        {%- endif -%}
+
+      {%- endfor -%}
+
+    </div>
+
+  {%- endif -%}
+
+
+
+  <div class="hero-content">
+
+    {%- if section.settings.heading != blank -%}
+
+      <h2 class="hero-heading">{{ section.settings.heading | escape }}</h2>
+
+    {%- endif -%}
+
+
+
+    {%- if section.settings.subheading != blank -%}
+
+      <div class="hero-subheading">{{ section.settings.subheading | escape }}</div>
+
+    {%- endif -%}
+
+
+
+    {%- if section.settings.cta_text != blank and section.settings.cta_link != blank -%}
+
+      <a href="{{ section.settings.cta_link }}" class="hero-btn">
+
+        {{ section.settings.cta_text | escape }}
+
+      </a>
+
+    {%- endif -%}
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+  (() => {
+
+    if (!window.__PHHeroEnterprise) {
+
+      class PHHeroEnterprise {
+
+        constructor(element) {
+
+          this.el = element;
+
+          this.sectionId = this.el.dataset.sectionId;
+
+          this.mediaMode = this.el.dataset.mediaMode;
+
+          this.defaultLink = this.el.dataset.defaultLink || '#';
+
+          this.autoplayDelay = parseInt(this.el.dataset.carouselAutoplay, 10) || 5000;
+
+          this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+
+
+          this.mediaLink = this.el.querySelector('.hero-media-link');
+
+          this.videos = Array.from(this.el.querySelectorAll('.js-hero-video'));
+
+          this.slides = Array.from(this.el.querySelectorAll('[data-hero-slide]'));
+
+          this.dots = Array.from(this.el.querySelectorAll('[data-hero-dot]'));
+
+
+
+          this.currentIndex = 0;
+
+          this.intervalId = null;
+
+          this.observer = null;
+
+          this.isInView = false;
+
+          this.suppressClickUntil = 0;
+
+
+
+          this.touchStartX = 0;
+
+          this.touchStartY = 0;
+
+          this.touchCurrentX = 0;
+
+          this.touchCurrentY = 0;
+
+          this.touchActive = false;
+
+          this.touchIsHorizontal = null;
+
+
+
+          this.handleClick = this.handleClick.bind(this);
+
+          this.handleVisibility = this.handleVisibility.bind(this);
+
+          this.handleMouseEnter = this.handleMouseEnter.bind(this);
+
+          this.handleMouseLeave = this.handleMouseLeave.bind(this);
+
+          this.handleFocusIn = this.handleFocusIn.bind(this);
+
+          this.handleFocusOut = this.handleFocusOut.bind(this);
+
+          this.handleTouchStart = this.handleTouchStart.bind(this);
+
+          this.handleTouchMove = this.handleTouchMove.bind(this);
+
+          this.handleTouchEnd = this.handleTouchEnd.bind(this);
+
+          this.handleTouchCancel = this.handleTouchCancel.bind(this);
+
+        }
+
+
+
+        init() {
+
+          if (this.slides.length > 0) {
+
+            this.updateSlides();
+
+          }
+
+
+
+          if (this.slides.length > 1) {
+
+            this.el.addEventListener('click', this.handleClick);
+
+            this.el.addEventListener('mouseenter', this.handleMouseEnter);
+
+            this.el.addEventListener('mouseleave', this.handleMouseLeave);
+
+            this.el.addEventListener('focusin', this.handleFocusIn);
+
+            this.el.addEventListener('focusout', this.handleFocusOut);
+
+            this.el.addEventListener('touchstart', this.handleTouchStart, { passive: true });
+
+            this.el.addEventListener('touchmove', this.handleTouchMove, { passive: true });
+
+            this.el.addEventListener('touchend', this.handleTouchEnd, { passive: true });
+
+            this.el.addEventListener('touchcancel', this.handleTouchCancel, { passive: true });
+
+          }
+
+
+
+          if (this.videos.length > 0 || this.slides.length > 1) {
+
+            this.initObserver();
+
+            document.addEventListener('visibilitychange', this.handleVisibility);
+
+          }
+
+        }
+
+
+
+        destroy() {
+
+          if (this.observer) this.observer.disconnect();
+
+
+
+          this.stopAutoplay();
+
+          this.pauseAllVideos();
+
+
+
+          this.el.removeEventListener('click', this.handleClick);
+
+          this.el.removeEventListener('mouseenter', this.handleMouseEnter);
+
+          this.el.removeEventListener('mouseleave', this.handleMouseLeave);
+
+          this.el.removeEventListener('focusin', this.handleFocusIn);
+
+          this.el.removeEventListener('focusout', this.handleFocusOut);
+
+          this.el.removeEventListener('touchstart', this.handleTouchStart);
+
+          this.el.removeEventListener('touchmove', this.handleTouchMove);
+
+          this.el.removeEventListener('touchend', this.handleTouchEnd);
+
+          this.el.removeEventListener('touchcancel', this.handleTouchCancel);
+
+
+
+          document.removeEventListener('visibilitychange', this.handleVisibility);
+
+        }
+
+
+
+        initObserver() {
+
+          this.observer = new IntersectionObserver((entries) => {
+
+            entries.forEach((entry) => {
+
+              if (entry.target !== this.el) return;
+
+
+
+              this.isInView = entry.isIntersecting;
+
+
+
+              if (this.isInView) {
+
+                this.playVisibleVideo();
+
+                this.startAutoplay();
+
+              } else {
+
+                this.pauseAllVideos();
+
+                this.stopAutoplay();
+
+              }
+
+            });
+
+          }, { threshold: 0.25 });
+
+
+
+          this.observer.observe(this.el);
+
+        }
+
+
+
+        isCarousel() {
+
+          return this.mediaMode === 'carousel';
+
+        }
+
+
+
+        isSwipeViewport() {
+
+          return window.matchMedia('(max-width: 1199px)').matches;
+
+        }
+
+
+
+        canSwipe() {
+
+          return this.isCarousel() && this.slides.length > 1 && this.isSwipeViewport();
+
+        }
+
+
+
+        handleClick(event) {
+
+          if (Date.now() < this.suppressClickUntil && event.target.closest('.hero-media-link')) {
+
+            event.preventDefault();
+
+            return;
+
+          }
+
+
+
+          const prev = event.target.closest('[data-hero-prev]');
+
+          const next = event.target.closest('[data-hero-next]');
+
+          const dot = event.target.closest('[data-hero-dot]');
+
+
+
+          if (prev) {
+
+            event.preventDefault();
+
+            this.goTo(this.currentIndex - 1, true);
+
+            return;
+
+          }
+
+
+
+          if (next) {
+
+            event.preventDefault();
+
+            this.goTo(this.currentIndex + 1, true);
+
+            return;
+
+          }
+
+
+
+          if (dot) {
+
+            event.preventDefault();
+
+            this.goTo(Number(dot.dataset.index), true);
+
+          }
+
+        }
+
+
+
+        handleVisibility() {
+
+          if (document.hidden) {
+
+            this.pauseAllVideos();
+
+            this.stopAutoplay();
+
+            return;
+
+          }
+
+
+
+          if (this.isInView) {
+
+            this.playVisibleVideo();
+
+            this.startAutoplay();
+
+          }
+
+        }
+
+
+
+        handleMouseEnter() {
+
+          this.stopAutoplay();
+
+        }
+
+
+
+        handleMouseLeave() {
+
+          this.startAutoplay();
+
+        }
+
+
+
+        handleFocusIn() {
+
+          this.stopAutoplay();
+
+        }
+
+
+
+        handleFocusOut() {
+
+          window.requestAnimationFrame(() => {
+
+            if (!this.el.contains(document.activeElement)) {
+
+              this.startAutoplay();
+
+            }
+
+          });
+
+        }
+
+
+
+        handleTouchStart(event) {
+
+          if (!this.canSwipe()) return;
+
+          if (!event.touches || event.touches.length !== 1) return;
+
+
+
+          const touch = event.touches[0];
+
+          this.touchStartX = touch.clientX;
+
+          this.touchStartY = touch.clientY;
+
+          this.touchCurrentX = touch.clientX;
+
+          this.touchCurrentY = touch.clientY;
+
+          this.touchActive = true;
+
+          this.touchIsHorizontal = null;
+
+
+
+          this.stopAutoplay();
+
+        }
+
+
+
+        handleTouchMove(event) {
+
+          if (!this.touchActive || !this.canSwipe()) return;
+
+          if (!event.touches || event.touches.length !== 1) return;
+
+
+
+          const touch = event.touches[0];
+
+          this.touchCurrentX = touch.clientX;
+
+          this.touchCurrentY = touch.clientY;
+
+
+
+          const deltaX = this.touchCurrentX - this.touchStartX;
+
+          const deltaY = this.touchCurrentY - this.touchStartY;
+
+
+
+          if (this.touchIsHorizontal === null) {
+
+            if (Math.abs(deltaX) < 6 && Math.abs(deltaY) < 6) return;
+
+            this.touchIsHorizontal = Math.abs(deltaX) > Math.abs(deltaY);
+
+          }
+
+
+
+          if (this.touchIsHorizontal === false) {
+
+            this.touchActive = false;
+
+            this.startAutoplay();
+
+          }
+
+        }
+
+
+
+        handleTouchEnd() {
+
+          if (!this.touchActive || !this.canSwipe()) {
+
+            this.resetTouch();
+
+            return;
+
+          }
+
+
+
+          const deltaX = this.touchCurrentX - this.touchStartX;
+
+          const deltaY = this.touchCurrentY - this.touchStartY;
+
+          const isValidSwipe = this.touchIsHorizontal && Math.abs(deltaX) > 40 && Math.abs(deltaX) > Math.abs(deltaY);
+
+
+
+          if (isValidSwipe) {
+
+            if (deltaX < 0) {
+
+              this.goTo(this.currentIndex + 1, true);
+
+            } else {
+
+              this.goTo(this.currentIndex - 1, true);
+
+            }
+
+
+
+            this.suppressClickUntil = Date.now() + 350;
+
+          } else {
+
+            this.startAutoplay();
+
+          }
+
+
+
+          this.resetTouch();
+
+        }
+
+
+
+        handleTouchCancel() {
+
+          this.resetTouch();
+
+          this.startAutoplay();
+
+        }
+
+
+
+        resetTouch() {
+
+          this.touchStartX = 0;
+
+          this.touchStartY = 0;
+
+          this.touchCurrentX = 0;
+
+          this.touchCurrentY = 0;
+
+          this.touchActive = false;
+
+          this.touchIsHorizontal = null;
+
+        }
+
+
+
+        goTo(index, userInitiated = false) {
+
+          if (this.slides.length < 2) return;
+
+
+
+          const total = this.slides.length;
+
+          this.currentIndex = (index + total) % total;
+
+          this.updateSlides();
+
+
+
+          if (userInitiated) {
+
+            this.stopAutoplay();
+
+            this.startAutoplay();
+
+          }
+
+        }
+
+
+
+        updateSlides() {
+
+          this.slides.forEach((slide, index) => {
+
+            const isActive = index === this.currentIndex;
+
+            slide.classList.toggle('is-active', isActive);
+
+            slide.setAttribute('aria-hidden', String(!isActive));
+
+          });
+
+
+
+          this.dots.forEach((dot, index) => {
+
+            const isActive = index === this.currentIndex;
+
+            dot.classList.toggle('is-active', isActive);
+
+            dot.setAttribute('aria-current', String(isActive));
+
+          });
+
+
+
+          this.updateActiveLink();
+
+        }
+
+
+
+        updateActiveLink() {
+
+          if (!this.mediaLink) return;
+
+
+
+          if (this.isCarousel() && this.slides.length > 0) {
+
+            const activeSlide = this.slides[this.currentIndex];
+
+            const activeLink = activeSlide ? activeSlide.dataset.slideLink : '';
+
+            this.mediaLink.href = activeLink || this.defaultLink;
+
+          } else {
+
+            this.mediaLink.href = this.defaultLink;
+
+          }
+
+        }
+
+
+
+        startAutoplay() {
+
+          if (!this.isCarousel()) return;
+
+          if (this.slides.length < 2) return;
+
+          if (this.reducedMotion) return;
+
+          if (!this.isInView || document.hidden) return;
+
+
+
+          this.stopAutoplay();
+
+          this.intervalId = window.setInterval(() => {
+
+            this.goTo(this.currentIndex + 1, false);
+
+          }, this.autoplayDelay);
+
+        }
+
+
+
+        stopAutoplay() {
+
+          if (!this.intervalId) return;
+
+          clearInterval(this.intervalId);
+
+          this.intervalId = null;
+
+        }
+
+
+
+        playVisibleVideo() {
+
+          this.videos.forEach((video) => {
+
+            const parent = video.parentElement;
+
+            const isVisible = parent && getComputedStyle(parent).display !== 'none';
+
+
+
+            if (isVisible && this.isInView && !document.hidden) {
+
+              const playPromise = video.play();
+
+              if (playPromise !== undefined) {
+
+                playPromise.then(() => {
+
+                  video.classList.add('is-playing');
+
+                }).catch(() => {});
+
+              }
+
+            } else {
+
+              video.pause();
+
+              video.classList.remove('is-playing');
+
+            }
+
+          });
+
+        }
+
+
+
+        pauseAllVideos() {
+
+          this.videos.forEach((video) => {
+
+            video.pause();
+
+            video.classList.remove('is-playing');
+
+          });
+
+        }
+
+
+
+        goToBlock(blockId) {
+
+          if (!blockId || this.slides.length < 1) return;
+
+
+
+          const index = this.slides.findIndex((slide) => slide.dataset.heroBlockId === blockId);
+
+          if (index > -1) {
+
+            this.currentIndex = index;
+
+            this.updateSlides();
+
+            this.stopAutoplay();
+
+          }
+
+        }
+
+
+
+        resumeAfterEditor() {
+
+          this.startAutoplay();
+
+        }
+
+      }
+
+
+
+      const instances = new Map();
+
+
+
+      const init = (scope = document) => {
+
+        const sections = scope.querySelectorAll('.js-hero-enterprise');
+
+
+
+        sections.forEach((section) => {
+
+          const id = section.dataset.sectionId;
+
+          if (!id) return;
+
+
+
+          if (instances.has(id)) {
+
+            instances.get(id).destroy();
+
+            instances.delete(id);
+
+          }
+
+
+
+          const instance = new PHHeroEnterprise(section);
+
+          instance.init();
+
+          instances.set(id, instance);
+
+        });
+
+      };
+
+
+
+      const destroyFromSection = (sectionContainer) => {
+
+        const section = sectionContainer.querySelector('.js-hero-enterprise');
+
+        if (!section) return;
+
+
+
+        const id = section.dataset.sectionId;
+
+        if (!instances.has(id)) return;
+
+
+
+        instances.get(id).destroy();
+
+        instances.delete(id);
+
+      };
+
+
+
+      /* O markup da seção já existe quando este script executa; inicialização imediata evita uma segunda rodada no DOMContentLoaded. */
+
+      document.addEventListener('shopify:section:load', (event) => init(event.target));
+
+      document.addEventListener('shopify:section:unload', (event) => destroyFromSection(event.target));
+
+
+
+      document.addEventListener('shopify:block:select', (event) => {
+
+        const block = event.target.closest('[data-hero-block-id]');
+
+        if (!block) return;
+
+
+
+        const section = block.closest('.js-hero-enterprise');
+
+        if (!section) return;
+
+
+
+        const instance = instances.get(section.dataset.sectionId);
+
+        if (!instance) return;
+
+
+
+        instance.goToBlock(block.dataset.heroBlockId);
+
+      });
+
+
+
+      document.addEventListener('shopify:block:deselect', (event) => {
+
+        const block = event.target.closest('[data-hero-block-id]');
+
+        if (!block) return;
+
+
+
+        const section = block.closest('.js-hero-enterprise');
+
+        if (!section) return;
+
+
+
+        const instance = instances.get(section.dataset.sectionId);
+
+        if (!instance) return;
+
+
+
+        instance.resumeAfterEditor();
+
+      });
+
+
+
+      window.__PHHeroEnterprise = { init };
+
+    }
+
+
+
+    window.__PHHeroEnterprise.init(document);
+
+  })();
+
+</script>
+
+
+
+{% schema %}
+
+{
+
+  "name": "Enterprise Hero",
+
+  "tag": "section",
+
+  "class": "section-hero-enterprise",
+
+  "settings": [
+
+    {
+
+      "type": "header",
+
+      "content": "Media Mode"
+
+    },
+
+    {
+
+      "type": "select",
+
+      "id": "media_mode",
+
+      "label": "Media Mode",
+
+      "default": "image",
+
+      "options": [
+
+        { "value": "image", "label": "Single image" },
+
+        { "value": "carousel", "label": "Carousel" },
+
+        { "value": "video", "label": "Video" }
+
+      ]
+
+    },
+
+    {
+
+      "type": "range",
+
+      "id": "carousel_autoplay",
+
+      "min": 3,
+
+      "max": 8,
+
+      "step": 1,
+
+      "unit": "s",
+
+      "label": "Carousel autoplay interval",
+
+      "default": 5
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Layout Desktop"
+
+    },
+
+    {
+
+      "type": "range",
+
+      "id": "height_desktop",
+
+      "min": 50,
+
+      "max": 100,
+
+      "step": 5,
+
+      "unit": "vh",
+
+      "label": "Desktop Height",
+
+      "default": 90
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Layout Tablet"
+
+    },
+
+    {
+
+      "type": "range",
+
+      "id": "height_tablet",
+
+      "min": 45,
+
+      "max": 100,
+
+      "step": 5,
+
+      "unit": "vh",
+
+      "label": "Tablet Height",
+
+      "default": 70
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Layout Mobile"
+
+    },
+
+    {
+
+      "type": "range",
+
+      "id": "height_mobile",
+
+      "min": 40,
+
+      "max": 100,
+
+      "step": 5,
+
+      "unit": "vh",
+
+      "label": "Mobile Height",
+
+      "default": 85
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Single Image / Fallback"
+
+    },
+
+    {
+
+      "type": "image_picker",
+
+      "id": "image_desktop",
+
+      "label": "Desktop Image"
+
+    },
+
+    {
+
+      "type": "image_picker",
+
+      "id": "image_tablet",
+
+      "label": "Tablet Image",
+
+      "info": "Optional. Falls back to Desktop if blank."
+
+    },
+
+    {
+
+      "type": "image_picker",
+
+      "id": "image_mobile",
+
+      "label": "Mobile Image",
+
+      "info": "Fallback to Tablet, then Desktop, if blank."
+
+    },
+
+    {
+
+      "type": "url",
+
+      "id": "media_link",
+
+      "label": "Hero default link",
+
+      "info": "Used in single image/video mode, and as fallback when a slide has no link."
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Video"
+
+    },
+
+    {
+
+      "type": "video",
+
+      "id": "video_desktop",
+
+      "label": "Desktop Video"
+
+    },
+
+    {
+
+      "type": "video",
+
+      "id": "video_mobile",
+
+      "label": "Mobile Video"
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Content"
+
+    },
+
+    {
+
+      "type": "text",
+
+      "id": "heading",
+
+      "label": "Heading",
+
+      "default": "The New Collection"
+
+    },
+
+    {
+
+      "type": "text",
+
+      "id": "subheading",
+
+      "label": "Subheading",
+
+      "default": "Spring / Summer 2024"
+
+    },
+
+    {
+
+      "type": "text",
+
+      "id": "cta_text",
+
+      "label": "Button Label",
+
+      "default": "Shop Now"
+
+    },
+
+    {
+
+      "type": "url",
+
+      "id": "cta_link",
+
+      "label": "Button Link"
+
+    },
+
+    {
+
+      "type": "header",
+
+      "content": "Colors"
+
+    },
+
+    {
+
+      "type": "color",
+
+      "id": "text_color",
+
+      "label": "Text Color",
+
+      "default": "#FFFFFF"
+
+    },
+
+    {
+
+      "type": "color",
+
+      "id": "btn_text_color",
+
+      "label": "Button Text Color",
+
+      "default": "#000000"
+
+    },
+
+    {
+
+      "type": "color",
+
+      "id": "overlay_color",
+
+      "label": "Overlay Color",
+
+      "default": "#000000"
+
+    },
+
+    {
+
+      "type": "range",
+
+      "id": "overlay_opacity",
+
+      "min": 0,
+
+      "max": 90,
+
+      "step": 5,
+
+      "unit": "%",
+
+      "label": "Overlay Opacity",
+
+      "default": 20
+
+    }
+
+  ],
+
+  "blocks": [
+
+    {
+
+      "type": "slide",
+
+      "name": "Slide",
+
+      "settings": [
+
+        {
+
+          "type": "image_picker",
+
+          "id": "image_desktop",
+
+          "label": "Desktop Image"
+
+        },
+
+        {
+
+          "type": "image_picker",
+
+          "id": "image_tablet",
+
+          "label": "Tablet Image",
+
+          "info": "Optional. Falls back to Desktop if blank."
+
+        },
+
+        {
+
+          "type": "image_picker",
+
+          "id": "image_mobile",
+
+          "label": "Mobile Image",
+
+          "info": "Fallback to Tablet, then Desktop, if blank."
+
+        },
+
+        {
+
+          "type": "url",
+
+          "id": "slide_link",
+
+          "label": "Slide link",
+
+          "info": "Collection, product, page or any internal URL."
+
+        }
+
+      ]
+
+    }
+
+  ],
+
+  "max_blocks": 6,
+
+  "presets": [
+
+    {
+
+      "name": "Hero.PH"
+
+    }
+
+  ]
+
+}
+
+{% endschema %}
