@@ -1352,11 +1352,11 @@
 
                         {{ media | image_url: width: 800 }} 800w"
 
-                sizes="(max-width: 749px) 85vw, 50vw"
+                sizes="(max-width: 749px) 85vw, (max-width: 989px) 46vw, (max-width: 1199px) 54vw, 30vw"
 
-                loading="{% if forloop.index <= 2 %}eager{% else %}lazy{% endif %}"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
 
-                {% if forloop.index <= 2 %}fetchpriority="high"{% endif %}
+                fetchpriority="{% if forloop.first %}high{% else %}auto{% endif %}"
 
                 width="{{ media.width }}"
 
@@ -1366,11 +1366,7 @@
 
                 draggable="false">
 
-              <div class="pp-media-item__zoom-layer"
-
-                style="background-image: url('{{ media | image_url: width: 2000 }}');"
-
-                aria-hidden="true"></div>
+              <div class="pp-media-item__zoom-layer" aria-hidden="true"></div>
 
               <div class="pp-media-item__zoom-icon" aria-hidden="true">
 
@@ -2323,10 +2319,7 @@
         var hdSrc = item.getAttribute('data-pp-zoom-src');
 
         if (hdSrc) {
-
-          var preload = new Image();
-
-          preload.src = hdSrc;
+          zoomLayer.style.backgroundImage = 'url("' + hdSrc.replace(/"/g, '\\"') + '")';
 
           item._ppHdPreloaded = true;
 

@@ -12,12 +12,7 @@
     <meta name="theme-color" content="{{ settings.colors_background_1 | default: '#ffffff' }}">
 
     {%- comment -%} OTIMIZAÇÕES DE REDE ESTRATÉGICAS {%- endcomment -%}
-    <!-- Preconnect para recursos críticos -->
     <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-<!-- DNS prefetch para recursos não-críticos -->
-    <link rel="dns-prefetch" href="//www.googletagmanager.com">
-    <link rel="dns-prefetch" href="//www.google-analytics.com">
     <link rel="dns-prefetch" href="//connect.facebook.net">
 
     <link rel="canonical" href="{{ canonical_url }}">
@@ -25,9 +20,6 @@
     {%- comment -%} PRELOAD RECURSOS CRÍTICOS PARA LCP OTIMIZADO {%- endcomment -%}
     <!-- Apenas a fonte realmente crítica acima da dobra. Inter permanece disponível via @font-face e carrega sob demanda. -->
     {{ 'Sora-Regular.woff2' | asset_url | preload_tag: as: 'font', type: 'font/woff2', crossorigin: 'anonymous' }}
-
-    <!-- CSS crítico do header -->
-    <link rel="preload" href="{{ 'am-header-critical.css' | asset_url }}" as="style">
 
     {%- if settings.favicon != blank -%}
       <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
@@ -110,19 +102,13 @@
       }
     </style>
 
-    {%- comment -%} CSS NÃO-CRÍTICO - Carregado de forma lazy para não bloquear render {%- endcomment -%}
+    {%- comment -%} CSS estrutural e do header devem estar aplicados no primeiro paint. {%- endcomment -%}
     {%- render 'stylesheets' -%}
+    {{ 'am-header-critical.css' | asset_url | stylesheet_tag }}
 
     <!-- CSS Mobile drawer - carregado condicionalmente -->
     <link rel="preload" href="{{ 'am-mobile-drawer.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet';this.media='screen and (max-width: 989px)'">
     <noscript><link rel="stylesheet" href="{{ 'am-mobile-drawer.css' | asset_url }}" media="screen and (max-width: 989px)"></noscript>
-
-    <!-- Carregamento inteligente de CSS baseado no template. Um único hint evita preload duplicado no PDP. -->
-    {%- if template.name == 'product' -%}
-      <link rel="preload" href="{{ 'am-product.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-      <noscript>{{ 'am-product.css' | asset_url | stylesheet_tag }}</noscript>
-    {%- endif -%}
-
 
     {%- comment -%}
       NOTA: Verifique se 'render fonts' carrega fontes nativas do Shopify. 
@@ -133,48 +119,6 @@
 
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-schemes' -%}
-
-    {%- comment -%} PERFORMANCE: Prefetch navegação provável {%- endcomment -%}
-    {%- comment -%}
-      ROLLBACK (mantido comentado): Prefetch injetado no <head> (pode competir com LCP em conexões lentas)
-      {%- if template == 'index' -%}
-        <link rel="prefetch" href="{{ routes.collections_url }}">
-      {%- endif -%}
-      {%- if template.name == 'collection' -%}
-        {%- for product in collection.products limit: 3 -%}
-          <link rel="prefetch" href="{{ product.url }}">
-        {%- endfor -%}
-      {%- endif -%}
-    {%- endcomment -%}
-
-    {%- comment -%}
-      PERFORMANCE (novo, baixo risco): adia prefetch para idle (pós-load) para não competir com LCP/FCP.
-      Mantém o mesmo comportamento (prefetch dos mesmos destinos), só muda o timing.
-    {%- endcomment -%}
-    <script>
-      window.addEventListener('load', function () {
-        var r = ('requestIdleCallback' in window) ? window.requestIdleCallback : function (cb) { setTimeout(cb, 1500); };
-        r(function () {
-          try {
-            var links = [];
-            {%- if template == 'index' -%}
-              links.push("{{ routes.collections_url }}");
-            {%- endif -%}
-            {%- if template.name == 'collection' -%}
-              {%- for product in collection.products limit: 3 -%}
-                links.push("{{ product.url }}");
-              {%- endfor -%}
-            {%- endif -%}
-            for (var i = 0; i < links.length; i++) {
-              var l = document.createElement('link');
-              l.rel = 'prefetch';
-              l.href = links[i];
-              document.head.appendChild(l);
-            }
-          } catch (e) {}
-        }, { timeout: 4000 });
-      });
-    </script>
 
     {{ content_for_header }}
 
@@ -206,23 +150,9 @@
     {% render 'search-modal' %}
     {% sections 'popup-group' %}
 
-    {%- comment -%} SCRIPTS NÃO-CRÍTICOS - Carregados após render inicial {%- endcomment -%}
-    <script src="{{ 'autoplay-fix.js' | asset_url }}" defer></script>
-    <script src="{{ 'tiny-img-link-preloader.js' | asset_url }}" defer></script>
-
-    {%- comment -%} Service Worker + Web Vitals - otimizados para não impactar métricas {%- endcomment -%}
+    {%- comment -%} Web Vitals carregado fora do caminho crítico. {%- endcomment -%}
     <script>
-      // Carregamento ultra-lazy de scripts de analytics
       function loadNonCriticalScripts() {
-        // Service Worker
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-          navigator.serviceWorker.register('{{ "sw.js" | asset_url }}', {
-            scope: '/',
-            updateViaCache: 'none'
-          }).catch(function() {/* silently fail */});
-        }
-
-        // Web Vitals tracking
         const script = document.createElement('script');
         script.src = '{{ "web-vitals-tracking.js" | asset_url }}';
         script.type = 'module';

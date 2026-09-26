@@ -74,21 +74,21 @@
               {% if campaign_image_mobile != blank %}
                 <source
                   media="(max-width: 899px)"
-                  srcset="{{ campaign_image_mobile | image_url: width: 480 }} 480w, {{ campaign_image_mobile | image_url: width: 640 }} 640w, {{ campaign_image_mobile | image_url: width: 800 }} 800w, {{ campaign_image_mobile | image_url: width: 1000 }} 1000w"
+                  data-cog-srcset="{{ campaign_image_mobile | image_url: width: 480 }} 480w, {{ campaign_image_mobile | image_url: width: 640 }} 640w, {{ campaign_image_mobile | image_url: width: 800 }} 800w, {{ campaign_image_mobile | image_url: width: 1000 }} 1000w"
                   sizes="90vw"
                 >
               {% endif %}
-              {{
-                campaign_image_desktop
-                | image_url: width: 1400
-                | image_tag:
-                  class: 'cog-modal__photo',
-                  loading: 'eager',
-                  fetchpriority: 'high',
-                  widths: '640, 800, 1000, 1200, 1400',
-                  sizes: '(max-width: 899px) 90vw, 54vw',
-                  alt: section.settings.campaign_image_alt
-              }}
+              <img
+                class="cog-modal__photo"
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                data-cog-src="{{ campaign_image_desktop | image_url: width: 1400 }}"
+                data-cog-srcset="{{ campaign_image_desktop | image_url: width: 640 }} 640w, {{ campaign_image_desktop | image_url: width: 800 }} 800w, {{ campaign_image_desktop | image_url: width: 1000 }} 1000w, {{ campaign_image_desktop | image_url: width: 1200 }} 1200w, {{ campaign_image_desktop | image_url: width: 1400 }} 1400w"
+                sizes="(max-width: 899px) 90vw, 54vw"
+                width="{{ campaign_image_desktop.width }}"
+                height="{{ campaign_image_desktop.height }}"
+                alt="{{ section.settings.campaign_image_alt | escape }}"
+                decoding="async"
+              >
             </picture>
           {% else %}
             <div class="cog-modal__photo-placeholder">
@@ -138,16 +138,17 @@
 
           <div class="cog-modal__headline-wrap">
             {% if section.settings.headline_image != blank %}
-              {{
-                section.settings.headline_image
-                | image_url: width: 900
-                | image_tag:
-                  class: 'cog-modal__headline-image',
-                  loading: 'eager',
-                  widths: '320, 480, 640, 760, 900',
-                  sizes: '(max-width: 749px) 78vw, 390px',
-                  alt: section.settings.headline_alt
-              }}
+              <img
+                class="cog-modal__headline-image"
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                data-cog-src="{{ section.settings.headline_image | image_url: width: 900 }}"
+                data-cog-srcset="{{ section.settings.headline_image | image_url: width: 320 }} 320w, {{ section.settings.headline_image | image_url: width: 480 }} 480w, {{ section.settings.headline_image | image_url: width: 640 }} 640w, {{ section.settings.headline_image | image_url: width: 760 }} 760w, {{ section.settings.headline_image | image_url: width: 900 }} 900w"
+                sizes="(max-width: 749px) 78vw, 390px"
+                width="{{ section.settings.headline_image.width }}"
+                height="{{ section.settings.headline_image.height }}"
+                alt="{{ section.settings.headline_alt | escape }}"
+                decoding="async"
+              >
               <h2 id="{{ popup_id }}-title" class="visually-hidden">
                 {{ section.settings.headline_line_1 }} {{ section.settings.headline_line_2 }}
               </h2>
@@ -1213,6 +1214,7 @@
       let previousFocus = null;
       let opened = false;
       let triggerBound = false;
+      let imagesHydrated = false;
 
       const now = () => Date.now();
 
@@ -1285,6 +1287,18 @@
       function open() {
         if (opened || !canShow()) return;
 
+        if (!imagesHydrated) {
+          root.querySelectorAll('[data-cog-srcset]').forEach((element) => {
+            element.srcset = element.dataset.cogSrcset;
+            element.removeAttribute('data-cog-srcset');
+          });
+          root.querySelectorAll('img[data-cog-src]').forEach((image) => {
+            image.src = image.dataset.cogSrc;
+            image.removeAttribute('data-cog-src');
+          });
+          imagesHydrated = true;
+        }
+
         opened = true;
         previousFocus = document.activeElement;
         root.classList.add('is-open');
@@ -1349,6 +1363,37 @@
         document.addEventListener('mouseleave', onMouseLeave);
       }
 
+      function bindDelayedInteractionTrigger() {
+        let delayElapsed = false;
+        let interacted = false;
+
+        const cleanup = () => {
+          window.removeEventListener('scroll', onIntent);
+          document.removeEventListener('pointerdown', onIntent);
+          document.removeEventListener('keydown', onIntent);
+        };
+
+        const maybeOpen = () => {
+          if (!delayElapsed || !interacted) return;
+          cleanup();
+          open();
+        };
+
+        const onIntent = () => {
+          interacted = true;
+          maybeOpen();
+        };
+
+        window.addEventListener('scroll', onIntent, { passive: true, once: true });
+        document.addEventListener('pointerdown', onIntent, { passive: true, once: true });
+        document.addEventListener('keydown', onIntent, { once: true });
+
+        window.setTimeout(() => {
+          delayElapsed = true;
+          maybeOpen();
+        }, Math.max(5000, delay));
+      }
+
       function schedule() {
         if (!canShow()) return;
 
@@ -1357,7 +1402,7 @@
         } else if (trigger === 'exit') {
           bindExitTrigger();
         } else {
-          window.setTimeout(open, Math.max(0, delay));
+          bindDelayedInteractionTrigger();
         }
       }
 

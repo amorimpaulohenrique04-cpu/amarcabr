@@ -337,9 +337,6 @@ endif
   {% endif %}
 </header-component>
 
-<!-- CORREÇÃO FOUC: CSS crítico carregado diretamente -->
-{{ 'am-header-critical.css' | asset_url | stylesheet_tag }}
-
 <!-- CSS não-crítico carregado de forma lazy -->
 <link rel="preload" href="{{ 'am-header-lazy.css' | asset_url }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript>{{ 'am-header-lazy.css' | asset_url | stylesheet_tag }}</noscript>

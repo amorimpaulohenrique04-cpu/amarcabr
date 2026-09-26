@@ -22,8 +22,7 @@
 
 <style>
 /* ═══ Base ═══ */
-.lx-wrap{opacity:0;animation:lxIn .3s ease .05s forwards;background:var(--lx-bg);color:var(--lx-text);padding:clamp(24px,5vw,80px) var(--lx-px);font-family:var(--font-b);overflow:visible!important;position:relative;z-index:1}
-@keyframes lxIn{to{opacity:1}}
+.lx-wrap{background:var(--lx-bg);color:var(--lx-text);padding:clamp(24px,5vw,80px) var(--lx-px);font-family:var(--font-b);overflow:visible!important;position:relative;z-index:1}
 .lx-container{max-width:var(--lx-max);margin:0 auto;padding-inline:var(--lx-px);box-sizing:border-box;overflow:visible!important}
 .lx-card{background:var(--lx-card);border:1px solid var(--lx-border);border-radius:var(--lx-radius);box-shadow:var(--lx-shadow)}
 
@@ -305,10 +304,21 @@
     </div>
     <div class="lx-heroMedia">
       <div class="lx-heroFrame">
-        <img class="lx-heroImg lx-heroImg--dynamic" data-hero-dynamic src="" alt="Produto selecionado" loading="eager">
         {%- if section.settings.hero_image != blank -%}
-          {{ section.settings.hero_image | image_url: width: 1600 | image_tag: class: "lx-heroImg", loading: "lazy", alt: section.settings.hero_image.alt | default: "Imagem principal" }}
+          <img
+            class="lx-heroImg lx-heroImg--dynamic is-active"
+            data-hero-dynamic
+            src="{{ section.settings.hero_image | image_url: width: 1600 }}"
+            srcset="{{ section.settings.hero_image | image_url: width: 640 }} 640w, {{ section.settings.hero_image | image_url: width: 960 }} 960w, {{ section.settings.hero_image | image_url: width: 1280 }} 1280w, {{ section.settings.hero_image | image_url: width: 1600 }} 1600w"
+            sizes="(max-width: 767px) 100vw, (max-width: 989px) 66vw, 50vw"
+            width="{{ section.settings.hero_image.width }}"
+            height="{{ section.settings.hero_image.height }}"
+            alt="{{ section.settings.hero_image.alt | default: 'Imagem principal' | escape }}"
+            loading="eager"
+            fetchpriority="high"
+          >
         {%- else -%}
+          <img class="lx-heroImg lx-heroImg--dynamic" data-hero-dynamic alt="Produto selecionado" loading="lazy" width="{{ product.featured_image.width | default: 1 }}" height="{{ product.featured_image.height | default: 1 }}">
           <div class="lx-heroFallback"></div>
         {%- endif -%}
         {%- if section.settings.badge_1 != blank -%}<div class="lx-badge lx-badge--topleft"><span class="lx-dot"></span>{{ section.settings.badge_1 }}</div>{%- endif -%}
@@ -348,9 +358,9 @@
       {%- for p in mf_products_1 -%}{%- if p != blank -%}{%- unless forloop.first -%},{%- endunless -%}
           {%- assign p_img_url = '' -%}{%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 1200 -%}{%- endif -%}
           {%- assign child_ref = p.metafields.custom.kids_product.value -%}
-          {"id":{{ p.id | json }},"handle":{{ p.handle | json }},"title":{{ p.title | json }},"url":{{ p.url | json }},"featured_image":{{ p_img_url | json }},"child_product_id":{% if child_ref != blank %}{{ child_ref.id | json }}{% else %}null{% endif %},"variants":[
+          {"id":{{ p.id | json }},"title":{{ p.title | json }},"featured_image":{{ p_img_url | json }},"child_product_id":{% if child_ref != blank %}{{ child_ref.id | json }}{% else %}null{% endif %},"variants":[
               {%- for v in p.variants -%}{%- unless forloop.first -%},{%- endunless -%}{%- assign v_img = v.featured_image | default: p.featured_image -%}{%- assign v_img_url = '' -%}{%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 1200 -%}{%- endif -%}
-              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }},"featured_image":{{ v_img_url | json }}}
+              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"featured_image":{{ v_img_url | json }}}
               {%- endfor -%}]}
       {%- endif -%}{%- endfor -%}
   {%- else -%}
@@ -358,9 +368,9 @@
           {%- assign p = block.settings.product -%}{%- unless forloop.first -%},{%- endunless -%}
           {%- assign p_img_url = '' -%}{%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 1200 -%}{%- endif -%}
           {%- assign child_ref = p.metafields.custom.kids_product.value -%}
-          {"id":{{ p.id | json }},"handle":{{ p.handle | json }},"title":{{ p.title | json }},"url":{{ p.url | json }},"featured_image":{{ p_img_url | json }},"child_product_id":{% if child_ref != blank %}{{ child_ref.id | json }}{% else %}null{% endif %},"variants":[
+          {"id":{{ p.id | json }},"title":{{ p.title | json }},"featured_image":{{ p_img_url | json }},"child_product_id":{% if child_ref != blank %}{{ child_ref.id | json }}{% else %}null{% endif %},"variants":[
               {%- for v in p.variants -%}{%- unless forloop.first -%},{%- endunless -%}{%- assign v_img = v.featured_image | default: p.featured_image -%}{%- assign v_img_url = '' -%}{%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 1200 -%}{%- endif -%}
-              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }},"featured_image":{{ v_img_url | json }}}
+              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"featured_image":{{ v_img_url | json }}}
               {%- endfor -%}]}
       {%- endif -%}{%- endfor -%}
   {%- endif -%}]
@@ -372,9 +382,9 @@
   [{%- if mf_products_2 != blank -%}
       {%- for p in mf_products_2 -%}{%- if p != blank -%}{%- unless forloop.first -%},{%- endunless -%}
           {%- assign p_img_url = '' -%}{%- if p.featured_image != blank -%}{%- assign p_img_url = p.featured_image | image_url: width: 600 -%}{%- endif -%}
-          {"id":{{ p.id | json }},"handle":{{ p.handle | json }},"title":{{ p.title | json }},"url":{{ p.url | json }},"featured_image":{{ p_img_url | json }},"variants":[
+          {"id":{{ p.id | json }},"title":{{ p.title | json }},"featured_image":{{ p_img_url | json }},"variants":[
               {%- for v in p.variants -%}{%- unless forloop.first -%},{%- endunless -%}{%- assign v_img = v.featured_image | default: p.featured_image -%}{%- assign v_img_url = '' -%}{%- if v_img != blank -%}{%- assign v_img_url = v_img | image_url: width: 600 -%}{%- endif -%}
-              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"price":{{ v.price | json }},"featured_image":{{ v_img_url | json }}}
+              {"id":{{ v.id | json }},"title":{{ v.title | json }},"available":{{ v.available | json }},"featured_image":{{ v_img_url | json }}}
               {%- endfor -%}]}
       {%- endif -%}{%- endfor -%}
   {%- endif -%}]
@@ -413,7 +423,7 @@
           <div class="lx-slotBody">
             <div class="lx-thumb" data-thumb>
               <div class="lx-thumbPh"><span class="lx-thumbPhNum">{{ i }}</span></div>
-              <img class="lx-thumbImg" data-thumb-img alt="" loading="lazy" hidden>
+              <img class="lx-thumbImg" data-thumb-img alt="" loading="lazy" width="88" height="88" hidden>
             </div>
             <div class="lx-controls">
               <div class="lx-csel" data-csel="product">
@@ -445,7 +455,7 @@
         <input type="checkbox" class="lx-extra-input" data-extra-checkbox>
         <span class="lx-extra-checkmark"></span>
         <div class="lx-extra-thumb">
-          <img class="lx-extra-thumbImg" data-extra-thumb src="" alt="" loading="lazy">
+          <img class="lx-extra-thumbImg" data-extra-thumb alt="" loading="lazy" width="44" height="44">
         </div>
         <div class="lx-extra-info">
           <div>
@@ -544,7 +554,18 @@
 
   function isMobile(){return mobileMq.matches}
 
-  function heroImg(u){if(!heroDyn)return;u?(heroDyn.src=u,heroDyn.classList.add('is-active')):heroDyn.classList.remove('is-active')}
+  function heroImg(u){
+    if(!heroDyn)return;
+    if(u){
+      heroDyn.removeAttribute('srcset');
+      heroDyn.removeAttribute('sizes');
+      heroDyn.fetchPriority='auto';
+      heroDyn.src=u;
+      heroDyn.classList.add('is-active');
+    }else{
+      heroDyn.classList.remove('is-active');
+    }
+  }
 
   function closeAll(){R.querySelectorAll('.lx-csel.is-open').forEach(function(e){e.classList.remove('is-open')})}
   function openSelect(cs){if(!cs||cs.hidden)return;closeAll();cs.classList.add('is-open')}
