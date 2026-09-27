@@ -11,7 +11,6 @@
   @param {string} [sale_metafield_namespace] - Sale price metafield namespace
   @param {string} [sale_metafield_key] - Sale price metafield key
   @param {string} [sale_label] - Sale badge label
-  @param {string} [quick_buy_label] - Desktop quick buy trigger label
 {%- enddoc -%}
 
 {%- liquid
@@ -20,9 +19,7 @@
   assign sale_metafield_namespace = sale_metafield_namespace | default: 'custom'
   assign sale_metafield_key = sale_metafield_key | default: 'sale'
   assign sale_label = sale_label | default: 'Sale'
-  if quick_buy_label == blank
-    assign quick_buy_label = 'actions.choose' | t
-  endif
+  assign quick_buy_label = 'Quick buy'
   assign selected_variant = product.selected_or_first_available_variant
   assign sale_price = blank
 
@@ -291,23 +288,26 @@
     }
   }
 
-  @media (hover: hover) and (min-width: 1024px) {
+  @media (hover: hover) and (min-width: 750px) {
     .eurus-card .quick-add__button {
-      right: auto;
-      bottom: 24px;
-      left: 50%;
+      right: 12px;
+      bottom: 12px;
+      left: auto;
       width: auto;
-      min-width: var(--cta-desktop-min-width, 160px);
-      min-height: 44px;
-      padding: var(--cta-desktop-padding, 9px) 0;
+      min-width: 0;
+      min-height: 36px;
+      height: 36px;
+      padding: 0 13px;
+      border: 1px solid rgb(0 0 0 / 8%);
+      border-radius: 999px;
       opacity: 0;
-      translate: -50% 15px;
-      box-shadow: 0 4px 20px rgb(0 0 0 / 6%);
+      translate: 0 8px;
+      box-shadow: 0 3px 12px rgb(0 0 0 / 7%);
     }
 
     .eurus-card:is(:hover, :focus-within) .quick-add__button {
       opacity: 1;
-      translate: -50% 0;
+      translate: 0;
     }
 
     .eurus-card .quick-add__button .add-to-cart-text::before {
@@ -317,13 +317,13 @@
     .eurus-card .quick-add__button .add-to-cart-text__content {
       display: grid;
       grid-template-columns: 1fr;
-      font-size: var(--cta-desktop-font-size, 11px);
-      letter-spacing: 0.12em;
+      font-size: 10px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
     .eurus-card .quick-add__button .add-to-cart-text__content > span > span {
-      padding-inline: var(--padding-sm);
+      padding-inline: 0;
       opacity: 1;
       filter: none;
       translate: 0;

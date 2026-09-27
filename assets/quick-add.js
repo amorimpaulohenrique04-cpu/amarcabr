@@ -118,7 +118,7 @@ export class QuickAddComponent extends Component {
 
     const cardRect = this.getBoundingClientRect();
     const viewportInset = 8;
-    const cardInset = Math.min(12, cardRect.width * 0.04);
+    const cardInset = Math.min(16, cardRect.width * 0.05);
     const left = Math.max(viewportInset, cardRect.left + cardInset);
     const right = Math.min(window.innerWidth - viewportInset, cardRect.right - cardInset);
     const bottom = Math.max(viewportInset, window.innerHeight - cardRect.bottom + cardInset);
